@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stagebox - Handbuch</title>
+    <style>
+        :root {
+            --bg-primary: #0d0d0d;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #262626;
+            --bg-hover: #2d2d2d;
+            --text-primary: #e8e8e8;
+            --text-secondary: #a0a0a0;
+            --text-dim: #666;
+            --border-color: #333;
+            --border-hover: #444;
+            --accent-primary: #4a9eff;
+            --accent-hover: #6ab0ff;
+            --status-online: #22c55e;
+            --status-offline: #ef4444;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .top-header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-hover);
+        }
+
+        .header-logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .header-title span {
+            color: var(--accent-primary);
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 73px);
+        }
+
+        /* Tab Navigation - Left Sidebar */
+        .tab-nav {
+            width: 240px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .tab-nav h2 {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+            padding-left: 0.5rem;
+        }
+
+        .tab-btn {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-align: left;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 0.25rem;
+        }
+
+        .tab-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .tab-btn .tab-num {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            margin-right: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .tab-btn.active .tab-num {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem 3rem;
+        }
+
+        .tab-content {
+            display: none;
+            max-width: 900px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Typography */
+        .tab-content h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-content h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--accent-primary);
+        }
+
+        .tab-content h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .tab-content p {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .tab-content ul, .tab-content ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .tab-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Screenshot Placeholder */
+        .screenshot-placeholder {
+            background: var(--bg-tertiary);
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .screenshot-placeholder .icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .screenshot-placeholder .description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .screenshot-placeholder .filename {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+
+        /* Screenshot Container - auto-switches between placeholder and image */
+        .screenshot-container {
+            margin: 1.5rem 0;
+        }
+
+        .screenshot-container img {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .screenshot-container img.loaded {
+            display: block;
+        }
+
+        .screenshot-container .screenshot-placeholder {
+            display: block;
+        }
+
+        .screenshot-container img.loaded + .screenshot-placeholder {
+            display: none;
+        }
+
+        .screenshot-container .caption {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: var(--bg-tertiary);
+            border-left: 4px solid var(--accent-primary);
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .info-box.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .info-box.success {
+            border-left-color: var(--status-online);
+        }
+
+        .info-box .title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box p {
+            margin-bottom: 0;
+            color: var(--text-secondary);
+        }
+
+        /* Step List */
+        .steps {
+            counter-reset: step-counter;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .steps li {
+            counter-increment: step-counter;
+            position: relative;
+            padding-left: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 2rem;
+            height: 2rem;
+            background: var(--accent-primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Code/Key Highlighting */
+        code {
+            background: var(--bg-tertiary);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85em;
+            color: var(--accent-primary);
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-selector select {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .lang-selector select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--bg-hover);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="top-header">
+        <div class="header-left">
+            <button class="back-btn" onclick="window.location.href='/'">← <span data-i18n="manual.back">Zurück</span></button>
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Stagebox" class="header-logo">
+            <div class="header-title">Stagebox <span data-i18n="manual.title">Handbuch</span></div>
+        </div>
+        <div class="lang-selector">
+            <select id="language-select">
+                <option value="de">Deutsch</option>
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+                <option value="it">Italiano</option>
+                <option value="nl">Nederlands</option>
+            </select>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Tab Navigation -->
+        <nav class="tab-nav">
+            <h2 data-i18n="manual.chapters">Kapitel</h2>
+            <button class="tab-btn active" data-tab="getting-started">
+                <span class="tab-num">1</span>
+                <span data-i18n="manual.ch1_title">Erste Schritte</span>
+            </button>
+            <button class="tab-btn" data-tab="provisioning">
+                <span class="tab-num">2</span>
+                <span data-i18n="manual.ch2_title">Provisioning</span>
+            </button>
+            <button class="tab-btn" data-tab="devices">
+                <span class="tab-num">3</span>
+                <span data-i18n="manual.ch3_title">Geräte</span>
+            </button>
+            <button class="tab-btn" data-tab="admin">
+                <span class="tab-num">4</span>
+                <span data-i18n="manual.ch4_title">Administration</span>
+            </button>
+        </nav>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            
+            <!-- Chapter 1: Getting Started -->
+            <div class="tab-content active" id="tab-getting-started">
+                <h1 data-i18n="manual.ch1_title">Erste Schritte</h1>
+                
+                <p data-i18n="manual.ch1_intro">Willkommen bei Stagebox! Diese Anleitung führt Sie durch die ersten Schritte zur Einrichtung Ihres ersten Gebäudes.</p>
+
+                <h2 data-i18n="manual.ch1_admin_title">Admin-Bereich freischalten</h2>
+                
+                <p data-i18n="manual.ch1_admin_intro">Um ein neues Gebäude zu erstellen, müssen Sie sich zuerst als Administrator anmelden.</p>
+
+                <ol class="steps">
+                    <li data-i18n="manual.ch1_admin_step1">Klicken Sie in der linken Seitenleiste auf <code>Admin</code>.</li>
+                    <li data-i18n="manual.ch1_admin_step2">Beim ersten Start werden Sie aufgefordert, einen Admin-PIN festzulegen. Wählen Sie einen mindestens 4-stelligen PIN.</li>
+                    <li data-i18n="manual.ch1_admin_step3">Bei späteren Besuchen geben Sie Ihren PIN ein, um den Admin-Bereich zu entsperren.</li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <img src="{{ url_for('static', filename='img/manual/01-admin-pin.png') }}" 
+                         alt="Admin PIN Dialog"
+                         onload="this.classList.add('loaded')">
+                    <div class="screenshot-placeholder">
+                        <div class="icon">🔐</div>
+                        <div class="description" data-i18n="manual.img_admin_pin">Admin PIN-Eingabe Dialog</div>
+                        <div class="filename">img/manual/01-admin-pin.png</div>
+                    </div>
+                </div>
+
+                <h2 data-i18n="manual.ch1_building_title">Neues Gebäude erstellen</h2>
+
+                <p data-i18n="manual.ch1_building_intro">Nach der Admin-Anmeldung können Sie ein neues Gebäude anlegen:</p>
+
+                <ol class="steps">
+                    <li data-i18n="manual.ch1_building_step1">Klicken Sie auf <code>Neues Gebäude</code> im Admin-Bereich.</li>
+                    <li data-i18n="manual.ch1_building_step2">Geben Sie einen Namen ein (nur Kleinbuchstaben, Zahlen und Unterstriche).</li>
+                    <li data-i18n="manual.ch1_building_step3">Klicken Sie auf <code>Erstellen</code>.</li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <img src="{{ url_for('static', filename='img/manual/02-new-building.png') }}" 
+                         alt="New Building Dialog"
+                         onload="this.classList.add('loaded')">
+                    <div class="screenshot-placeholder">
+                        <div class="icon">🏢</div>
+                        <div class="description" data-i18n="manual.img_new_building">Neues Gebäude erstellen Dialog</div>
+                        <div class="filename">img/manual/02-new-building.png</div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <div class="title" data-i18n="manual.tip">Tipp</div>
+                    <p data-i18n="manual.ch1_building_tip">Verwenden Sie aussagekräftige Namen wie <code>schulhaus_west</code> oder <code>wohnblock_a</code>.</p>
+                </div>
+
+                <h2 data-i18n="manual.ch1_settings_title">Building Settings konfigurieren</h2>
+
+                <p data-i18n="manual.ch1_settings_intro">Bevor Sie Geräte provisionieren können, müssen Sie die Netzwerkeinstellungen festlegen:</p>
+
+                <h3 data-i18n="manual.ch1_wifi_title">WiFi-Einstellungen</h3>
+                
+                <p data-i18n="manual.ch1_wifi_intro">Die Shelly-Geräte werden mit diesem WiFi-Netzwerk verbunden:</p>
+                
+                <table>
+                    <tr>
+                        <th data-i18n="manual.field">Feld</th>
+                        <th data-i18n="manual.description">Beschreibung</th>
+                    </tr>
+                    <tr>
+                        <td><code>Primary SSID</code></td>
+                        <td data-i18n="manual.ch1_wifi_ssid">Name des Haupt-WiFi-Netzwerks</td>
+                    </tr>
+                    <tr>
+                        <td><code>Password</code></td>
+                        <td data-i18n="manual.ch1_wifi_password">WiFi-Passwort</td>
+                    </tr>
+                    <tr>
+                        <td><code>Fallback SSID</code></td>
+                        <td data-i18n="manual.ch1_wifi_fallback">Optional: Backup-Netzwerk falls Primary nicht erreichbar</td>
+                    </tr>
+                </table>
+
+                <h3 data-i18n="manual.ch1_ip_title">IP-Pool Einstellungen</h3>
+                
+                <p data-i18n="manual.ch1_ip_intro">Der IP-Pool definiert die statischen IP-Adressen für Ihre Geräte:</p>
+                
+                <table>
+                    <tr>
+                        <th data-i18n="manual.field">Feld</th>
+                        <th data-i18n="manual.description">Beschreibung</th>
+                    </tr>
+                    <tr>
+                        <td><code>IP Pool Start</code></td>
+                        <td data-i18n="manual.ch1_ip_start">Erste IP-Adresse im Pool (z.B. 192.168.1.100)</td>
+                    </tr>
+                    <tr>
+                        <td><code>IP Pool End</code></td>
+                        <td data-i18n="manual.ch1_ip_end">Letzte IP-Adresse im Pool (z.B. 192.168.1.200)</td>
+                    </tr>
+                    <tr>
+                        <td><code>Gateway</code></td>
+                        <td data-i18n="manual.ch1_ip_gateway">Router-Adresse (wird automatisch abgeleitet wenn leer)</td>
+                    </tr>
+                    <tr>
+                        <td><code>DHCP Range</code></td>
+                        <td data-i18n="manual.ch1_ip_dhcp">Bereich in dem nach neuen Geräten gescannt wird</td>
+                    </tr>
+                </table>
+
+                <div class="screenshot-container">
+                    <img src="{{ url_for('static', filename='img/manual/03-building-settings.png') }}" 
+                         alt="Building Settings"
+                         onload="this.classList.add('loaded')">
+                    <div class="screenshot-placeholder">
+                        <div class="icon">⚙️</div>
+                        <div class="description" data-i18n="manual.img_building_settings">Building Settings Dialog</div>
+                        <div class="filename">img/manual/03-building-settings.png</div>
+                    </div>
+                </div>
+
+                <div class="info-box warning">
+                    <div class="title" data-i18n="manual.important">Wichtig</div>
+                    <p data-i18n="manual.ch1_ip_warning">Der IP-Pool darf sich nicht mit dem DHCP-Bereich Ihres Routers überschneiden! Reservieren Sie einen separaten Bereich für Stagebox.</p>
+                </div>
+            </div>
+
+            <!-- Chapter 2: Provisioning -->
+            <div class="tab-content" id="tab-provisioning">
+                <h1 data-i18n="manual.ch2_title">Provisioning</h1>
+                
+                <p data-i18n="manual.ch2_intro">Der Provisioning-Workflow besteht aus 4 Stages, die ein neues Shelly-Gerät vom Auslieferungszustand bis zur vollständigen Konfiguration führen.</p>
+
+                <h2 data-i18n="manual.ch2_overview_title">Übersicht der Stages</h2>
+
+                <table>
+                    <tr>
+                        <th>Stage</th>
+                        <th data-i18n="manual.name">Name</th>
+                        <th data-i18n="manual.description">Beschreibung</th>
+                    </tr>
+                    <tr>
+                        <td><code>S1</code></td>
+                        <td>AP Setup</td>
+                        <td data-i18n="manual.ch2_s1_desc">WiFi-Konfiguration über Shelly Access Point</td>
+                    </tr>
+                    <tr>
+                        <td><code>S2</code></td>
+                        <td>Adopt</td>
+                        <td data-i18n="manual.ch2_s2_desc">Statische IP zuweisen aus dem Pool</td>
+                    </tr>
+                    <tr>
+                        <td><code>S3</code></td>
+                        <td>OTA + Name</td>
+                        <td data-i18n="manual.ch2_s3_desc">Firmware-Update und Friendly Name setzen</td>
+                    </tr>
+                    <tr>
+                        <td><code>S4</code></td>
+                        <td>Configure</td>
+                        <td data-i18n="manual.ch2_s4_desc">Profile und Scripts deployen</td>
+                    </tr>
+                </table>
+
+                <h2 data-i18n="manual.ch2_s1_title">Stage 1: AP Setup</h2>
+
+                <p data-i18n="manual.ch2_s1_intro">In Stage 1 verbindet sich Stagebox mit dem Access Point eines neuen Shelly-Geräts und konfiguriert es für Ihr Netzwerk.</p>
+
+                <ol class="steps">
+                    <li data-i18n="manual.ch2_s1_step1">Schliessen Sie das neue Shelly-Gerät an Strom an. Es erstellt einen eigenen Access Point (z.B. <code>ShellyPlus1-XXXX</code>).</li>
+                    <li data-i18n="manual.ch2_s1_step2">Klicken Sie in Stagebox auf <code>S1 AP Setup</code>.</li>
+                    <li data-i18n="manual.ch2_s1_step3">Im Loop-Modus: Stagebox wartet automatisch auf neue Geräte. Ideal für mehrere Geräte hintereinander.</li>
+                    <li data-i18n="manual.ch2_s1_step4">Das Gerät wird konfiguriert: WiFi, Cloud deaktiviert, Bluetooth deaktiviert, AP deaktiviert.</li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <img src="{{ url_for('static', filename='img/manual/04-stage1.png') }}" 
+                         alt="Stage 1 AP Setup"
+                         onload="this.classList.add('loaded')">
+                    <div class="screenshot-placeholder">
+                        <div class="icon">📡</div>
+                        <div class="description" data-i18n="manual.img_stage1">Stage 1 AP Setup Panel</div>
+                        <div class="filename">img/manual/04-stage1.png</div>
+                    </div>
+                </div>
+
+                <div class="info-box success">
+                    <div class="title" data-i18n="manual.ch2_s1_success">Nach Stage 1</div>
+                    <p data-i18n="manual.ch2_s1_result">Das Gerät ist nun in Ihrem WiFi-Netzwerk und hat eine DHCP-Adresse. Es erscheint noch nicht in der Geräteliste.</p>
+                </div>
+
+                <h2 data-i18n="manual.ch2_s2_title">Stage 2: Adopt</h2>
+
+                <p data-i18n="manual.ch2_s2_intro">Stage 2 scannt den DHCP-Bereich nach neuen Shelly-Geräten und weist ihnen eine statische IP aus dem Pool zu.</p>
+
+                <ol class="steps">
+                    <li data-i18n="manual.ch2_s2_step1">Klicken Sie auf <code>S2 Adopt</code>.</li>
+                    <li data-i18n="manual.ch2_s2_step2">Stagebox scannt den konfigurierten DHCP-Bereich.</li>
+                    <li data-i18n="manual.ch2_s2_step3">Gefundene Geräte erhalten eine statische IP und einen technischen Hostnamen.</li>
+                    <li data-i18n="manual.ch2_s2_step4">Die Geräte erscheinen nun in der Geräteliste.</li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <img src="{{ url_for('static', filename='img/manual/05-stage2.png') }}" 
+                         alt="Stage 2 Adopt"
+                         onload="this.classList.add('loaded')">
+                    <div class="screenshot-placeholder">
+                        <div class="icon">🔍</div>
+                        <div class="description" data-i18n="manual.img_stage2">Stage 2 Adopt - Geräte werden gescannt</div>
+                        <div class="filename">img/manual/05-stage2.png</div>
+                    </div>
+                </div>
+
+                <h2 data-i18n="manual.ch2_s3_title">Stage 3: OTA + Name</h2>
+
+                <p data-i18n="manual.ch2_s3_intro">Stage 3 aktualisiert die Firmware und setzt den Friendly Name des Geräts.</p>
+
+                <ol class="steps">
+                    <li data-i18n="manual.ch2_s3_step1">Wählen Sie Geräte in der Liste aus (oder alle mit Stage-Filter).</li>
+                    <li data-i18n="manual.ch2_s3_step2">Klicken Sie auf <code>S3 OTA + Name</code>.</li>
+                    <li data-i18n="manual.ch2_s3_step3">Stagebox prüft die Firmware-Version und führt bei Bedarf ein Update durch.</li>
+                    <li data-i18n="manual.ch2_s3_step4">Der Friendly Name wird aus Room + Location zusammengesetzt.</li>
+                </ol>
+
+                <div class="info-box">
+                    <div class="title" data-i18n="manual.tip">Tipp</div>
+                    <p data-i18n="manual.ch2_s3_tip">Setzen Sie Room und Location im Details-Tab bevor Sie Stage 3 ausführen. So erhalten Ihre Geräte aussagekräftige Namen wie "Wohnzimmer Deckenlampe".</p>
+                </div>
+
+                <h2 data-i18n="manual.ch2_s4_title">Stage 4: Configure</h2>
+
+                <p data-i18n="manual.ch2_s4_intro">Stage 4 wendet die finale Konfiguration an: Device-Profile und Scripts.</p>
+
+                <ol class="steps">
+                    <li data-i18n="manual.ch2_s4_step1">Wählen Sie Geräte aus.</li>
+                    <li data-i18n="manual.ch2_s4_step2">Klicken Sie auf <code>S4 Configure</code>.</li>
+                    <li data-i18n="manual.ch2_s4_step3">Das Device-Profil wird geladen und die Einstellungen angewendet (Input-Typen, Switch-Modi, etc.).</li>
+                    <li data-i18n="manual.ch2_s4_step4">Zugewiesene Scripts werden deployed und gestartet.</li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <img src="{{ url_for('static', filename='img/manual/06-stage4.png') }}" 
+                         alt="Stage 4 Configure"
+                         onload="this.classList.add('loaded')">
+                    <div class="screenshot-placeholder">
+                        <div class="icon">✅</div>
+                        <div class="description" data-i18n="manual.img_stage4">Stage 4 Configure - Vollständig provisioniertes Gerät</div>
+                        <div class="filename">img/manual/06-stage4.png</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chapter 3: Devices -->
+            <div class="tab-content" id="tab-devices">
+                <h1 data-i18n="manual.ch3_title">Geräte verwalten</h1>
+
+                <p data-i18n="manual.ch3_intro">Nach dem Provisioning können Sie Ihre Geräte über die Web-UI verwalten, konfigurieren und überwachen.</p>
+
+                <h2 data-i18n="manual.ch3_list_title">Geräteliste</h2>
+
+                <p data-i18n="manual.ch3_list_intro">Die Geräteliste zeigt alle provisionierten Shelly-Geräte:</p>
+
+                <ul>
+                    <li data-i18n="manual.ch3_list_status">Grüner Punkt = Online, Roter Punkt = Offline</li>
+                    <li data-i18n="manual.ch3_list_search">Suche nach Name, IP, MAC, Room oder Location</li>
+                    <li data-i18n="manual.ch3_list_filter">Filter nach Stage oder Online/Offline Status</li>
+                </ul>
+
+                <div class="screenshot-container">
+                    <img src="{{ url_for('static', filename='img/manual/07-device-list.png') }}" 
+                         alt="Device List"
+                         onload="this.classList.add('loaded')">
+                    <div class="screenshot-placeholder">
+                        <div class="icon">📋</div>
+                        <div class="description" data-i18n="manual.img_device_list">Geräteliste mit Status-Anzeige</div>
+                        <div class="filename">img/manual/07-device-list.png</div>
+                    </div>
+                </div>
+
+                <h2 data-i18n="manual.ch3_details_title">Details Tab</h2>
+
+                <p data-i18n="manual.ch3_details_intro">Im Details-Tab können Sie Geräteinformationen einsehen und bearbeiten:</p>
+
+                <table>
+                    <tr>
+                        <th data-i18n="manual.field">Feld</th>
+                        <th data-i18n="manual.description">Beschreibung</th>
+                    </tr>
+                    <tr>
+                        <td><code>Name</code></td>
+                        <td data-i18n="manual.ch3_details_name">Friendly Name des Geräts</td>
+                    </tr>
+                    <tr>
+                        <td><code>Room</code></td>
+                        <td data-i18n="manual.ch3_details_room">Raum (z.B. Wohnzimmer, Küche)</td>
+                    </tr>
+                    <tr>
+                        <td><code>Location</code></td>
+                        <td data-i18n="manual.ch3_details_location">Position im Raum (z.B. Decke, Wand links)</td>
+                    </tr>
+                    <tr>
+                        <td><code>MAC / IP</code></td>
+                        <td data-i18n="manual.ch3_details_network">Netzwerk-Identifikation (nur lesbar)</td>
+                    </tr>
+                </table>
+
+                <h2 data-i18n="manual.ch3_settings_title">Settings Tab</h2>
+
+                <p data-i18n="manual.ch3_settings_intro">Gerätetyp-spezifische Einstellungen:</p>
+
+                <h3 data-i18n="manual.ch3_switch_title">Switch-Geräte</h3>
+                <ul>
+                    <li data-i18n="manual.ch3_switch_initial">Initial State: Verhalten nach Stromausfall</li>
+                    <li data-i18n="manual.ch3_switch_auto">Auto-Off/Auto-On: Automatisches Schalten nach Zeit</li>
+                    <li data-i18n="manual.ch3_switch_input">Input-Typ: Button, Switch, oder detached</li>
+                </ul>
+
+                <h3 data-i18n="manual.ch3_cover_title">Cover-Geräte (Rolläden)</h3>
+                <ul>
+                    <li data-i18n="manual.ch3_cover_swap">Swap Inputs: Auf/Ab Tasten tauschen</li>
+                    <li data-i18n="manual.ch3_cover_times">Öffnungs-/Schliesszeit kalibrieren</li>
+                </ul>
+
+                <h2 data-i18n="manual.ch3_scripts_title">Scripts Tab</h2>
+
+                <p data-i18n="manual.ch3_scripts_intro">Shelly-Scripts auf Geräte deployen:</p>
+
+                <ol class="steps">
+                    <li data-i18n="manual.ch3_scripts_step1">Wählen Sie ein Script aus der Liste (Lokal oder GitHub Library).</li>
+                    <li data-i18n="manual.ch3_scripts_step2">Wählen Sie die Zielgeräte (nur Online-Geräte verfügbar).</li>
+                    <li data-i18n="manual.ch3_scripts_step3">Klicken Sie auf <code>Deploy</code>.</li>
+                    <li data-i18n="manual.ch3_scripts_step4">Das Script wird in Chunks hochgeladen und gestartet.</li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <img src="{{ url_for('static', filename='img/manual/08-scripts.png') }}" 
+                         alt="Scripts Tab"
+                         onload="this.classList.add('loaded')">
+                    <div class="screenshot-placeholder">
+                        <div class="icon">📜</div>
+                        <div class="description" data-i18n="manual.img_scripts">Scripts Tab - Deploy Dialog</div>
+                        <div class="filename">img/manual/08-scripts.png</div>
+                    </div>
+                </div>
+
+                <h2 data-i18n="manual.ch3_kvs_title">KVS Tab</h2>
+
+                <p data-i18n="manual.ch3_kvs_intro">Der Key-Value Store speichert persistente Daten auf dem Gerät:</p>
+
+                <ul>
+                    <li data-i18n="manual.ch3_kvs_view">Alle gespeicherten Key-Value Paare anzeigen</li>
+                    <li data-i18n="manual.ch3_kvs_edit">Werte inline bearbeiten</li>
+                    <li data-i18n="manual.ch3_kvs_delete">Einzelne Keys oder alle löschen</li>
+                </ul>
+
+                <div class="info-box">
+                    <div class="title" data-i18n="manual.info">Info</div>
+                    <p data-i18n="manual.ch3_kvs_info">KVS-Einträge werden typischerweise von Scripts erstellt. Hier können Sie bestehende Werte einsehen und anpassen.</p>
+                </div>
+            </div>
+
+            <!-- Chapter 4: Administration -->
+            <div class="tab-content" id="tab-admin">
+                <h1 data-i18n="manual.ch4_title">Administration</h1>
+
+                <p data-i18n="manual.ch4_intro">Administrative Funktionen für Backup, Export und Systemverwaltung.</p>
+
+                <h2 data-i18n="manual.ch4_labels_title">Labels exportieren</h2>
+
+                <p data-i18n="manual.ch4_labels_intro">Exportieren Sie Geräte-Labels als CSV für Etikettendrucker (Brother, DYMO):</p>
+
+                <ol class="steps">
+                    <li data-i18n="manual.ch4_labels_step1">Klicken Sie auf <code>Export Labels (CSV)</code> in der Seitenleiste.</li>
+                    <li data-i18n="manual.ch4_labels_step2">Wählen Sie "Gefilterte Geräte" oder "Alle Geräte".</li>
+                    <li data-i18n="manual.ch4_labels_step3">Die CSV-Datei wird heruntergeladen.</li>
+                </ol>
+
+                <p data-i18n="manual.ch4_labels_content">Die CSV enthält: Name, Room, Location, IP, MAC - ideal für Beschriftungsetiketten.</p>
+
+                <h2 data-i18n="manual.ch4_snapshots_title">Snapshots</h2>
+
+                <p data-i18n="manual.ch4_snapshots_intro">Snapshots speichern den aktuellen Konfigurationsstand aller Geräte:</p>
+
+                <ul>
+                    <li><code data-i18n="manual.ch4_snapshots_create">Create Snapshot</code> - Aktuellen Stand speichern</li>
+                    <li><code data-i18n="manual.ch4_snapshots_view">View Snapshots</code> - Gespeicherte Snapshots anzeigen</li>
+                    <li><code data-i18n="manual.ch4_snapshots_audit">Run Audit</code> - Aktuelle Konfiguration mit Snapshot vergleichen</li>
+                </ul>
+
+                <div class="info-box">
+                    <div class="title" data-i18n="manual.tip">Tipp</div>
+                    <p data-i18n="manual.ch4_snapshots_tip">Erstellen Sie einen Snapshot nach Abschluss der Installation. So können Sie später Änderungen erkennen.</p>
+                </div>
+
+                <h2 data-i18n="manual.ch4_backup_title">Backup</h2>
+
+                <h3 data-i18n="manual.ch4_backup_usb_title">USB Backup</h3>
+                <p data-i18n="manual.ch4_backup_usb_intro">Im Greeting Screen (Gebäudeauswahl):</p>
+                <ol class="steps">
+                    <li data-i18n="manual.ch4_backup_usb_step1">USB-Stick einstecken.</li>
+                    <li data-i18n="manual.ch4_backup_usb_step2">Klicken Sie auf <code>Backup to USB</code>.</li>
+                    <li data-i18n="manual.ch4_backup_usb_step3">Alle Building-Daten werden auf den Stick kopiert.</li>
+                </ol>
+
+                <h3 data-i18n="manual.ch4_backup_nas_title">NAS Backup</h3>
+                <p data-i18n="manual.ch4_backup_nas_intro">Im Admin-Bereich können Sie ein NAS für automatische Backups konfigurieren:</p>
+                <ol class="steps">
+                    <li data-i18n="manual.ch4_backup_nas_step1">Klicken Sie auf <code>NAS-Einstellungen</code>.</li>
+                    <li data-i18n="manual.ch4_backup_nas_step2">Geben Sie Server, Freigabe und Zugangsdaten ein.</li>
+                    <li data-i18n="manual.ch4_backup_nas_step3">Testen Sie die Verbindung.</li>
+                    <li data-i18n="manual.ch4_backup_nas_step4">Mit <code>Backup auf NAS</code> starten Sie ein manuelles Backup.</li>
+                </ol>
+
+                <h2 data-i18n="manual.ch4_system_title">System</h2>
+
+                <p data-i18n="manual.ch4_system_intro">Systemfunktionen im Greeting Screen:</p>
+
+                <table>
+                    <tr>
+                        <th data-i18n="manual.function">Funktion</th>
+                        <th data-i18n="manual.description">Beschreibung</th>
+                    </tr>
+                    <tr>
+                        <td><code>Reboot</code></td>
+                        <td data-i18n="manual.ch4_system_reboot">Stagebox neustarten</td>
+                    </tr>
+                    <tr>
+                        <td><code>Shutdown</code></td>
+                        <td data-i18n="manual.ch4_system_shutdown">Stagebox herunterfahren (sicher vor Stromtrennung)</td>
+                    </tr>
+                </table>
+
+                <div class="info-box warning">
+                    <div class="title" data-i18n="manual.important">Wichtig</div>
+                    <p data-i18n="manual.ch4_system_warning">Fahren Sie die Stagebox immer über <code>Shutdown</code> herunter bevor Sie den Strom trennen, um Datenverlust zu vermeiden.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Tab Navigation
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active from all tabs and contents
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Activate clicked tab
+                btn.classList.add('active');
+                const tabId = 'tab-' + btn.dataset.tab;
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // i18n System
+        let translations = {};
+        
+        // Get language from URL parameter, localStorage, or default to 'en'
+        function getInitialLanguage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlLang = urlParams.get('lang');
+            if (urlLang && ['en', 'de', 'fr', 'it', 'nl'].includes(urlLang)) {
+                return urlLang;
+            }
+            return localStorage.getItem('stagebox-lang') || 'en';
+        }
+        
+        let currentLang = getInitialLanguage();
+
+        async function loadTranslations(lang) {
+            try {
+                const response = await fetch(`/static/i18n/${lang}.json`);
+                if (response.ok) {
+                    translations = await response.json();
+                    applyTranslations();
+                }
+            } catch (e) {
+                console.error('Failed to load translations:', e);
+            }
+        }
+
+        function getNestedValue(obj, path) {
+            return path.split('.').reduce((current, key) => current?.[key], obj);
+        }
+
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                const value = getNestedValue(translations, key);
+                if (value) {
+                    // Use innerHTML to allow <code> tags in translations
+                    el.innerHTML = value;
+                }
+            });
+        }
+
+        // Language selector
+        const langSelect = document.getElementById('language-select');
+        langSelect.value = currentLang;
+        langSelect.addEventListener('change', (e) => {
+            currentLang = e.target.value;
+            localStorage.setItem('stagebox-lang', currentLang);
+            // Update URL without reload
+            const url = new URL(window.location);
+            url.searchParams.set('lang', currentLang);
+            window.history.replaceState({}, '', url);
+            loadTranslations(currentLang);
+        });
+
+        // Initial load
+        loadTranslations(currentLang);
+    </script>
+</body>
+</html>

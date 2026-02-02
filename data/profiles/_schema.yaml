@@ -1,0 +1,101 @@
+# Stagebox Profile Schema
+# Version: 1.0
+# 
+# This file documents the structure of profile YAML files.
+# Profiles define how Stage 4 configures a Shelly device.
+
+schema_version: 1
+
+# ============================================================================
+# PROFILE STRUCTURE
+# ============================================================================
+#
+# name: string (required)
+#   Display name of the profile
+#
+# description: string (optional)
+#   Description of what this profile does
+#
+# device_types: list[string] (required)
+#   List of compatible hw_model codes (from Shelly.GetDeviceInfo)
+#   Examples: S1MINIPMG3, S2PMG3, I4G3, SNSW-001P16EU
+#
+# shelly_profile: string (optional)
+#   Only for multi-profile devices (e.g. 2PM)
+#   Values: "switch" | "cover"
+#   WARNING: Profile change triggers reboot!
+#
+# components: dict (optional)
+#   Configuration of Shelly components
+#   Keys are component IDs: "switch:0", "input:0", "cover:0", etc.
+#
+# scripts: list[dict] (optional)
+#   Scripts to be deployed to the Shelly
+#   Each entry:
+#     - name: string (required) - Name in Shelly
+#     - file: string (required) - Path relative to data/scripts/
+#     - slot: int (optional) - Script slot (1-based), auto if not set
+#     - run_on_start: bool (optional, default: false)
+#
+# webhooks: list[dict] (optional)
+#   Webhooks to be created
+#   Each entry:
+#     - event: string (required) - Event type (e.g. "input.button_push")
+#     - component_id: int (optional) - e.g. 0 for input:0
+#     - urls: list[string] (required) - Target URLs
+#     - condition: string (optional) - Condition for triggering
+#
+# ============================================================================
+# COMPONENT CONFIGURATION REFERENCE
+# ============================================================================
+#
+# switch:<id>
+#   name: string - Display name
+#   initial_state: "off" | "on" | "restore_last" | "match_input"
+#   auto_on: bool - Enable auto-on
+#   auto_on_delay: float - Delay in seconds
+#   auto_off: bool - Enable auto-off
+#   auto_off_delay: float - Delay in seconds
+#   in_mode: "momentary" | "follow" | "flip" | "detached"
+#
+# input:<id>
+#   name: string - Display name
+#   type: "button" | "switch" | "analog"
+#   invert: bool - Invert input
+#   factory_reset: bool - Allow factory reset via input
+#
+# cover:<id>
+#   name: string - Display name
+#   maxtime_open: float - Max time for opening (seconds)
+#   maxtime_close: float - Max time for closing (seconds)
+#   initial_state: "open" | "closed" | "stopped"
+#   invert_directions: bool - Invert directions
+#   swap_inputs: bool - Swap inputs
+#   in_mode: "single" | "dual" | "detached"
+#   obstruction_detection:
+#     enable: bool
+#     direction: "open" | "close" | "both"
+#     action: "stop" | "reverse"
+#     power_thr: int - Power threshold in Watts
+#
+# ============================================================================
+# EVENT TYPES (for webhooks)
+# ============================================================================
+#
+# Input Events:
+#   input.button_push      - Single button press
+#   input.button_longpush  - Long button press  
+#   input.button_doublepush - Double click
+#   input.toggle_on        - Switch toggled on
+#   input.toggle_off       - Switch toggled off
+#
+# Switch Events:
+#   switch.on              - Switch turned on
+#   switch.off             - Switch turned off
+#
+# Cover Events:
+#   cover.open             - Cover opening
+#   cover.close            - Cover closing
+#   cover.stop             - Cover stopped
+#   cover.stopped          - Cover reached position
+#

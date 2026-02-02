@@ -1,0 +1,184 @@
+# data/config.yaml
+#
+# Non-secret configuration for the Shelly provisioning toolbox.
+# All real secrets (WiFi passwords, MQTT credentials, etc.)
+# remain in data/secrets.yaml.
+
+# ─────────────────────────────────────────────
+# Stage 1 – WiFi, cloud/mqtt/ble/ap disable
+# ─────────────────────────────────────────────
+stage1:
+  enabled: true
+
+  # Optional override for Shelly AP IP.
+  shelly_ip: "192.168.33.1"
+
+  # Stage-1-specific options.
+  options:
+    disable_cloud: true
+    disable_bluetooth: true
+    disable_ap: true
+    mqtt_disable: true
+    loop_mode: true
+
+  logging:
+    # relative to project root (e.g., /home/coredev/stagebox)
+    base_path: "var/log/stage1_session.log"
+    inventory: "var/log/stage1_inventory.csv"
+
+# ─────────────────────────────────────────────
+# Stage 2 – static IP pool & hostnames
+# ─────────────────────────────────────────────
+stage2:
+  enabled: true
+
+  rpc:
+    # Timeout for all HTTP/RPC calls in seconds
+    timeout_s: 0.50
+
+  network:
+    # IP assignment mode for Shellys discovered in the LAN
+    mode: static_pool
+
+    # Global network parameters for the static IPs
+    # gateway: auto-derived from pool_start (e.g., 192.168.50.30 → 192.168.50.1)
+    # netmask: 255.255.255.0 (default)
+    # nameserver: same as gateway (default)
+
+    # Static IP pool range for adopted Shellys
+    pool_start: 192.168.50.30
+    pool_end: 192.168.50.99
+
+    # CIDR range to scan for Shellys (auto-derived from pool_start)
+    # scan_cidr: 192.168.50.0/24
+    scan_exclude_pool: true
+
+    # Optional DHCP scan range - leave empty for full subnet scan
+    # Set these only if you know your router's DHCP range (faster scans)
+    # dhcp_scan_start: 192.168.50.150
+    # dhcp_scan_end: 192.168.50.249
+
+    # Path to ip_state.json, relative to the project root
+    state_file: "data/ip_state.json"
+
+  naming:
+    # If true, Stage 2 will derive a technical hostname per device
+    # (e.g. "shelly-i4g3-ec1b50") and push it via Sys.SetConfig
+    enabled: true
+
+  # Model mapping file (maps "S3SW-001P8EU" → "Mini1PMG3", etc.)
+  # Non-secret → stays in config.yaml.
+  model_mapping_file: "data/shelly_model_map.yaml"
+
+  logging:
+    # Session log for Stage 2 (relative to project root)
+    base_path: "var/log/stage2_session.log"
+
+
+# ─────────────────────────────────────────────
+# Stage 3 – OTA + friendly names
+# ─────────────────────────────────────────────
+stage3:
+  enabled: true
+
+  # ip_state.json location (relative)
+  ip_state_file: "data/ip_state.json"
+
+  logging:
+    base_path: "var/log/stage3_session.log"
+
+  ota:
+    enabled: true
+    mode: "check_and_update"   # or: "check_only"
+    timeout: 20                # seconds
+
+# ─────────────────────────────────────────────
+# Stage 4 – scripts & KVS deployment
+# ─────────────────────────────────────────────
+stage4:
+  script_path: "data/scripts"
+  kvs_path: "data/kvs"
+
+  timeout: 0.5                 # RPC timeout in seconds
+  max_script_bytes: 60000      # safety limit for Script.PutCode uploads
+
+
+# ─────────────────────────────────────────────
+# Offline reporting & labeling
+# ─────────────────────────────────────────────
+report:
+  enabled: true
+
+  # Single source of truth for all reports/labels.
+  state_file: "data/ip_state.json"
+
+  output:
+    # Tabular exports (CSV/XLSX) go here.
+    table_dir: "data/report"
+    # Label CSV files for Dymo etc. go here.
+    labels_dir: "data/labels"
+
+  stdout:
+    # Standard filter for the text report on stdout:
+    #   all | friendly_ok | ota_ok | script_ok | done | error_only
+    default_filter: "all"
+
+    # Standard columns for the stdout report
+    default_columns:
+      - room
+      - location
+      - model
+      - ip
+#      - hostname
+      - friendly_name
+#      - fw
+#      - stage3_friendly_status
+#      - stage3_ota_status
+#      - stage4_status_result
+
+  export:
+    # Standard format: csv (later optionally xlsx)
+    default_format: "csv"
+
+    # For Excel in DE/CH typically semicolon
+    csv_delimiter: ";"
+
+    # Standard columns for CSV/XLSX exports
+    default_columns:
+      - id
+      - ip
+      - hostname
+      - fw
+      - model
+      - hw_model
+      - friendly_name
+      - room
+      - location
+      - assigned_at
+      - last_seen
+      - stage3_friendly_status
+      - stage3_ota_status
+      - stage4_status_result
+
+  labels:
+    # Standard mode: multiline | band
+    default_mode: "multiline"
+    # Base name of label CSV files (without suffix)
+    default_basename: "shelly_labels"
+
+    # Label templates for different use cases
+    templates:
+      dymo_band_standard:
+        type: "band"
+        # Single-line band labels (e.g. cables)
+#        text: "{location} {room} {friendly_name} {ip}"
+        text: "{friendly_name}-{ip}"
+
+      dymo_multiline_default:
+        type: "multiline"
+        # Multiline labels – each line is a CSV column
+        fields:
+          line1: "{location} {room}"
+          line2: "{friendly_name}"
+          line3: "{ip}"
+          line4: "{model}"

@@ -1,0 +1,43 @@
+# I4 Profile
+# For: Shelly I4 Gen3 (4-input device without relays)
+
+name: I4
+description: |
+  4-input device for scene control.
+  All inputs configured as buttons for push/longpush/doublepush events.
+  Controls other devices via webhooks or scripts.
+
+device_types:
+  # Gen3
+  - I4G3             # Shelly I4 Gen3
+  - S3SN-0024X       # Shelly I4 Gen3 (alt code)
+  # Plus
+  - SNSN-0024X       # Shelly Plus I4
+  # Pro
+  - SPSN-0024XEU     # Shelly Pro I4
+
+components:
+  input:0:
+    name: Button 1
+    type: button
+    invert: false
+    factory_reset: false
+
+  input:1:
+    name: Button 2
+    type: button
+    invert: false
+
+  input:2:
+    name: Button 3
+    type: button
+    invert: false
+
+  input:3:
+    name: Button 4
+    type: button
+    invert: false
+
+scripts: []
+
+webhooks: []

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ t.report_title }} - {{ building_profile.object_name or building_name }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 15mm 15mm 20mm 15mm;
+            @bottom-center {
+                content: "{{ t.page }} " counter(page) " {{ t.of }} " counter(pages);
+                font-size: 9pt;
+                color: #666;
+            }
+            @bottom-right {
+                content: "Powered by Stagebox";
+                font-size: 8pt;
+                color: #999;
+            }
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Header */
+        .header {
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #2a5298;
+        }
+        
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .header-left {
+            vertical-align: top;
+        }
+        
+        .header-right {
+            text-align: right;
+            vertical-align: top;
+            width: 200px;
+        }
+        
+        .logo {
+            max-width: 180px;
+            max-height: 80px;
+        }
+        
+        .company-info {
+            font-size: 9pt;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        .company-info p {
+            margin: 2px 0;
+        }
+        
+        h1 {
+            font-size: 18pt;
+            color: #2a5298;
+            margin: 0 0 5px 0;
+        }
+        
+        .report-meta {
+            font-size: 9pt;
+            color: #666;
+        }
+        
+        /* Object Info Box */
+        .object-info {
+            background: #f5f7fa;
+            border: 1px solid #ddd;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+        }
+        
+        .object-info h2 {
+            font-size: 12pt;
+            color: #2a5298;
+            margin: 0 0 6px 0;
+        }
+        
+        .object-info-table {
+            font-size: 9pt;
+            border-collapse: collapse;
+        }
+        
+        .object-info-table td {
+            padding: 2px 10px 2px 0;
+        }
+        
+        .object-info-table .label {
+            color: #666;
+        }
+        
+        /* Legend Box */
+        .legend-box {
+            background: #fff9e6;
+            border: 1px solid #e6d9a6;
+            padding: 6px 12px;
+            margin-bottom: 10px;
+            font-size: 8pt;
+        }
+        
+        .legend-title {
+            font-weight: 600;
+            color: #856404;
+        }
+        
+        .legend-text {
+            color: #666;
+        }
+        
+        /* Summary box */
+        .summary-box {
+            background: #e8f4e8;
+            border: 1px solid #28a745;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+        }
+        
+        .summary-box h3 {
+            color: #28a745;
+            margin: 0 0 6px 0;
+            font-size: 11pt;
+        }
+        
+        .summary-table {
+            border-collapse: collapse;
+        }
+        
+        .summary-table td {
+            text-align: center;
+            padding: 0 20px 0 0;
+        }
+        
+        .summary-number {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #2a5298;
+        }
+        
+        .summary-label {
+            font-size: 8pt;
+            color: #666;
+        }
+        
+        /* Section Headers */
+        .section-header {
+            background: #2a5298;
+            color: white;
+            padding: 8px 12px;
+            font-size: 11pt;
+            font-weight: 600;
+            margin: 12px 0 8px 0;
+        }
+        
+        /* Device Table */
+        table.devices {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 7.5pt;
+        }
+        
+        table.devices th {
+            background: #f0f0f0;
+            color: #333;
+            font-weight: 600;
+            text-align: left;
+            padding: 4px 3px;
+            border-bottom: 2px solid #ddd;
+            white-space: nowrap;
+        }
+        
+        table.devices td {
+            padding: 3px 3px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+        
+        table.devices tr:nth-child(even) {
+            background: #fafafa;
+        }
+        
+        /* QR Code */
+        .qr-cell {
+            width: 40px;
+            text-align: center;
+        }
+        
+        .qr-code {
+            width: 36px;
+            height: 36px;
+        }
+        
+        /* Monospace for technical data */
+        .mono {
+            font-family: 'Courier New', monospace;
+            font-size: 7pt;
+        }
+        
+        /* Feature indicators */
+        .features {
+            font-size: 7pt;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+        
+        .feature-on {
+            color: #2a5298;
+            font-weight: bold;
+        }
+        
+        .feature-off {
+            color: #ddd;
+        }
+        
+        /* Notes section */
+        .notes-section {
+            margin-top: 15px;
+            padding: 10px;
+            background: #fff9e6;
+            border: 1px solid #ffc107;
+        }
+        
+        .notes-section h4 {
+            margin: 0 0 5px 0;
+            color: #856404;
+            font-size: 10pt;
+        }
+        
+        .notes-section p {
+            margin: 0;
+            font-size: 9pt;
+            color: #856404;
+        }
+        
+        /* Footer */
+        .footer-info {
+            margin-top: 15px;
+            font-size: 8pt;
+            color: #999;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with Logo and Company Info -->
+    <div class="header">
+        <table class="header-table">
+            <tr>
+                <td class="header-left">
+                    <h1>{{ t.report_title }}</h1>
+                    <div class="report-meta">
+                        {{ t.generated }}: {{ report_date }}<br>
+                        {{ t.snapshot_date }}: {{ snapshot_date }}
+                    </div>
+                </td>
+                <td class="header-right">
+                    {% if installer_logo %}
+                    <img src="{{ installer_logo }}" alt="Logo" class="logo"><br>
+                    {% endif %}
+                    {% if installer_profile.company_name %}
+                    <div class="company-info">
+                        <p><strong>{{ installer_profile.company_name }}</strong></p>
+                        {% if installer_profile.phone %}<p>Tel: {{ installer_profile.phone }}</p>{% endif %}
+                        {% if installer_profile.email %}<p>{{ installer_profile.email }}</p>{% endif %}
+                    </div>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    <!-- Object Information -->
+    <div class="object-info">
+        <h2>{{ building_profile.object_name or building_name }}</h2>
+        <table class="object-info-table">
+            <tr>
+                {% if building_profile.customer_name %}
+                <td class="label">{{ t.customer }}:</td>
+                <td>{{ building_profile.customer_name }}</td>
+                {% endif %}
+                {% if building_profile.address %}
+                <td class="label">{{ t.address }}:</td>
+                <td>{{ building_profile.address | replace('\n', ', ') }}</td>
+                {% endif %}
+            </tr>
+        </table>
+    </div>
+    
+    <!-- Legend -->
+    <div class="legend-box">
+        <span class="legend-title">{{ t.legend }}:</span>
+        <span class="legend-text">S = {{ t.legend_scripts }} | W = {{ t.legend_webhooks }} | T = {{ t.legend_timers }} | A = {{ t.legend_schedules }} | K = {{ t.legend_kvs }}</span>
+    </div>
+    
+    <!-- Summary -->
+    <div class="summary-box">
+        <h3>{{ t.summary }}</h3>
+        <table class="summary-table">
+            <tr>
+                <td>
+                    <div class="summary-number">{{ devices | length }}</div>
+                    <div class="summary-label">{{ t.devices }}</div>
+                </td>
+                <td>
+                    <div class="summary-number">{{ rooms | length }}</div>
+                    <div class="summary-label">{{ t.rooms }}</div>
+                </td>
+                <td>
+                    <div class="summary-number">{{ model_count }}</div>
+                    <div class="summary-label">{{ t.device_types }}</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    <!-- Device Overview -->
+    <div class="section-header">{{ t.device_overview }}</div>
+    
+    <table class="devices">
+        <thead>
+            <tr>
+                <th class="qr-cell">QR</th>
+                <th>{{ t.room }}</th>
+                <th>{{ t.location }}</th>
+                <th>{{ t.name }}</th>
+                <th>{{ t.model }}</th>
+                <th>IP</th>
+                <th>FW</th>
+                <th>MAC</th>
+                <th>SWTAK</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for device in devices %}
+            <tr>
+                <td class="qr-cell">
+                    {% if device.qr_code %}
+                    <img src="{{ device.qr_code }}" alt="QR" class="qr-code">
+                    {% endif %}
+                </td>
+                <td>{{ device.room or '-' }}</td>
+                <td>{{ device.location or '-' }}</td>
+                <td><strong>{{ device.friendly_name or device.hostname or '-' }}</strong></td>
+                <td>{{ device.model_display or device.model or '-' }}</td>
+                <td class="mono">{{ device.ip }}</td>
+                <td class="mono">{{ device.fw or '-' }}</td>
+                <td class="mono">...{{ device.mac_short }}</td>
+                <td class="features"><span class="{{ 'feature-on' if device.has_scripts else 'feature-off' }}">S</span><span class="{{ 'feature-on' if device.has_webhooks else 'feature-off' }}">W</span><span class="{{ 'feature-on' if device.has_auto_timer else 'feature-off' }}">T</span><span class="{{ 'feature-on' if device.has_schedules else 'feature-off' }}">A</span><span class="{{ 'feature-on' if device.has_kvs else 'feature-off' }}">K</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    {% if building_profile.notes %}
+    <div class="notes-section">
+        <h4>{{ t.notes }}</h4>
+        <p>{{ building_profile.notes }}</p>
+    </div>
+    {% endif %}
+    
+    <div class="footer-info">
+        {{ t.snapshot_reference }}: {{ snapshot_filename }}<br>
+        {{ t.generated_with }} Stagebox v{{ version }}
+    </div>
+</body>
+</html>

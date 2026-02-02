@@ -1,0 +1,43 @@
+# 1PM Profile
+# For: Shelly 1PM Mini Gen3 and similar single-switch devices
+
+name: 1PM
+description: |
+  Standard configuration for single switch with power metering.
+  Input configured as button for single/double/long push events.
+
+device_types:
+  # Gen3
+  - S1MINIPMG3       # Shelly 1PM Mini Gen3
+  - S1PMG3           # Shelly 1PM Gen3
+  - S3SW-001P8EU     # Shelly 1 Gen3
+  - S3SW-001X8EU     # Shelly 1 Mini Gen3 (no power metering)
+  - S3SW-001P16EU    # Shelly 1PM Gen3 (16A)
+  # Plus
+  - SNSW-001P16EU    # Shelly Plus 1PM
+  - SNSW-001X16EU    # Shelly Plus 1
+  # Pro
+  - SPSW-001PE16EU   # Shelly Pro 1PM
+  - SPSW-001XE16EU   # Shelly Pro 1
+  # Gen4
+  - S4SW-001P8EU     # Shelly 1 Gen4
+
+components:
+  switch:0:
+    name: null                  # Will be set from friendly_name
+    initial_state: "off"        # "off" | "on" | "restore_last" (NOT match_input with button)
+    auto_on: false
+    auto_on_delay: 60.0
+    auto_off: false
+    auto_off_delay: 60.0
+    in_mode: momentary          # momentary | detached (NOT follow/flip with button)
+
+  input:0:
+    name: Button
+    type: button                # button for push events
+    invert: false
+    factory_reset: false         # allow factory reset via 5x toggle
+
+scripts: []
+
+webhooks: []

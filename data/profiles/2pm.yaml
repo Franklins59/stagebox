@@ -1,0 +1,53 @@
+# 2PM Profile (Switch Mode)
+# For: Shelly 2PM Gen3 as two independent switches
+
+name: 2PM
+description: |
+  2PM as two independent switches with power metering.
+  Each channel has its own input and relay.
+
+device_types:
+  # Gen3
+  - S2PMG3           # Shelly 2PM Gen3
+  - S3SW-002P16EU    # Shelly 2PM Gen3 (alt code)
+  # Plus
+  - SNSW-102P16EU    # Shelly Plus 2PM
+  - SNSW-102X16EU    # Shelly Plus 2
+  # Pro
+  - SPSW-202PE16EU   # Shelly Pro 2PM
+  - SPSW-202XE16EU   # Shelly Pro 2
+
+shelly_profile: switch
+
+components:
+  switch:0:
+    name: Channel 1
+    initial_state: "off"
+    auto_on: false
+    auto_on_delay: 60.0
+    auto_off: false
+    auto_off_delay: 60.0
+    in_mode: momentary
+
+  switch:1:
+    name: Channel 2
+    initial_state: "off"
+    auto_on: false
+    auto_on_delay: 60.0
+    auto_off: false
+    auto_off_delay: 60.0
+    in_mode: momentary
+
+  input:0:
+    name: Button 1
+    type: button
+    invert: false
+
+  input:1:
+    name: Button 2
+    type: button
+    invert: false
+
+scripts: []
+
+webhooks: []

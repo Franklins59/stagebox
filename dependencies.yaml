@@ -1,0 +1,101 @@
+# =============================================================================
+# Stagebox Dependencies
+# =============================================================================
+# This file defines all required system packages and Python packages.
+# It is deployed with each Stagebox release and used by:
+#   1. System Updates - to check/install missing dependencies
+#   2. Whitelist - to filter relevant apt updates
+#
+# DO NOT EDIT MANUALLY - this file is managed by Stagebox releases.
+# =============================================================================
+
+# Version of this dependency spec (for future migrations)
+spec_version: 1
+
+# -----------------------------------------------------------------------------
+# APT Packages (System)
+# -----------------------------------------------------------------------------
+apt:
+  # Core system
+  - python3
+  - python3-pip
+  - python3-venv
+  - curl
+  - wget
+  
+  # Networking
+  - network-manager
+  - wpasupplicant
+  
+  # Report Feature (v1.2.0+)
+  - libpango-1.0-0
+  - libpangocairo-1.0-0
+  - libgdk-pixbuf-2.0-0
+  - libffi-dev
+  - libcairo2
+
+# -----------------------------------------------------------------------------
+# PIP Packages (Python)
+# -----------------------------------------------------------------------------
+pip:
+  # Core
+  - Flask>=2.0
+  - PyYAML>=6.0
+  - requests>=2.28
+  - pydantic>=2.0
+  
+  # Report Feature (v1.2.0+)
+  - qrcode>=7.4
+  - weasyprint>=60.0
+  - openpyxl>=3.1
+
+# -----------------------------------------------------------------------------
+# APT Update Whitelist
+# -----------------------------------------------------------------------------
+# Prefixes for packages that should appear in "System Updates"
+# Security updates are always shown regardless of this list
+apt_update_prefixes:
+  # Kernel & firmware
+  - linux-
+  - raspi-
+  - rpi-
+  - firmware-
+  - raspberrypi-
+  
+  # Core system
+  - systemd
+  - sudo
+  - apt
+  - dpkg
+  - libc
+  - libgcc
+  - libstdc++
+  - base-files
+  - tzdata
+  
+  # Security
+  - openssl
+  - libssl
+  - ca-certificates
+  - openssh
+  - libssh
+  
+  # Networking
+  - networkmanager
+  - network-manager
+  - dhcpcd
+  - wpasupplicant
+  - curl
+  - wget
+  - libcurl
+  
+  # Python
+  - python3
+  - python-
+  - libpython
+  
+  # Stagebox dependencies
+  - libpango
+  - libcairo
+  - libgdk-pixbuf
+  - libffi

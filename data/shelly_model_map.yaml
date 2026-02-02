@@ -1,0 +1,26 @@
+# Shelly Gen3 & Plus devices
+  S3SW-002P16EU: "S2PMG3"    # Shelly Plus Plug S / Power Meter Gen3
+  S3SW-001X16EU: "S1G3"      # Shelly 1 Gen3
+  S3SW-001X10EU: "S1MINIG3"  # Shelly Mini 1 Gen3
+  S3SW-001X8EU: "S1MINIG3"   # Shelly Mini 1 Gen3, no power meter
+  S3SW-002X16EU: "S2G3"      # Shelly 2 Gen3
+  S3SW-004X16EU: "S4G3"      # Shelly 4 Gen3
+  S3SW-004X08EU: "I4G3"      # Shelly i4 Gen3 (input-only)
+  S3SW-002P16US: "S2PMG3-US"
+  S3SW-001P16EU: "S1PMG3"
+  S3SW-001P10EU: "S1MINIPMG3"
+  S3SW-0A1X1EUL: "S1LG3"
+  S3SN-0024X: "I4G3"
+  S3SW-001P8EU: "S1MINIPMG3"
+  S4SW-001P8EU: "S1MINIG4"
+  SPSW-104PE16EU: "S4PMPro"
+  S3DM-0A101WWL: "SDIMG3" 
+  SNSW-001P16EU: "S1PMPLUS"
+
+# Plus / Pro (Gen2) fallback examples
+  SHPLG-S: "Plug S"
+  SHPLG2-1: "Plug"
+  SHSW-1: "1PM"
+  SHSW-21: "2.5"
+  SHSW-PM: "1PM"
+  SHSW-L: "Dimmer"

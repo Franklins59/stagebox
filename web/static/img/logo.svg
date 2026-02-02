@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="#1f2940" stroke="#4a9eff" stroke-width="2"/>
+  
+  <!-- Stylized "SB" letters -->
+  <text x="32" y="42" 
+        font-family="Arial, sans-serif" 
+        font-size="24" 
+        font-weight="bold" 
+        fill="#4a9eff" 
+        text-anchor="middle">SB</text>
+  
+  <!-- Small circuit/connection dots -->
+  <circle cx="16" cy="20" r="3" fill="#4caf50"/>
+  <circle cx="48" cy="20" r="3" fill="#4caf50"/>
+  <circle cx="16" cy="44" r="3" fill="#4caf50"/>
+  <circle cx="48" cy="44" r="3" fill="#4caf50"/>
+  
+  <!-- Connection lines -->
+  <line x1="16" y1="20" x2="22" y2="26" stroke="#4caf50" stroke-width="1.5"/>
+  <line x1="48" y1="20" x2="42" y2="26" stroke="#4caf50" stroke-width="1.5"/>
+  <line x1="16" y1="44" x2="22" y2="38" stroke="#4caf50" stroke-width="1.5"/>
+  <line x1="48" y1="44" x2="42" y2="38" stroke="#4caf50" stroke-width="1.5"/>
+</svg>

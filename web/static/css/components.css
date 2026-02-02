@@ -1,0 +1,638 @@
+/* Device List Item */
+.device-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.device-item:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
+}
+
+.device-item.selected {
+    background: var(--bg-tertiary);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 1px var(--accent-primary);
+}
+
+.device-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.3rem;
+}
+
+.device-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.device-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.device-id {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    font-family: 'Courier New', monospace;
+}
+
+.device-actions {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+/* Stage Badge */
+.stage-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.75rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+}
+
+.stage-badge.stage-complete {
+    background: rgba(74, 222, 128, 0.2);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.4);
+}
+
+.stage-badge.stage-3 {
+    background: rgba(96, 165, 250, 0.2);
+    color: #60a5fa;
+    border: 1px solid rgba(96, 165, 250, 0.4);
+}
+
+.stage-badge.stage-2 {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.4);
+}
+
+.stage-badge.stage-none {
+    background: rgba(148, 163, 184, 0.2);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.visit-btn {
+    padding: 0.25rem 0.5rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    color: var(--text-primary);
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.visit-btn:hover {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: white;
+}
+
+.edit-btn {
+    padding: 0.25rem 0.5rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    color: var(--text-primary);
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.edit-btn:hover {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: white;
+}
+
+.device-info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.35rem;
+    font-size: 0.8rem;
+}
+
+.device-info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    margin-bottom: 0.1rem;
+}
+
+.info-value {
+    color: var(--text-secondary);
+    font-family: 'Courier New', monospace;
+}
+
+/* Form Styles */
+#device-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+.form-group label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.form-group input {
+    padding: 0.4rem 0.6rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    transition: var(--transition);
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    background: var(--bg-hover);
+}
+
+.form-group input:read-only {
+    color: var(--text-dim);
+    cursor: not-allowed;
+    background: var(--bg-secondary);
+}
+
+.form-group input[type="checkbox"] {
+    cursor: pointer !important;
+}
+
+.form-group input.modified {
+    border-color: var(--accent-primary);
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 0.35rem;
+}
+
+/* Empty State */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0.75rem;
+    color: var(--text-secondary);
+}
+
+.empty-state-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.5;
+}
+
+.empty-state-text {
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* Notification Toast */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.85rem 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    z-index: 99999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.toast.show {
+    opacity: 1;
+}
+
+.toast.success {
+    border-color: var(--status-online);
+}
+
+.toast.error {
+    border-color: var(--status-offline);
+}
+
+.toast-message {
+    color: var(--text-primary);
+    font-size: 0.8rem;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .device-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .toast {
+        bottom: 0.75rem;
+        right: 0.75rem;
+        left: 0.75rem;
+    }
+}
+
+/* ============================================
+   Stage Buttons (Left Sidebar)
+   ============================================ */
+
+.stage-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+}
+
+.stage-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: left;
+    font-size: 0.85rem;
+}
+
+.stage-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent-primary);
+}
+
+.stage-btn.active {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.stage-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.stage-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.stage-btn:hover .stage-label,
+.stage-btn.active .stage-label {
+    color: var(--text-primary);
+}
+
+/* ============================================
+   Filter Buttons
+   ============================================ */
+
+.filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+}
+
+.filter-btn {
+    padding: 0.25rem 0.5rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.filter-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.filter-btn.active {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: white;
+}
+
+/* ============================================
+   Action Buttons
+   ============================================ */
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    margin-bottom: 1rem;
+}
+
+.action-btn {
+    padding: 0.35rem 0.6rem;
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: left;
+}
+
+.action-btn:hover:not(:disabled) {
+    background: var(--bg-card);
+}
+
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   Stage Panels (Right Sidebar)
+   ============================================ */
+
+.stage-panel {
+    padding: 0;
+}
+
+.stage-panel h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: var(--text-primary);
+}
+
+.stage-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.stage-info {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    padding: 0.35rem 0.6rem;
+    background: var(--bg-tertiary);
+    border-radius: 3px;
+}
+
+.stage-info span {
+    font-weight: 600;
+    color: var(--accent-primary);
+}
+
+.stage-actions {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Stage Device List (for Stage 3/4 selection) */
+.stage-device-list {
+    max-height: 180px;
+    overflow-y: auto;
+    background: var(--bg-tertiary);
+    border-radius: 5px;
+    padding: 0.35rem;
+    margin-bottom: 0.75rem;
+}
+
+.stage-device-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.4rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.stage-device-item:last-child {
+    border-bottom: none;
+}
+
+.stage-device-item input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--accent-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.stage-device-name {
+    flex: 1;
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stage-device-ip {
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    width: 100px;
+    flex-shrink: 0;
+}
+
+.stage-device-model {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    width: 75px;
+    flex-shrink: 0;
+    text-align: right;
+}
+
+.stage-empty {
+    text-align: center;
+    padding: 0.75rem;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+}
+
+/* ============================================
+   Progress Bar
+   ============================================ */
+
+.stage-progress {
+    margin-bottom: 0.75rem;
+}
+
+.progress-bar {
+    height: 6px;
+    background: var(--bg-tertiary);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.35rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--accent-primary);
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.progress-fill.success {
+    background: var(--status-online);
+}
+
+.progress-fill.error {
+    background: var(--status-offline);
+}
+
+.progress-text {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   Stage Results
+   ============================================ */
+
+.stage-results {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.result-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem;
+    background: var(--bg-tertiary);
+    border-radius: 3px;
+    margin-bottom: 0.25rem;
+    font-size: 0.75rem;
+}
+
+.result-item .status-icon {
+    width: 0.9rem;
+    height: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.result-item .status-icon.ok {
+    color: var(--status-online);
+}
+
+.result-item .status-icon.error {
+    color: var(--status-offline);
+}
+
+.result-item .status-icon.pending {
+    color: var(--text-dim);
+}
+
+.result-item .device-name {
+    flex: 1;
+    color: var(--text-primary);
+}
+
+.result-item .result-msg {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+}
+
+/* Scan Results (Stage 2) */
+.scan-result-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    margin-bottom: 0.25rem;
+}
+
+.scan-result-item input[type="checkbox"] {
+    width: 0.9rem;
+    height: 0.9rem;
+}
+
+.scan-result-item .device-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.scan-result-item .device-ip {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+}
+
+.scan-result-item .device-model {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.scan-result-item .existing-badge {
+    font-size: 0.65rem;
+    padding: 0.1rem 0.3rem;
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+    border-radius: 2px;
+}

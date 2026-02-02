@@ -1,0 +1,63 @@
+# ============================================
+# Stagebox .gitignore
+# Repository root: /home/coredev/stagebox/
+# ============================================
+
+# ----- Personal/Installer Data (NEVER commit!) -----
+data/installer_logo.png
+data/installer_profile.json
+
+# ----- Secrets & Credentials -----
+data/secrets.yaml
+data/internal_secrets.yaml
+data/admin.yaml
+data/config.yaml
+
+# ----- Runtime Data -----
+data/ip_state.json
+data/ip_state.json.bak
+data/ip_state.json.bak_*
+data/labels/
+data/language.txt
+
+# ----- Logs & Temp -----
+var/
+shelly_snapshot_*.json
+
+# ----- Python -----
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+.env
+
+# ----- Cython / Compiled -----
+*.so
+*.c
+build/
+*.egg-info/
+
+# ----- Generated Files -----
+*.pdf
+
+# ----- Old/Backup Files -----
+*.old
+*.bak
+*.bak_*
+OLD/
+oldstuff/
+
+# ----- OS & Editor -----
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# ----- Tests (optional) -----
+tests/
+test_*.py
