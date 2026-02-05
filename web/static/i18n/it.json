@@ -55,7 +55,19 @@
     "buildings_in_zip": "Edifici nel ZIP:",
     "import_selected": "Importa selezionati",
     "importing": "Importazione...",
-    "importing_buildings": "Importazione edifici..."
+    "importing_buildings": "Importazione edifici...",
+    "personal_replace_warning": "L'edificio esistente verrà sostituito.",
+    "personal_existing": "Edificio esistente:",
+    "personal_importing": "Importazione:",
+    "personal_backup_hint": "Consigliamo di scaricare un backup prima di sostituire.",
+    "backup_and_replace": "Backup & Sostituisci",
+    "just_replace": "Solo Sostituisci",
+    "downloading_backup": "Download del backup...",
+    "backup_downloaded": "Backup scaricato",
+    "backup_failed": "Download del backup fallito",
+    "success": "Importazione riuscita",
+    "failed": "Importazione fallita",
+    "buildings_imported": "edificio/i importato/i"
   },
   "restore": {
     "title": "Ripristina da USB",
@@ -282,6 +294,7 @@
     "title": "Dispositivi",
     "search_placeholder": "Cerca...",
     "loading": "Caricamento dispositivi...",
+    "syncing": "Sincronizzazione...",
     "empty": "Nessun dispositivo trovato",
     "total": "totale",
     "refresh": "Aggiorna",
@@ -451,7 +464,8 @@
     "empty": "Clicca \"Verifica\" per controllare le versioni firmware.",
     "update_selected": "Aggiorna selezionati",
     "update_all_outdated": "Aggiorna tutti obsoleti",
-    "info": "ℹ️ Gli aggiornamenti possono richiedere diversi minuti. I dispositivi si riavviano automaticamente."
+    "info": "ℹ️ Gli aggiornamenti possono richiedere diversi minuti. I dispositivi si riavviano automaticamente.",
+    "refresh_hint": "Aggiornamento in corso. Clicca su Aggiorna dopo ~1 minuto per vedere le nuove versioni firmware."
   },
   "settings": {
     "network_settings": "⚙️ Impostazioni di rete",

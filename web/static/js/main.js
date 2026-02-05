@@ -123,7 +123,21 @@ const App = {
     async loadDevices() {
         try {
             UI.elements.refreshBtn.disabled = true;
-            UI.elements.refreshBtn.textContent = 'Loading...';
+            UI.elements.refreshBtn.textContent = i18n.t('device_list.syncing') || 'Syncing...';
+            
+            // Reset firmware update progress display
+            const fwProgress = document.getElementById('firmware-progress');
+            if (fwProgress) fwProgress.style.display = 'none';
+            
+            // First sync device info from Shellys (e.g. firmware versions)
+            try {
+                await API.syncDevices();
+            } catch (syncError) {
+                console.warn('Device sync failed:', syncError);
+                // Continue with loading even if sync fails
+            }
+            
+            UI.elements.refreshBtn.textContent = i18n.t('device_list.loading') || 'Loading...';
             
             const result = await API.getDevices();
             
@@ -139,7 +153,7 @@ const App = {
             UI.renderDeviceList([]);
         } finally {
             UI.elements.refreshBtn.disabled = false;
-            UI.elements.refreshBtn.textContent = 'Refresh';
+            UI.elements.refreshBtn.textContent = i18n.t('device_list.refresh') || 'Refresh';
         }
     },
     

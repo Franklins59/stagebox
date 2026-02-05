@@ -84,6 +84,15 @@ const API = {
         return await this.request('/api/status');
     },
     
+    /**
+     * Sync device info from Shellys to database (e.g. firmware versions)
+     */
+    async syncDevices() {
+        return await this.request('/api/devices/sync', {
+            method: 'POST'
+        });
+    },
+    
     // =========================================================================
     // Device Actions
     // =========================================================================

@@ -55,7 +55,19 @@
     "buildings_in_zip": "Buildings in ZIP:",
     "import_selected": "Import Selected",
     "importing": "Importing...",
-    "importing_buildings": "Importing buildings..."
+    "importing_buildings": "Importing buildings...",
+    "personal_replace_warning": "The existing building will be replaced.",
+    "personal_existing": "Existing building:",
+    "personal_importing": "Importing:",
+    "personal_backup_hint": "We recommend downloading a backup before replacing.",
+    "backup_and_replace": "Backup & Replace",
+    "just_replace": "Just Replace",
+    "downloading_backup": "Downloading backup...",
+    "backup_downloaded": "Backup downloaded",
+    "backup_failed": "Backup download failed",
+    "success": "Import successful",
+    "failed": "Import failed",
+    "buildings_imported": "building(s) imported"
   },
   "restore": {
     "title": "Restore from USB",
@@ -282,6 +294,7 @@
     "title": "Devices",
     "search_placeholder": "Search...",
     "loading": "Loading devices...",
+    "syncing": "Syncing...",
     "empty": "No devices found",
     "total": "total",
     "refresh": "Refresh",
@@ -451,7 +464,8 @@
     "empty": "Click \"Check\" to check firmware versions.",
     "update_selected": "Update Selected",
     "update_all_outdated": "Update All Outdated",
-    "info": "ℹ️ Updates may take several minutes. Devices reboot automatically."
+    "info": "ℹ️ Updates may take several minutes. Devices reboot automatically.",
+    "refresh_hint": "Devices are updating. Click Refresh after ~1 minute to see new firmware versions."
   },
   "device": {
     "select_device": "Select a device",

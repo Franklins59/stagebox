@@ -333,6 +333,19 @@
                             <button type="submit" id="save-btn" class="btn-primary" disabled data-i18n="details.save">Save</button>
                         </div>
                     </form>
+                    
+                    <!-- Danger Zone - Device Removal -->
+                    <div class="danger-zone" id="danger-zone" style="display: none;">
+                        <div class="danger-zone-content">
+                            <div class="danger-item">
+                                <div class="danger-info">
+                                    <span class="danger-title">⚠️ <span data-i18n="device.remove_device">Remove Device</span></span>
+                                    <span class="danger-description" data-i18n="device.remove_description">Removes this Shelly from the database</span>
+                                </div>
+                                <button id="btn-delete-device" class="btn-danger-small" data-i18n="device.remove">Remove</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Stage Execution Tab -->
@@ -745,19 +758,6 @@
                         
                         <div class="firmware-info">
                             <p data-i18n="firmware.info">ℹ️ Updates may take several minutes. Devices reboot automatically.</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Danger Zone - Device Removal -->
-                <div class="danger-zone" id="danger-zone" style="display: none;">
-                    <div class="danger-zone-content">
-                        <div class="danger-item">
-                            <div class="danger-info">
-                                <span class="danger-title">⚠️ <span data-i18n="device.remove_device">Remove Device</span></span>
-                                <span class="danger-description" data-i18n="device.remove_description">Removes this Shelly from the database</span>
-                            </div>
-                            <button id="btn-delete-device" class="btn-danger-small" data-i18n="device.remove">Remove</button>
                         </div>
                     </div>
                 </div>
@@ -8041,6 +8041,13 @@
                     
                     UI.showToast(`Firmware update: ${successCount}/${devices.length} started`, 
                         successCount === devices.length ? 'success' : 'warning');
+                    
+                    // Show hint to refresh after update completes
+                    if (successCount > 0) {
+                        setTimeout(() => {
+                            UI.showToast(i18n.t('firmware.refresh_hint'), 'info');
+                        }, 2000);
+                    }
                     
                     // Clear selection
                     firmwareSelected.clear();

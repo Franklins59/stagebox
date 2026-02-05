@@ -1091,3 +1091,75 @@ def update_firmware():
         results = list(executor.map(update_device, device_macs))
     
     return jsonify({'success': True, 'results': results})
+
+
+@bp.route('/api/devices/sync', methods=['POST'])
+def sync_devices():
+    """Sync device info from Shellys to ip_state.json.
+    
+    Queries firmware version from all online devices and updates
+    ip_state.json if changes are detected.
+    """
+    import requests
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    
+    devices = device_manager.devices
+    if not devices:
+        return jsonify({'success': True, 'synced': 0, 'changes': []})
+    
+    changes = []
+    
+    def sync_device(device):
+        """Query device and return changes if any."""
+        if not isinstance(device, dict):
+            return None
+        
+        mac = device.get('id') or device.get('mac')
+        ip = device.get('ip')
+        if not ip or not mac:
+            return None
+        
+        try:
+            # Query device info
+            resp = requests.get(f'http://{ip}/rpc/Shelly.GetDeviceInfo', timeout=3)
+            if resp.status_code != 200:
+                return None
+            
+            info = resp.json()
+            new_fw = info.get('fw_id', info.get('ver'))
+            if not new_fw:
+                return None
+            
+            # Check if firmware changed
+            old_fw = device.get('fw')
+            if old_fw != new_fw:
+                return {
+                    'mac': mac,
+                    'field': 'fw',
+                    'old': old_fw,
+                    'new': new_fw
+                }
+            
+            return None
+            
+        except Exception:
+            return None
+    
+    # Query devices in parallel
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {executor.submit(sync_device, d): d for d in devices}
+        
+        for future in as_completed(futures):
+            result = future.result()
+            if result:
+                changes.append(result)
+    
+    # Apply changes to ip_state.json
+    for change in changes:
+        device_manager.update_device(change['mac'], {'fw': change['new']})
+    
+    return jsonify({
+        'success': True,
+        'synced': len(devices),
+        'changes': changes
+    })

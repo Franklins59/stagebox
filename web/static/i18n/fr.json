@@ -55,7 +55,19 @@
     "buildings_in_zip": "Bâtiments dans le ZIP:",
     "import_selected": "Importer la sélection",
     "importing": "Importation...",
-    "importing_buildings": "Importation des bâtiments..."
+    "importing_buildings": "Importation des bâtiments...",
+    "personal_replace_warning": "Le bâtiment existant sera remplacé.",
+    "personal_existing": "Bâtiment existant:",
+    "personal_importing": "Importation:",
+    "personal_backup_hint": "Nous recommandons de télécharger une sauvegarde avant de remplacer.",
+    "backup_and_replace": "Sauvegarder & Remplacer",
+    "just_replace": "Remplacer seulement",
+    "downloading_backup": "Téléchargement de la sauvegarde...",
+    "backup_downloaded": "Sauvegarde téléchargée",
+    "backup_failed": "Échec du téléchargement de la sauvegarde",
+    "success": "Importation réussie",
+    "failed": "Échec de l'importation",
+    "buildings_imported": "bâtiment(s) importé(s)"
   },
   "restore": {
     "title": "Restaurer depuis USB",
@@ -282,6 +294,7 @@
     "title": "Appareils",
     "search_placeholder": "Rechercher...",
     "loading": "Chargement des appareils...",
+    "syncing": "Synchronisation...",
     "empty": "Aucun appareil trouvé",
     "total": "total",
     "refresh": "Actualiser",
@@ -451,7 +464,8 @@
     "empty": "Cliquez sur \"Vérifier\" pour vérifier les versions firmware.",
     "update_selected": "Mettre à jour la sélection",
     "update_all_outdated": "Mettre à jour tous les obsolètes",
-    "info": "ℹ️ Les mises à jour peuvent prendre plusieurs minutes. Les appareils redémarrent automatiquement."
+    "info": "ℹ️ Les mises à jour peuvent prendre plusieurs minutes. Les appareils redémarrent automatiquement.",
+    "refresh_hint": "Mise à jour en cours. Cliquez sur Actualiser après ~1 minute pour voir les nouvelles versions firmware."
   },
   "settings": {
     "network_settings": "⚙️ Paramètres réseau",

@@ -55,7 +55,19 @@
     "buildings_in_zip": "Gebouwen in ZIP:",
     "import_selected": "Geselecteerde importeren",
     "importing": "Importeren...",
-    "importing_buildings": "Gebouwen worden geïmporteerd..."
+    "importing_buildings": "Gebouwen worden geïmporteerd...",
+    "personal_replace_warning": "Het bestaande gebouw wordt vervangen.",
+    "personal_existing": "Bestaand gebouw:",
+    "personal_importing": "Importeren:",
+    "personal_backup_hint": "We raden aan eerst een backup te downloaden.",
+    "backup_and_replace": "Backup & Vervangen",
+    "just_replace": "Alleen Vervangen",
+    "downloading_backup": "Backup downloaden...",
+    "backup_downloaded": "Backup gedownload",
+    "backup_failed": "Backup download mislukt",
+    "success": "Import geslaagd",
+    "failed": "Import mislukt",
+    "buildings_imported": "gebouw(en) geïmporteerd"
   },
   "restore": {
     "title": "Herstellen van USB",
@@ -282,6 +294,7 @@
     "title": "Apparaten",
     "search_placeholder": "Zoeken...",
     "loading": "Apparaten laden...",
+    "syncing": "Synchroniseren...",
     "empty": "Geen apparaten gevonden",
     "total": "totaal",
     "refresh": "Vernieuwen",
@@ -451,7 +464,8 @@
     "no_device": "Geen apparaat geselecteerd",
     "up_to_date": "Up-to-date",
     "update": "Bijwerken",
-    "update_all": "Alles bijwerken"
+    "update_all": "Alles bijwerken",
+    "refresh_hint": "Apparaten worden bijgewerkt. Klik na ~1 minuut op Vernieuwen om de nieuwe firmware-versies te zien."
   },
   "settings": {
     "network_settings": "⚙️ Netwerkinstellingen",

@@ -656,10 +656,8 @@ def execute_import():
                         # Deactivate if active
                         if get_active_building() == existing_to_delete:
                             deactivate_building()
-                        # Backup and delete
-                        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                        backup_path = config.BUILDINGS_DIR / f"{existing_to_delete}_backup_{timestamp}"
-                        shutil.move(str(existing_path), str(backup_path))
+                        # Delete existing building (user was offered backup download in UI)
+                        shutil.rmtree(str(existing_path))
                 
                 # Determine target path (may be renamed for Personal edition)
                 target_path = config.BUILDINGS_DIR / target_name

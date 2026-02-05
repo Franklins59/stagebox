@@ -55,7 +55,19 @@
     "buildings_in_zip": "Gebäude in ZIP:",
     "import_selected": "Ausgewählte importieren",
     "importing": "Importiere...",
-    "importing_buildings": "Gebäude werden importiert..."
+    "importing_buildings": "Gebäude werden importiert...",
+    "personal_replace_warning": "Das bestehende Gebäude wird ersetzt.",
+    "personal_existing": "Bestehendes Gebäude:",
+    "personal_importing": "Importiere:",
+    "personal_backup_hint": "Wir empfehlen, vorher ein Backup herunterzuladen.",
+    "backup_and_replace": "Backup & Ersetzen",
+    "just_replace": "Nur Ersetzen",
+    "downloading_backup": "Backup wird heruntergeladen...",
+    "backup_downloaded": "Backup heruntergeladen",
+    "backup_failed": "Backup-Download fehlgeschlagen",
+    "success": "Import erfolgreich",
+    "failed": "Import fehlgeschlagen",
+    "buildings_imported": "Gebäude importiert"
   },
   "restore": {
     "title": "Von USB wiederherstellen",
@@ -282,6 +294,7 @@
     "title": "Geräte",
     "search_placeholder": "Suchen...",
     "loading": "Lade Geräte...",
+    "syncing": "Synchronisiere...",
     "empty": "Keine Geräte gefunden",
     "total": "gesamt",
     "refresh": "Aktualisieren",
@@ -451,7 +464,8 @@
     "empty": "Klicken Sie auf \"Prüfen\", um Firmware-Versionen zu prüfen.",
     "update_selected": "Ausgewählte aktualisieren",
     "update_all_outdated": "Alle veralteten aktualisieren",
-    "info": "ℹ️ Updates können mehrere Minuten dauern. Geräte starten automatisch neu."
+    "info": "ℹ️ Updates können mehrere Minuten dauern. Geräte starten automatisch neu.",
+    "refresh_hint": "Geräte werden aktualisiert. Klicken Sie nach ca. 1 Minute auf Aktualisieren, um die neuen Firmware-Versionen zu sehen."
   },
   "device": {
     "select_device": "Gerät auswählen",

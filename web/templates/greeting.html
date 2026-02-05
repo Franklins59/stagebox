@@ -668,6 +668,38 @@
             font-size: 0.8rem;
         }
 
+        .import-personal-warning {
+            background: rgba(255, 152, 0, 0.1);
+            border: 1px solid var(--accent-warning);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .import-personal-warning p {
+            margin: 0.5rem 0;
+        }
+
+        .import-personal-warning .hint {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+        }
+
+        .btn-warning {
+            background: var(--accent-warning);
+            color: #000;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-warning:hover {
+            background: #e68a00;
+        }
+
         /* Restore from USB Modal */
         .backup-list {
             max-height: 250px;
@@ -3046,7 +3078,7 @@
                 
                 if (data.success) {
                     importBuildings = data.buildings;
-                    renderImportBuildings(data.buildings);
+                    renderImportBuildings(data.buildings, data.is_personal === true);
                     if (listEl) listEl.style.display = 'block';
                 } else {
                     showToast('Analysis failed: ' + (data.error || 'Unknown'), 'error');
@@ -3059,19 +3091,57 @@
             }
         }
         
-        function renderImportBuildings(buildings) {
+        function renderImportBuildings(buildings, isPersonal = false) {
             const container = document.getElementById('import-buildings-container');
+            const actionsDiv = document.querySelector('#modal-import .modal-actions');
             
             if (buildings.length === 0) {
                 container.innerHTML = '<div class="import-building-item"><em>No buildings found in ZIP</em></div>';
                 return;
             }
             
+            // Personal edition with existing building: show backup dialog
+            if (isPersonal && buildings.length === 1 && buildings[0].exists) {
+                const b = buildings[0];
+                container.innerHTML = `
+                    <div class="import-personal-warning">
+                        <p>⚠️ <strong>${t('import.personal_replace_warning') || 'The existing building will be replaced.'}</strong></p>
+                        <p>${t('import.personal_existing') || 'Existing building:'} <strong>${b.existing_building}</strong></p>
+                        <p>${t('import.personal_importing') || 'Importing:'} <strong>${b.name}</strong> → <strong>${b.target_name}</strong></p>
+                        <p class="hint">${t('import.personal_backup_hint') || 'We recommend downloading a backup before replacing.'}</p>
+                    </div>
+                `;
+                
+                // Store data for later use
+                container.dataset.buildingName = b.name;
+                container.dataset.targetName = b.target_name;
+                container.dataset.existingBuilding = b.existing_building;
+                container.dataset.isPersonal = 'true';
+                
+                // Replace buttons for Personal edition
+                actionsDiv.innerHTML = `
+                    <button id="import-cancel" class="btn btn-secondary" data-i18n="common.cancel">Cancel</button>
+                    <button id="import-backup-replace" class="btn btn-primary">${t('import.backup_and_replace') || 'Backup & Replace'}</button>
+                    <button id="import-just-replace" class="btn btn-warning">${t('import.just_replace') || 'Just Replace'}</button>
+                `;
+                
+                // Re-attach event listeners
+                document.getElementById('import-cancel').addEventListener('click', () => {
+                    document.getElementById('modal-import').classList.remove('active');
+                    resetImportState();
+                });
+                document.getElementById('import-backup-replace').addEventListener('click', () => executePersonalImport(true));
+                document.getElementById('import-just-replace').addEventListener('click', () => executePersonalImport(false));
+                
+                return;
+            }
+            
+            // Standard rendering (Pro edition or Personal without conflict)
             container.innerHTML = buildings.map(b => {
                 const hasConflict = b.exists === true;
                 return `
                     <div class="import-building-item">
-                        <input type="checkbox" id="import-${b.name}" data-name="${b.name}" data-conflict="${hasConflict}" ${!hasConflict ? 'checked' : ''}>
+                        <input type="checkbox" id="import-${b.name}" data-name="${b.name}" data-target-name="${b.target_name || b.name}" data-conflict="${hasConflict}" ${!hasConflict ? 'checked' : ''}>
                         <div class="import-building-info">
                             <div class="import-building-name">${b.name}</div>
                             <div class="import-building-details">${b.action || (hasConflict ? 'skip' : 'import')}</div>
@@ -3081,6 +3151,9 @@
                 `;
             }).join('');
             
+            // Mark as Personal if applicable (for executeImport to use target_name)
+            container.dataset.isPersonal = isPersonal ? 'true' : 'false';
+            
             // Enable execute button
             updateImportButton();
             
@@ -3088,6 +3161,82 @@
             container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
                 cb.addEventListener('change', updateImportButton);
             });
+        }
+        
+        async function executePersonalImport(withBackup) {
+            if (!importFile) {
+                showToast('No file selected', 'error');
+                return;
+            }
+            
+            const container = document.getElementById('import-buildings-container');
+            const buildingName = container.dataset.buildingName;
+            const targetName = container.dataset.targetName;
+            const existingBuilding = container.dataset.existingBuilding;
+            
+            // Download backup first if requested
+            if (withBackup) {
+                showToast(t('import.downloading_backup') || 'Downloading backup...', 'info');
+                try {
+                    const response = await fetch('/api/buildings/export', { method: 'POST' });
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = response.headers.get('Content-Disposition')?.match(/filename="?(.+)"?/)?.[1] || 'backup.zip';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                        showToast(t('import.backup_downloaded') || 'Backup downloaded', 'success');
+                    } else {
+                        showToast(t('import.backup_failed') || 'Backup download failed', 'error');
+                        return;
+                    }
+                } catch (error) {
+                    showToast(t('import.backup_failed') || 'Backup download failed: ' + error.message, 'error');
+                    return;
+                }
+            }
+            
+            // Proceed with import
+            const fileToImport = importFile;
+            
+            document.getElementById('modal-import').classList.remove('active');
+            document.getElementById('modal-import-progress').classList.add('active');
+            
+            const formData = new FormData();
+            formData.append('file', fileToImport);
+            formData.append('selections', JSON.stringify([{
+                name: buildingName,
+                target_name: targetName,
+                existing_building: existingBuilding,
+                action: 'overwrite'
+            }]));
+            
+            try {
+                const response = await fetch('/api/buildings/import/execute', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                document.getElementById('modal-import-progress').classList.remove('active');
+                
+                if (data.success) {
+                    showToast(`${t('import.success') || 'Import successful'}: ${data.imported} ${t('import.buildings_imported') || 'building(s) imported'}`, 'success');
+                    // Redirect to main page (building is already activated)
+                    window.location.href = '/';
+                } else {
+                    showToast(`${t('import.failed') || 'Import failed'}: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                document.getElementById('modal-import-progress').classList.remove('active');
+                showToast(`${t('import.failed') || 'Import failed'}: ${error.message}`, 'error');
+            }
+            
+            resetImportState();
         }
         
         function updateImportButton() {
