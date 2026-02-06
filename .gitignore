@@ -40,7 +40,6 @@ build/
 *.egg-info/
 
 # ----- Edition Control (Pro/Personal set at deployment) -----
-web/edition.py
 
 # ----- Generated Files -----
 *.pdf
