@@ -9,7 +9,7 @@ This file defines the edition at build time.
 #   1 = Personal
 #   2 = Pro
 # =============================================================================
-_E = 1
+_E = 1  # Personal Edition
 # =============================================================================
 
 # Obfuscated edition resolution (hard to find in compiled binary)
