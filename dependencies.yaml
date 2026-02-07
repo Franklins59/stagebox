@@ -67,7 +67,8 @@ apt_update_prefixes:
   - sudo
   - apt
   - dpkg
-  - libc
+  - libc6
+  - libc-bin
   - libgcc
   - libstdc++
   - base-files

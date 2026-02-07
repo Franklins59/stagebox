@@ -952,6 +952,7 @@ def get_device_live_status(device_id):
         return jsonify({'success': False, 'error': 'Device has no IP'}), 400
     
     try:
+        # Get device status
         resp = requests.post(
             f'http://{ip}/rpc',
             json={'id': 1, 'method': 'Shelly.GetStatus', 'params': {}},
@@ -959,12 +960,27 @@ def get_device_live_status(device_id):
         )
         data = resp.json()
         
+        result = {'success': True, 'status': {}, 'device_info': {}}
+        
         if 'result' in data:
-            return jsonify({'success': True, 'status': data['result']})
+            result['status'] = data['result']
         elif 'error' in data:
             return jsonify({'success': False, 'error': data['error'].get('message', 'Unknown error')}), 400
         
-        return jsonify({'success': True, 'status': {}})
+        # Also get device info (contains profile for 2PM devices)
+        try:
+            resp_info = requests.post(
+                f'http://{ip}/rpc',
+                json={'id': 2, 'method': 'Shelly.GetDeviceInfo', 'params': {}},
+                timeout=5
+            )
+            info_data = resp_info.json()
+            if 'result' in info_data:
+                result['device_info'] = info_data['result']
+        except:
+            pass  # device_info is optional
+        
+        return jsonify(result)
         
     except requests.exceptions.Timeout:
         return jsonify({'success': False, 'error': 'Device timeout'}), 504

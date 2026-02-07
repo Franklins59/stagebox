@@ -12,6 +12,8 @@ from typing import Optional, List
 from flask import Blueprint, jsonify, request
 
 from web import config
+from web.config import VERSION
+from web.edition import get_edition_name
 from web.services import device_manager, is_building_active, get_active_building
 from web.routes.pro.admin import require_admin, require_pro
 
@@ -1090,7 +1092,8 @@ def generate_report():
                 report_date=report_date,
                 snapshot_date=snapshot_date,
                 snapshot_filename=snapshot_filename,
-                version='2.0'
+                version=VERSION,
+                edition_name=get_edition_name()
             )
             
             from weasyprint import HTML

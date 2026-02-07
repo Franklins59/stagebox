@@ -77,7 +77,7 @@ def check_apt_updates():
             'linux-', 'systemd', 'openssl', 'libssl',
             'ca-certificates', 'networkmanager', 'sudo',
             'apt', 'dpkg', 'openssh', 'curl', 'wget',
-            'raspi-', 'firmware-', 'libc', 'tzdata', 'base-files',
+            'raspi-', 'firmware-', 'libc6', 'libc-bin', 'tzdata', 'base-files',
         ]
     
     def is_system_package(pkg_name):
@@ -195,22 +195,74 @@ def check_apt_updates():
 @require_pro
 @require_admin
 def run_apt_upgrade():
-    """Run APT upgrade."""
+    """Run APT upgrade for system packages."""
+    import threading
+    
     try:
+        # Get packages from request (optional - if not provided, upgrade all)
+        data = request.get_json() or {}
+        packages = data.get('packages', [])
+        
+        if packages:
+            # Upgrade specific packages
+            cmd = ['sudo', 'apt-get', 'install', '--only-upgrade', '-y'] + packages
+        else:
+            # Upgrade all
+            cmd = ['sudo', 'apt-get', 'upgrade', '-y']
+        
         result = subprocess.run(
-            ['sudo', 'apt-get', 'upgrade', '-y'],
+            cmd,
             capture_output=True,
             text=True,
             timeout=600  # 10 minutes
         )
         
+        if result.returncode != 0:
+            return jsonify({
+                'success': False,
+                'message': 'Upgrade failed',
+                'error': result.stderr,
+                'rebooting': False
+            })
+        
+        # Count upgraded packages
+        upgraded_count = len(packages) if packages else 0
+        if not packages:
+            # Count from output
+            for line in result.stdout.split('\n'):
+                if 'upgraded' in line.lower():
+                    try:
+                        upgraded_count = int(line.split()[0])
+                    except:
+                        pass
+                    break
+        
+        # Schedule reboot in background (give time for response)
+        def delayed_reboot():
+            import time
+            time.sleep(3)
+            subprocess.run(['sudo', 'systemctl', 'reboot'], capture_output=True)
+        
+        reboot_thread = threading.Thread(target=delayed_reboot)
+        reboot_thread.start()
+        
         return jsonify({
-            'success': result.returncode == 0,
-            'stdout': result.stdout,
-            'stderr': result.stderr
+            'success': True,
+            'message': f'{upgraded_count} packages updated successfully',
+            'rebooting': True
         })
         
     except subprocess.TimeoutExpired:
-        return jsonify({'success': False, 'error': 'Upgrade timeout'}), 504
+        return jsonify({
+            'success': False,
+            'message': 'Upgrade timeout',
+            'error': 'Operation timed out after 10 minutes',
+            'rebooting': False
+        }), 504
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({
+            'success': False,
+            'message': 'Upgrade failed',
+            'error': str(e),
+            'rebooting': False
+        }), 500
