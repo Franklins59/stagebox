@@ -20,6 +20,7 @@ def register_blueprints(app: Flask):
     from web.routes import provisioning
     from web.routes import scripts
     from web.routes import updates
+    from web.routes import schedules
     
     app.register_blueprint(core.bp)
     app.register_blueprint(buildings.bp)
@@ -28,6 +29,7 @@ def register_blueprints(app: Flask):
     app.register_blueprint(provisioning.bp)
     app.register_blueprint(scripts.bp)
     app.register_blueprint(updates.bp)
+    app.register_blueprint(schedules.bp)
     
     # Admin routes (both editions - PIN, auth, settings)
     from web.routes.pro import admin

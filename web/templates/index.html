@@ -123,12 +123,16 @@
             </div>
         </main>
 
+        <!-- Resize handle -->
+        <div class="resize-handle" id="resize-handle"></div>
+
         <!-- Right Sidebar - Details/Stage Panels -->
         <aside class="sidebar-right">
             <div class="tabs">
                 <button class="tab-btn active" data-tab="details" data-i18n-title="tabs.details" title="Details">📋</button>
                 <button class="tab-btn" data-tab="stage" data-i18n-title="tabs.stage" title="Stage">🔧</button>
                 <button class="tab-btn" data-tab="scripts" data-i18n-title="tabs.scripts" title="Scripts">📜</button>
+                <button class="tab-btn" data-tab="schedules" data-i18n-title="tabs.schedules" title="Schedules">🕐</button>
                 <button class="tab-btn" data-tab="kvs" data-i18n-title="tabs.kvs" title="KVS">🗄</button>
                 <button class="tab-btn" data-tab="webhooks" data-i18n-title="tabs.webhooks" title="Webhooks">🔗</button>
                 <button class="tab-btn" data-tab="firmware" data-i18n-title="tabs.firmware" title="Firmware">💾</button>
@@ -507,6 +511,52 @@
                         <div class="scripts-results" id="scripts-results">
                             <!-- Results will appear here -->
                         </div>
+                    </div>
+                </div>
+
+                <!-- Schedules Tab -->
+                <div class="tab-pane" id="tab-schedules">
+                    <div class="schedules-panel">
+                        <div class="schedules-header">
+                            <h3 data-i18n="schedules.title">Manage Schedules</h3>
+                            <div class="schedules-controls-row">
+                                <button id="btn-refresh-schedules" class="btn-small" title="Refresh">🔄</button>
+                                <button id="btn-new-schedule" class="btn-small" title="New schedule">➕ New</button>
+                                <button id="btn-edit-schedule" class="btn-small" title="Edit selected" disabled>✏️ Edit</button>
+                                <button id="btn-delete-schedule-file" class="btn-small btn-danger-small" title="Delete template" disabled>🗑️</button>
+                            </div>
+                        </div>
+
+                        <!-- Template List -->
+                        <div class="schedules-list-container">
+                            <div class="schedules-list" id="schedules-list">
+                                <div class="loading-small" data-i18n="schedules.loading">Loading schedules...</div>
+                            </div>
+                        </div>
+
+                        <!-- Target Devices -->
+                        <div class="schedules-target">
+                            <div class="schedules-target-header">
+                                <h4 data-i18n="schedules.target_devices">Target devices</h4>
+                                <div class="schedules-target-controls">
+                                    <button id="btn-sched-select-all" class="btn-tiny" data-i18n="schedules.select_all">Select All</button>
+                                    <button id="btn-sched-select-none" class="btn-tiny" data-i18n="schedules.select_none">None</button>
+                                </div>
+                            </div>
+                            <div class="schedules-device-list" id="schedules-device-list"></div>
+                            <div class="schedules-selection-info">
+                                <span id="sched-selected-count">0</span> <span data-i18n="schedules.selected">selected</span>
+                            </div>
+                        </div>
+
+                        <!-- Deploy / Status / Delete -->
+                        <div class="schedules-actions">
+                            <button id="btn-deploy-schedule" class="btn-primary" disabled data-i18n="schedules.deploy">📤 Deploy</button>
+                            <button id="btn-sched-status" class="btn-secondary" disabled data-i18n="schedules.status">📋 Status</button>
+                            <button id="btn-sched-delete-all" class="btn-danger" disabled data-i18n="schedules.delete_all">🗑️ Delete All</button>
+                        </div>
+
+                        <div class="schedules-results" id="schedules-results"></div>
                     </div>
                 </div>
 
@@ -1432,6 +1482,152 @@
             
             <div class="modal-actions">
                 <button id="replace-result-close-btn" class="btn-primary" data-i18n="common.close">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Editor Modal -->
+    <div id="modal-schedule-editor" class="modal-overlay">
+        <div class="modal schedule-editor-modal">
+            <div class="modal-header">
+                <h3>🕐 <span id="schedule-editor-title" data-i18n="schedules.new_schedule">New Schedule</span></h3>
+                <p class="modal-subtitle" data-i18n="schedules.editor_subtitle">Define schedule timing and actions</p>
+            </div>
+
+            <div class="schedule-editor-body">
+                <div class="sched-editor-row">
+                    <div class="sched-editor-col">
+                        <div class="form-group-compact">
+                            <label data-i18n="schedules.name">Name</label>
+                            <input type="text" id="sched-name" placeholder="e.g. Morning lights" maxlength="50">
+                        </div>
+
+                        <div class="form-group-compact">
+                            <label data-i18n="schedules.description">Description</label>
+                            <input type="text" id="sched-description" placeholder="Optional" maxlength="100">
+                        </div>
+
+                        <!-- Unified timing editor -->
+                        <div class="sched-timing-section">
+                            <!-- Timing source selector -->
+                            <div class="timing-source-row">
+                                <label class="timing-source-btn active" data-source="time">
+                                    <input type="radio" name="timing-source" value="time" checked onchange="onTimingSourceChange()">
+                                    <span>⏰ <span data-i18n="schedules.source_time">Time</span></span>
+                                </label>
+                                <label class="timing-source-btn" data-source="sunrise">
+                                    <input type="radio" name="timing-source" value="sunrise" onchange="onTimingSourceChange()">
+                                    <span>☀️ <span data-i18n="schedules.source_sunrise">Sunrise</span></span>
+                                </label>
+                                <label class="timing-source-btn" data-source="sunset">
+                                    <input type="radio" name="timing-source" value="sunset" onchange="onTimingSourceChange()">
+                                    <span>🌙 <span data-i18n="schedules.source_sunset">Sunset</span></span>
+                                </label>
+                                <label class="timing-source-btn" data-source="interval">
+                                    <input type="radio" name="timing-source" value="interval" onchange="onTimingSourceChange()">
+                                    <span>🔁 <span data-i18n="schedules.source_interval">Interval</span></span>
+                                </label>
+                            </div>
+
+                            <!-- Time source: simple time picker -->
+                            <div id="timing-time-fields" class="timing-fields">
+                                <div class="form-group-compact">
+                                    <label data-i18n="schedules.time">Time</label>
+                                    <input type="time" id="sched-time" value="07:00" onchange="rebuildTimespec()">
+                                </div>
+                            </div>
+
+                            <!-- Sunrise/Sunset source: offset -->
+                            <div id="timing-solar-fields" class="timing-fields" style="display: none;">
+                                <div class="form-group-compact">
+                                    <label data-i18n="schedules.offset">Offset</label>
+                                    <div class="adv-offset-row">
+                                        <select id="adv-solar-sign" onchange="rebuildTimespec()">
+                                            <option value="+">+</option>
+                                            <option value="-">−</option>
+                                        </select>
+                                        <input type="number" id="adv-solar-offset" value="0" min="0" max="120" class="adv-input" onchange="rebuildTimespec()">
+                                        <span class="adv-unit">min</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Interval source: presets + custom -->
+                            <div id="timing-interval-fields" class="timing-fields" style="display: none;">
+                                <div class="interval-presets">
+                                    <button type="button" class="adv-preset-btn active" onclick="setIntervalPreset(this,'*/5','*')" data-iv="5m" data-i18n="schedules.every_5min">Every 5 min</button>
+                                    <button type="button" class="adv-preset-btn" onclick="setIntervalPreset(this,'*/15','*')" data-iv="15m" data-i18n="schedules.every_15min">Every 15 min</button>
+                                    <button type="button" class="adv-preset-btn" onclick="setIntervalPreset(this,'*/30','*')" data-iv="30m" data-i18n="schedules.every_30min">Every 30 min</button>
+                                    <button type="button" class="adv-preset-btn" onclick="setIntervalPreset(this,'0','*/1')" data-iv="1h" data-i18n="schedules.hourly">Hourly</button>
+                                    <button type="button" class="adv-preset-btn" onclick="setIntervalPreset(this,'0','*/2')" data-iv="2h" data-i18n="schedules.every_2h">Every 2h</button>
+                                </div>
+                                <div class="form-group-compact" style="margin-top: 0.3rem;">
+                                    <label data-i18n="schedules.custom_interval">Custom (min / hour)</label>
+                                    <div style="display: flex; gap: 0.3rem; align-items: center;">
+                                        <input type="text" id="interval-min" value="*/5" class="adv-input" style="width: 5rem;" onchange="rebuildTimespec()" placeholder="*/5">
+                                        <span class="adv-unit">min</span>
+                                        <input type="text" id="interval-hour" value="*" class="adv-input" style="width: 5rem;" onchange="rebuildTimespec()" placeholder="*">
+                                        <span class="adv-unit">hour</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Weekdays (shared by all sources) -->
+                            <div class="form-group-compact" style="margin-top: 0.4rem;">
+                                <label data-i18n="schedules.weekdays">Weekdays</label>
+                                <div class="weekday-selector" id="sched-weekdays">
+                                    <label class="weekday-cb"><input type="checkbox" value="MON" checked onchange="rebuildTimespec()"><span data-i18n="schedules.mon">Mo</span></label>
+                                    <label class="weekday-cb"><input type="checkbox" value="TUE" checked onchange="rebuildTimespec()"><span data-i18n="schedules.tue">Tu</span></label>
+                                    <label class="weekday-cb"><input type="checkbox" value="WED" checked onchange="rebuildTimespec()"><span data-i18n="schedules.wed">We</span></label>
+                                    <label class="weekday-cb"><input type="checkbox" value="THU" checked onchange="rebuildTimespec()"><span data-i18n="schedules.thu">Th</span></label>
+                                    <label class="weekday-cb"><input type="checkbox" value="FRI" checked onchange="rebuildTimespec()"><span data-i18n="schedules.fri">Fr</span></label>
+                                    <label class="weekday-cb"><input type="checkbox" value="SAT" onchange="rebuildTimespec()"><span data-i18n="schedules.sat">Sa</span></label>
+                                    <label class="weekday-cb"><input type="checkbox" value="SUN" onchange="rebuildTimespec()"><span data-i18n="schedules.sun">Su</span></label>
+                                </div>
+                            </div>
+
+                            <!-- Resulting timespec + preview -->
+                            <div class="adv-result">
+                                <div class="form-group-compact">
+                                    <label data-i18n="schedules.timespec">Timespec</label>
+                                    <input type="text" id="sched-timespec" class="monospace-input" readonly>
+                                </div>
+                                <div class="adv-preview" id="adv-preview"></div>
+                            </div>
+                        </div>
+
+                        <label class="checkbox-inline" style="margin-top: 0.5rem;">
+                            <input type="checkbox" id="sched-enable" checked>
+                            <span data-i18n="schedules.enabled">Enabled</span>
+                        </label>
+                    </div>
+
+                    <div class="sched-editor-col">
+                        <!-- Reference device for component discovery -->
+                        <div class="form-group-compact">
+                            <label data-i18n="schedules.reference_device">Reference device</label>
+                            <select id="sched-ref-device" onchange="onRefDeviceChanged()">
+                                <option value="">-- Select device --</option>
+                            </select>
+                        </div>
+
+                        <!-- Action builder -->
+                        <div class="schedule-actions-builder" id="sched-actions-builder">
+                            <label data-i18n="schedules.actions">Actions (max. 5)</label>
+                            <div id="sched-no-components-hint" class="timespec-help" style="padding: 0.5rem 0;">
+                                Select a reference device to load components and define actions.
+                            </div>
+                            <div class="sched-calls-list" id="sched-calls-list"></div>
+                            <button id="btn-add-call" class="btn-add-action" data-i18n="schedules.add_action" style="display: none;">+ Add Action</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button id="btn-close-editor" class="btn-secondary" data-i18n="common.cancel">Cancel</button>
+                <button id="btn-save-schedule" class="btn-primary" data-i18n="schedules.save">💾 Save</button>
             </div>
         </div>
     </div>
@@ -3546,6 +3742,573 @@
             text-align: center;
             padding: 2rem 1rem;
             color: var(--text-secondary, #a0a0a0);
+        }
+
+        /* ======================= Schedules Panel Styles ======================= */
+        .schedules-panel {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .schedules-header {
+            margin-bottom: 0.75rem;
+        }
+
+        .schedules-header h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .schedules-controls-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .schedules-list-container {
+            overflow-y: auto;
+            margin-bottom: 0.75rem;
+            background: var(--bg-secondary, #16213e);
+            border: 1px solid var(--border-color, #2a3a5a);
+            border-radius: 6px;
+            min-height: 80px;
+            max-height: 180px;
+        }
+
+        .schedules-list {
+            padding: 0.5rem;
+        }
+
+        .sched-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .sched-item:hover {
+            background: rgba(74, 158, 255, 0.1);
+        }
+
+        .sched-item.selected {
+            background: rgba(74, 158, 255, 0.2);
+            border: 1px solid var(--accent-primary, #4a9eff);
+        }
+
+        .sched-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .sched-item-name {
+            font-weight: 500;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sched-item-meta {
+            font-size: 0.7rem;
+            color: var(--text-secondary, #a0a0a0);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sched-item-badge {
+            font-size: 0.65rem;
+            padding: 0.1em 0.4em;
+            border-radius: 3px;
+            background: var(--bg-tertiary, #1a1a2e);
+            color: var(--text-secondary, #a0a0a0);
+        }
+
+        /* Schedule Editor Modal */
+        .schedule-editor-modal {
+            background: var(--bg-card, #1f2940);
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 700px;
+            width: 95%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .schedule-editor-body {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+
+        .sched-editor-row {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .sched-editor-col {
+            flex: 1;
+            min-width: 0;
+        }
+
+        @media (max-width: 600px) {
+            .sched-editor-row {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+
+        .schedule-editor-modal .modal-actions {
+            gap: 0.75rem;
+        }
+
+        .form-group-compact {
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group-compact label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary, #a0a0a0);
+            margin-bottom: 0.15rem;
+        }
+
+        .form-group-compact input[type="text"],
+        .form-group-compact input[type="time"],
+        .form-group-compact select {
+            width: 100%;
+            padding: 0.35rem 0.5rem;
+            background: var(--bg-primary, #0f0f23);
+            border: 1px solid var(--border-color, #2a3a5a);
+            border-radius: 4px;
+            color: var(--text-primary, #e0e0e0);
+            font-size: 0.85rem;
+            box-sizing: border-box;
+        }
+
+        .form-group-compact input:focus,
+        .form-group-compact select:focus {
+            outline: none;
+            border-color: var(--accent-primary, #4a9eff);
+        }
+
+        .monospace-input {
+            font-family: 'Monaco', 'Menlo', monospace !important;
+        }
+
+        .timespec-help {
+            font-size: 0.65rem;
+            color: var(--text-dim, #666);
+            margin-top: 0.15rem;
+        }
+
+        /* Advanced mode builder */
+
+        .adv-preset-btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            background: var(--bg-tertiary, #1a1a2e);
+            border: 1px solid var(--border-color, #2a3a5a);
+            border-radius: 4px;
+            color: var(--text-secondary, #a0a0a0);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .adv-preset-btn:hover {
+            border-color: var(--accent-primary, #4a9eff);
+            color: var(--text-primary, #e0e0e0);
+            background: rgba(74, 158, 255, 0.1);
+        }
+
+        .adv-input {
+            width: 4rem;
+            padding: 0.3rem 0.4rem;
+            font-size: 0.8rem;
+            font-family: monospace;
+            background: var(--bg-secondary, #16213e);
+            border: 1px solid var(--border-color, #2a3a5a);
+            border-radius: 4px;
+            color: var(--text-primary, #e0e0e0);
+            text-align: center;
+        }
+
+        .adv-offset-row {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .adv-offset-row select {
+            width: 2.5rem;
+            padding: 0.3rem;
+            text-align: center;
+        }
+
+        .adv-offset-row input {
+            width: 3.5rem;
+        }
+
+        .adv-unit {
+            font-size: 0.75rem;
+            color: var(--text-dim, #666);
+        }
+
+        .adv-result {
+            border-top: 1px solid var(--border-color, #2a3a5a);
+            padding-top: 0.4rem;
+        }
+
+        .adv-preview {
+            font-size: 0.75rem;
+            color: var(--text-secondary, #a0a0a0);
+            margin-top: 0.25rem;
+            min-height: 1.2em;
+        }
+
+        .adv-preview .preview-ok {
+            color: var(--accent-success, #4caf50);
+        }
+
+        .adv-preview .preview-solar {
+            color: var(--accent-warning, #ff9800);
+        }
+
+        /* Unified timing editor */
+        .timing-source-row {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .timing-source-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.2rem;
+            padding: 0.35rem 0.3rem;
+            font-size: 0.75rem;
+            background: var(--bg-tertiary, #1a1a2e);
+            border: 1px solid var(--border-color, #2a3a5a);
+            border-radius: 4px;
+            color: var(--text-secondary, #a0a0a0);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .timing-source-btn input { display: none; }
+
+        .timing-source-btn.active {
+            border-color: var(--accent-primary, #4a9eff);
+            color: var(--text-primary, #e0e0e0);
+            background: rgba(74, 158, 255, 0.15);
+        }
+
+        .timing-fields {
+            margin-bottom: 0.3rem;
+        }
+
+        .interval-presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .interval-presets .adv-preset-btn.active {
+            border-color: var(--accent-primary, #4a9eff);
+            color: var(--text-primary, #e0e0e0);
+            background: rgba(74, 158, 255, 0.15);
+        }
+
+        .weekday-selector {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .weekday-cb {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.1rem;
+            cursor: pointer;
+        }
+
+        .weekday-cb span {
+            font-size: 0.7rem;
+            color: var(--text-secondary, #a0a0a0);
+        }
+
+        .weekday-cb input:checked + span {
+            color: var(--accent-primary, #4a9eff);
+            font-weight: 600;
+        }
+
+        /* Action builder */
+        .schedule-actions-builder {
+            margin-bottom: 0.5rem;
+        }
+
+        .schedule-actions-builder > label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary, #a0a0a0);
+            margin-bottom: 0.25rem;
+        }
+
+        .sched-calls-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .btn-add-action {
+            display: block;
+            width: 100%;
+            padding: 0.45rem 0.75rem;
+            font-size: 0.85rem;
+            background: var(--bg-tertiary, #1a1a2e);
+            border: 1px dashed var(--accent-primary, #4a9eff);
+            border-radius: 5px;
+            color: var(--accent-primary, #4a9eff);
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .btn-add-action:hover {
+            background: rgba(74, 158, 255, 0.15);
+            color: #fff;
+        }
+
+        .sched-call-item {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem;
+            background: var(--bg-primary, #0f0f23);
+            border: 1px solid var(--border-color, #2a3a5a);
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .sched-call-item select {
+            padding: 0.25rem;
+            background: var(--bg-secondary, #16213e);
+            border: 1px solid var(--border-color, #2a3a5a);
+            border-radius: 3px;
+            color: var(--text-primary, #e0e0e0);
+            font-size: 0.8rem;
+        }
+
+        .sched-call-item input {
+            width: 60px;
+            padding: 0.25rem;
+            background: var(--bg-secondary, #16213e);
+            border: 1px solid var(--border-color, #2a3a5a);
+            border-radius: 3px;
+            color: var(--text-primary, #e0e0e0);
+            font-size: 0.8rem;
+        }
+
+        .sched-call-remove {
+            background: none;
+            border: none;
+            color: var(--accent-danger, #e74c3c);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0;
+        }
+
+        /* Target devices (reuse scripts styles with own prefix) */
+        .schedules-target {
+            margin-bottom: 0.75rem;
+        }
+
+        .schedules-target-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .schedules-target-header h4 {
+            font-size: 0.85rem;
+            color: var(--text-secondary, #a0a0a0);
+            margin: 0;
+        }
+
+        .schedules-target-controls {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .schedules-device-list {
+            max-height: 120px;
+            overflow-y: auto;
+            background: var(--bg-secondary, #16213e);
+            border: 1px solid var(--border-color, #2a3a5a);
+            border-radius: 6px;
+            padding: 0.5rem;
+        }
+
+        .schedules-device-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+        }
+
+        .schedules-device-item:hover {
+            background: rgba(74, 158, 255, 0.1);
+        }
+
+        .schedules-device-item input[type="checkbox"] {
+            margin: 0;
+        }
+
+        .schedules-device-item .device-name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .schedules-device-item .device-ip {
+            color: var(--text-secondary, #a0a0a0);
+            font-size: 0.75rem;
+        }
+
+        .schedules-selection-info {
+            margin-top: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary, #a0a0a0);
+        }
+
+        .schedules-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .schedules-actions .btn-primary,
+        .schedules-actions .btn-secondary,
+        .schedules-actions .btn-danger {
+            flex: 1;
+            min-width: 100px;
+            padding: 0.6rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .schedules-results {
+            flex: 1;
+            overflow-y: auto;
+            font-size: 0.85rem;
+        }
+
+        .sched-result-item {
+            padding: 0.4rem 0;
+            border-bottom: 1px solid var(--border-color, #2a3a5a);
+        }
+
+        .sched-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .sched-result-device {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sched-result-device .device-name {
+            flex: 1;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+        }
+
+        .sched-result-device .result-status {
+            font-size: 0.9rem;
+        }
+
+        .sched-result-device .result-status.success {
+            color: var(--accent-success, #4caf50);
+        }
+
+        .sched-result-device .result-status.error {
+            color: var(--accent-danger, #f44336);
+        }
+
+        .sched-result-schedules {
+            margin-left: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary, #a0a0a0);
+        }
+
+        .sched-entry {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0;
+        }
+
+        .sched-entry-info {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .sched-entry-actions {
+            display: flex;
+            gap: 0.3rem;
+            flex-shrink: 0;
+        }
+
+        .sched-entry-btn {
+            background: var(--bg-tertiary, #1a1a2e);
+            border: 1px solid var(--border-color, #2a3a5a);
+            border-radius: 4px;
+            color: var(--text-secondary, #a0a0a0);
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 0.2rem 0.4rem;
+            line-height: 1.2;
+        }
+
+        .sched-entry-btn:hover {
+            border-color: var(--accent-primary, #4a9eff);
+            color: var(--text-primary, #e0e0e0);
+            background: rgba(74, 158, 255, 0.1);
+        }
+
+        .sched-entry-btn.btn-del:hover {
+            border-color: var(--accent-danger, #e74c3c);
+            color: var(--accent-danger, #e74c3c);
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .sched-entry-enabled {
+            color: var(--accent-success, #4caf50);
+        }
+
+        .sched-entry-disabled {
+            color: var(--text-dim, #666);
+        }
+
+        .no-schedules-hint {
+            text-align: center;
+            padding: 1rem;
+            color: var(--text-secondary, #a0a0a0);
+            font-size: 0.85rem;
         }
 
         /* KVS Panel Styles */
@@ -6833,6 +7596,15 @@
             return Array.from(scriptsSelectedDevices);
         }
         
+        // Resolve device MAC/IP to a display label (name + IP)
+        function getDeviceLabel(mac, ip) {
+            const allDevices = (window.UI && UI.filteredDevices) ? UI.filteredDevices : [];
+            const device = allDevices.find(d => d.id === mac || d.ip === ip);
+            const name = device ? (device.friendly_name || device.hostname || '') : '';
+            if (name && ip) return `${name} (${ip})`;
+            return name || ip || mac;
+        }
+        
         async function deployScript() {
             if (!selectedScript) {
                 UI.showToast('No script selected', 'warning');
@@ -6841,7 +7613,7 @@
             
             const targetDevices = getScriptTargetDevices();
             if (targetDevices.length === 0) {
-                UI.showToast('Keine Target devices', 'warning');
+                UI.showToast(i18n.t('schedules.no_target_devices'), 'warning');
                 return;
             }
             
@@ -6896,7 +7668,7 @@
                         
                         return `
                             <div class="script-result-item">
-                                <span class="device-name">${r.ip || r.device}</span>
+                                <span class="device-name">${getDeviceLabel(r.device, r.ip)}</span>
                                 <span class="result-status ${r.success ? 'success' : 'error'}">
                                     ${r.success ? '✓' : '✗'} ${r.message || ''}
                                 </span>
@@ -6928,7 +7700,7 @@
         async function checkScriptStatus() {
             const targetDevices = getScriptTargetDevices();
             if (targetDevices.length === 0) {
-                UI.showToast('Keine Target devices', 'warning');
+                UI.showToast(i18n.t('schedules.no_target_devices'), 'warning');
                 return;
             }
             
@@ -6955,7 +7727,7 @@
                         
                         return `
                             <div class="script-result-item">
-                                <span class="device-name">${r.ip || r.device}</span>
+                                <span class="device-name">${getDeviceLabel(r.device, r.ip)}</span>
                                 <span class="result-status ${r.success ? '' : 'error'}">
                                     ${r.success ? scriptInfo : '✗ ' + (r.error || 'Fehler')}
                                 </span>
@@ -6975,7 +7747,7 @@
         async function deleteScriptFromDevices() {
             const targetDevices = getScriptTargetDevices();
             if (targetDevices.length === 0) {
-                UI.showToast('Keine Target devices', 'warning');
+                UI.showToast(i18n.t('schedules.no_target_devices'), 'warning');
                 return;
             }
             
@@ -7009,7 +7781,7 @@
                     
                     resultsEl.innerHTML = data.results.map(r => `
                         <div class="script-result-item">
-                            <span class="device-name">${r.ip || r.device}</span>
+                            <span class="device-name">${getDeviceLabel(r.device, r.ip)}</span>
                             <span class="result-status ${r.success ? 'success' : 'error'}">
                                 ${r.success ? '✓ deleted' : '✗ ' + (r.error || 'Fehler')}
                             </span>
@@ -7030,7 +7802,7 @@
         async function controlScripts(action) {
             const targetDevices = getScriptTargetDevices();
             if (targetDevices.length === 0) {
-                UI.showToast('Keine Target devices', 'warning');
+                UI.showToast(i18n.t('schedules.no_target_devices'), 'warning');
                 return;
             }
             
@@ -7057,7 +7829,7 @@
                     
                     resultsEl.innerHTML = data.results.map(r => `
                         <div class="script-result-item">
-                            <span class="device-name">${r.ip || r.device}</span>
+                            <span class="device-name">${getDeviceLabel(r.device, r.ip)}</span>
                             <span class="result-status ${r.success ? 'success' : 'error'}">
                                 ${r.success ? '✓ ' + action : '✗ ' + (r.error || 'Fehler')}
                             </span>
@@ -7082,6 +7854,1061 @@
         
         // Update device list when filter changes
         document.addEventListener('devicesFiltered', updateScriptsDeviceList);
+    </script>
+
+    <script>
+        // ============================================
+        // Schedules Tab Functionality
+        // ============================================
+
+        let schedSelectedDevices = new Set();
+        let schedSelectedTemplate = null;
+        let schedDeviceComponents = []; // Components from reference device
+        let schedEditingFilename = null; // Filename when editing existing template
+        let schedEditingCalls = []; // Existing calls when editing (fallback if components not loaded)
+
+        // --- Template list ---
+        async function loadScheduleTemplates() {
+            const listEl = document.getElementById('schedules-list');
+            listEl.innerHTML = '<div class="loading-small">Loading...</div>';
+
+            try {
+                const resp = await fetch('/api/schedules/templates');
+                const data = await resp.json();
+
+                if (data.success && data.templates.length > 0) {
+                    listEl.innerHTML = data.templates.map(t => {
+                        return `
+                        <div class="sched-item" data-filename="${t.filename}" onclick="selectScheduleTemplate('${t.filename}')" ondblclick="selectScheduleTemplate('${t.filename}'); editScheduleTemplate();">
+                            <input type="radio" name="sched-template" value="${t.filename}">
+                            <div class="sched-item-info">
+                                <div class="sched-item-name">${t.name}</div>
+                                <div class="sched-item-meta">${t.timespec || ''} · ${t.calls_count} action(s)${t.description ? ' · ' + t.description : ''}</div>
+                            </div>
+                            <span class="sched-item-badge">${t.timespec?.startsWith('@') ? (t.timespec.includes('sunset') ? '🌙' : '☀️') : '⏰'}</span>
+                        </div>`;
+                    }).join('');
+                } else {
+                    listEl.innerHTML = `<div class="no-schedules-hint">${i18n.t('schedules.no_templates')}</div>`;
+                }
+            } catch (e) {
+                listEl.innerHTML = `<div class="no-schedules-hint">${i18n.t('schedules.error_loading')}</div>`;
+            }
+
+            schedSelectedTemplate = null;
+            updateScheduleButtons();
+        }
+
+        function selectScheduleTemplate(filename) {
+            schedSelectedTemplate = filename;
+            document.querySelectorAll('#schedules-list .sched-item').forEach(el => {
+                el.classList.toggle('selected', el.dataset.filename === filename);
+                el.querySelector('input[type="radio"]').checked = el.dataset.filename === filename;
+            });
+            updateScheduleButtons();
+        }
+
+        // Edit existing template
+        async function editScheduleTemplate() {
+            if (!schedSelectedTemplate) return;
+
+            try {
+                const resp = await fetch(`/api/schedules/templates/${schedSelectedTemplate}`);
+                const data = await resp.json();
+
+                if (data.success) {
+                    const template = data.template;
+                    template._filename = data.filename;
+                    openScheduleEditor(template);
+                } else {
+                    UI.showToast(data.error || i18n.t('schedules.load_failed_template'), 'error');
+                }
+            } catch (e) {
+                UI.showToast(i18n.t('schedules.connection_error'), 'error');
+            }
+        }
+
+        // --- Editor ---
+        function openScheduleEditor(template) {
+            const modal = document.getElementById('modal-schedule-editor');
+            modal.classList.add('active');
+
+            if (template) {
+                // Editing existing
+                document.getElementById('schedule-editor-title').textContent = i18n.t('schedules.edit_schedule');
+                document.getElementById('sched-name').value = template.name || '';
+                document.getElementById('sched-description').value = template.description || '';
+                document.getElementById('sched-enable').checked = template.schedule?.enable !== false;
+                schedEditingFilename = template._filename || null;
+
+                // Parse timespec into unified editor
+                const ts = template.schedule?.timespec || '';
+                if (ts) {
+                    parseTimespekToEditor(ts);
+                } else {
+                    setTimingSource('time');
+                    resetWeekdays();
+                    rebuildTimespec();
+                }
+
+                // Show existing calls info
+                const callsList = document.getElementById('sched-calls-list');
+                const existingCalls = template.schedule?.calls || [];
+                if (existingCalls.length > 0 && schedDeviceComponents.length === 0) {
+                    callsList.innerHTML = existingCalls.map(c =>
+                        `<div class="sched-call-item" style="opacity: 0.7;">
+                            <span>${c.method}(${Object.entries(c.params || {}).map(([k,v]) => k+'='+v).join(', ')})</span>
+                        </div>`
+                    ).join('');
+                    document.getElementById('sched-no-components-hint').textContent = i18n.t('schedules.select_ref_hint');
+                    document.getElementById('sched-no-components-hint').style.display = '';
+                    document.getElementById('btn-add-call').style.display = 'none';
+                } else if (existingCalls.length > 0) {
+                    restoreCallsFromTemplate(existingCalls);
+                    document.getElementById('sched-no-components-hint').style.display = 'none';
+                    document.getElementById('btn-add-call').style.display = '';
+                }
+
+                // Store existing calls for re-save if not edited
+                schedEditingCalls = existingCalls;
+            } else {
+                // New
+                document.getElementById('schedule-editor-title').textContent = i18n.t('schedules.new_schedule');
+                document.getElementById('sched-name').value = '';
+                document.getElementById('sched-description').value = '';
+                document.getElementById('sched-enable').checked = true;
+                document.getElementById('sched-time').value = '07:00';
+                document.getElementById('sched-timespec').value = '';
+                document.getElementById('sched-calls-list').innerHTML = '';
+                schedEditingFilename = null;
+                schedEditingCalls = [];
+                schedDeviceComponents = [];
+                document.getElementById('sched-no-components-hint').textContent = i18n.t('schedules.select_ref_hint_new');
+                document.getElementById('sched-no-components-hint').style.display = '';
+                document.getElementById('btn-add-call').style.display = 'none';
+                setTimingSource('time');
+                resetWeekdays();
+                rebuildTimespec();
+            }
+
+            populateRefDeviceSelect();
+
+            // Restore reference device from template if editing
+            if (template && template.ref_device) {
+                const refSelect = document.getElementById('sched-ref-device');
+                if (refSelect.querySelector(`option[value="${template.ref_device}"]`)) {
+                    refSelect.value = template.ref_device;
+                    onRefDeviceChanged();
+                }
+            }
+        }
+
+        function closeScheduleEditor() {
+            document.getElementById('modal-schedule-editor').classList.remove('active');
+        }
+
+
+        // --- Unified timing editor ---
+
+        function onTimingSourceChange() {
+            const source = document.querySelector('input[name="timing-source"]:checked')?.value || 'time';
+
+            // Update button styles
+            document.querySelectorAll('.timing-source-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.source === source);
+            });
+
+            // Show/hide fields
+            document.getElementById('timing-time-fields').style.display = source === 'time' ? '' : 'none';
+            document.getElementById('timing-solar-fields').style.display = (source === 'sunrise' || source === 'sunset') ? '' : 'none';
+            document.getElementById('timing-interval-fields').style.display = source === 'interval' ? '' : 'none';
+
+            rebuildTimespec();
+        }
+
+        function getWeekdayStr() {
+            const days = [];
+            document.querySelectorAll('#sched-weekdays input:checked').forEach(cb => days.push(cb.value));
+            if (days.length === 7 || days.length === 0) return '*';
+            return days.join(',');
+        }
+
+        function setWeekdaysFromStr(dowStr) {
+            const allDays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+            const activeDays = dowStr === '*' ? allDays : dowStr.split(',').flatMap(d => {
+                if (d.includes('-')) {
+                    const [start, end] = d.split('-');
+                    const si = allDays.indexOf(start);
+                    const ei = allDays.indexOf(end);
+                    if (si >= 0 && ei >= 0) return allDays.slice(si, ei + 1);
+                }
+                return [d];
+            });
+            document.querySelectorAll('#sched-weekdays input[type="checkbox"]').forEach(cb => {
+                cb.checked = activeDays.includes(cb.value);
+            });
+        }
+
+        function rebuildTimespec() {
+            const source = document.querySelector('input[name="timing-source"]:checked')?.value || 'time';
+            const dow = getWeekdayStr();
+            let ts = '';
+
+            if (source === 'time') {
+                const time = document.getElementById('sched-time').value;
+                if (!time) { document.getElementById('sched-timespec').value = ''; return; }
+                const [hh, mm] = time.split(':');
+                ts = `0 ${parseInt(mm)} ${parseInt(hh)} * * ${dow}`;
+            } else if (source === 'sunrise' || source === 'sunset') {
+                const sign = document.getElementById('adv-solar-sign').value;
+                const offset = parseInt(document.getElementById('adv-solar-offset').value) || 0;
+                let offsetStr = '';
+                if (offset > 0) {
+                    const hours = Math.floor(offset / 60);
+                    const mins = offset % 60;
+                    if (hours > 0 && mins > 0) offsetStr = `${sign}${hours}h${mins}m`;
+                    else if (hours > 0) offsetStr = `${sign}${hours}h`;
+                    else offsetStr = `${sign}${mins}m`;
+                }
+                ts = `@${source}${offsetStr} * * ${dow}`;
+            } else if (source === 'interval') {
+                const min = document.getElementById('interval-min').value.trim() || '0';
+                const hour = document.getElementById('interval-hour').value.trim() || '*';
+                ts = `0 ${min} ${hour} * * ${dow}`;
+            }
+
+            document.getElementById('sched-timespec').value = ts;
+            updateAdvPreview();
+        }
+
+        function setIntervalPreset(btn, min, hour) {
+            document.getElementById('interval-min').value = min;
+            document.getElementById('interval-hour').value = hour;
+            // Highlight active preset
+            document.querySelectorAll('.interval-presets .adv-preset-btn').forEach(b => {
+                b.classList.remove('active');
+            });
+            btn.classList.add('active');
+            rebuildTimespec();
+        }
+
+        function buildTimespec() {
+            // Always return the computed timespec
+            return document.getElementById('sched-timespec').value.trim();
+        }
+
+        function parseTimespekToEditor(timespec) {
+            // Parse any timespec and set the correct source + fields
+            const ts = timespec.trim();
+
+            // Auto-migrate bad format: "0 0 @sunrise+5 * * DOW"
+            const parts = ts.split(/\s+/);
+            const solarInField = parts.find(p => p.startsWith('@sunrise') || p.startsWith('@sunset'));
+
+            if (ts.startsWith('@') || (solarInField && !ts.startsWith('@'))) {
+                // Solar mode
+                let event, offsetStr, dow;
+
+                if (solarInField && !ts.startsWith('@')) {
+                    // Bad format migration
+                    const m = solarInField.match(/^@(sunrise|sunset)([+-]?\d*)$/);
+                    event = m ? m[1] : 'sunrise';
+                    const rawOff = m ? m[2] : '';
+                    const num = Math.abs(parseInt(rawOff?.replace(/[+-]/, ''))) || 0;
+                    const sign = rawOff?.startsWith('-') ? '-' : '+';
+                    offsetStr = num > 0 ? `${sign}${num}m` : '';
+                    dow = parts.length >= 6 ? parts[5] : '*';
+                } else {
+                    const solarMatch = ts.match(/^@(sunrise|sunset)([+-][\dh.m]+)?\s+(.*)$/);
+                    if (solarMatch) {
+                        event = solarMatch[1];
+                        offsetStr = solarMatch[2] || '';
+                        const remaining = solarMatch[3] || '* * *';
+                        const remParts = remaining.trim().split(/\s+/);
+                        dow = remParts.length >= 3 ? remParts[2] : (remParts[0] || '*');
+                    } else {
+                        event = ts.includes('sunset') ? 'sunset' : 'sunrise';
+                        offsetStr = '';
+                        dow = '*';
+                    }
+                }
+
+                // Set source radio
+                setTimingSource(event);
+
+                // Parse offset
+                if (offsetStr) {
+                    const sign = offsetStr[0];
+                    const offPart = offsetStr.slice(1);
+                    let totalMin = 0;
+                    const hMatch = offPart.match(/([\d.]+)h/);
+                    const mMatch = offPart.match(/(\d+)m/);
+                    if (hMatch) totalMin += parseFloat(hMatch[1]) * 60;
+                    if (mMatch) totalMin += parseInt(mMatch[1]);
+                    if (!hMatch && !mMatch) totalMin = parseInt(offPart) || 0;
+                    document.getElementById('adv-solar-sign').value = sign;
+                    document.getElementById('adv-solar-offset').value = Math.round(totalMin);
+                } else {
+                    document.getElementById('adv-solar-sign').value = '+';
+                    document.getElementById('adv-solar-offset').value = '0';
+                }
+
+                setWeekdaysFromStr(dow);
+
+            } else if (parts.length === 6) {
+                // Cron format: check if it's an interval or fixed time
+                const [sec, min, hour, day, month, dowPart] = parts;
+                const isInterval = min.includes('/') || hour.includes('/');
+
+                if (isInterval) {
+                    setTimingSource('interval');
+                    document.getElementById('interval-min').value = min;
+                    document.getElementById('interval-hour').value = hour;
+                    // Try to highlight matching preset
+                    document.querySelectorAll('.interval-presets .adv-preset-btn').forEach(b => b.classList.remove('active'));
+                } else {
+                    setTimingSource('time');
+                    const hh = String(parseInt(hour)).padStart(2, '0');
+                    const mm = String(parseInt(min)).padStart(2, '0');
+                    document.getElementById('sched-time').value = `${hh}:${mm}`;
+                }
+
+                setWeekdaysFromStr(dowPart);
+            }
+
+            rebuildTimespec();
+        }
+
+        function setTimingSource(source) {
+            document.querySelectorAll('input[name="timing-source"]').forEach(r => {
+                r.checked = r.value === source;
+            });
+            document.querySelectorAll('.timing-source-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.source === source);
+            });
+            document.getElementById('timing-time-fields').style.display = source === 'time' ? '' : 'none';
+            document.getElementById('timing-solar-fields').style.display = (source === 'sunrise' || source === 'sunset') ? '' : 'none';
+            document.getElementById('timing-interval-fields').style.display = source === 'interval' ? '' : 'none';
+        }
+
+        function resetWeekdays() {
+            const days = ['MON', 'TUE', 'WED', 'THU', 'FRI'];
+            document.querySelectorAll('#sched-weekdays input[type="checkbox"]').forEach(cb => {
+                cb.checked = days.includes(cb.value);
+            });
+        }
+
+        function updateAdvPreview() {
+            const previewEl = document.getElementById('adv-preview');
+            const ts = document.getElementById('sched-timespec').value.trim();
+            if (!ts) { previewEl.innerHTML = ''; return; }
+
+            if (ts.startsWith('@')) {
+                const solarMatch = ts.match(/^@(sunrise|sunset)([+-][\dh.m]+)?\s+(.*)$/);
+                if (solarMatch) {
+                    const event = solarMatch[1] === 'sunrise' ? '☀️ Sunrise' : '🌙 Sunset';
+                    let offsetDesc = '';
+                    if (solarMatch[2]) {
+                        const sign = solarMatch[2][0];
+                        const offPart = solarMatch[2].slice(1);
+                        let totalMin = 0;
+                        const hMatch = offPart.match(/([\d.]+)h/);
+                        const mMatch = offPart.match(/(\d+)m/);
+                        if (hMatch) totalMin += parseFloat(hMatch[1]) * 60;
+                        if (mMatch) totalMin += parseInt(mMatch[1]);
+                        if (!hMatch && !mMatch) totalMin = parseInt(offPart) || 0;
+                        if (totalMin > 0) {
+                            const h = Math.floor(totalMin / 60);
+                            const m = totalMin % 60;
+                            offsetDesc = ` ${sign} ${h > 0 ? h + 'h' : ''}${m > 0 ? m + 'min' : ''}`;
+                        }
+                    }
+                    const remaining = solarMatch[3] || '* * *';
+                    const remParts = remaining.trim().split(/\s+/);
+                    const days = remParts.length >= 3 ? remParts[2] : (remParts[0] || '*');
+                    const daysDesc = days === '*' ? i18n.t('schedules.preview_every_day') : days;
+                    previewEl.innerHTML = `<span class="preview-solar">⏱ ${event}${offsetDesc}, ${daysDesc}</span>`;
+                } else {
+                    previewEl.innerHTML = '<span style="color:var(--accent-danger)">Invalid solar timespec</span>';
+                }
+                return;
+            }
+
+            const parts = ts.split(/\s+/);
+            if (parts.some(p => p.includes('@'))) {
+                previewEl.innerHTML = '<span style="color:var(--accent-danger)">Invalid timespec format</span>';
+                return;
+            }
+
+            try {
+                if (parts.length < 6) {
+                    previewEl.innerHTML = '<span style="color:var(--accent-danger)">Need 6 fields</span>';
+                    return;
+                }
+                const nextTimes = computeNextCronTimes(parts, 3);
+                if (nextTimes.length > 0) {
+                    const formatted = nextTimes.map(d => {
+                        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                        return `${dayNames[d.getDay()]} ${d.toLocaleTimeString('de-CH', {hour:'2-digit', minute:'2-digit'})}`;
+                    }).join(', ');
+                    previewEl.innerHTML = `<span class="preview-ok">⏱ ${i18n.t('schedules.preview_next')} ${formatted}</span>`;
+                } else {
+                    previewEl.innerHTML = `<span style="color:var(--accent-warning)">${i18n.t('schedules.preview_no_upcoming')}</span>`;
+                }
+            } catch (e) {
+                previewEl.innerHTML = '';
+            }
+        }
+
+        function computeNextCronTimes(parts, count) {
+            const [secP, minP, hourP, dayP, monthP, dowP] = parts;
+            const results = [];
+            const now = new Date();
+
+            const allDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+            const allowedDow = new Set();
+            if (dowP === '*') {
+                for (let i = 0; i < 7; i++) allowedDow.add(i);
+            } else {
+                dowP.split(',').forEach(d => {
+                    if (d.includes('-')) {
+                        const [s, e] = d.split('-');
+                        let si = allDays.indexOf(s), ei = allDays.indexOf(e);
+                        if (si >= 0 && ei >= 0) {
+                            for (let i = si; i !== (ei + 1) % 7; i = (i + 1) % 7) allowedDow.add(i);
+                            allowedDow.add(ei);
+                        }
+                    } else {
+                        const idx = allDays.indexOf(d);
+                        if (idx >= 0) allowedDow.add(idx);
+                    }
+                });
+            }
+
+            function expandField(field, min, max) {
+                if (field === '*') {
+                    const arr = [];
+                    for (let i = min; i <= max; i++) arr.push(i);
+                    return arr;
+                }
+                if (field.startsWith('*/')) {
+                    const step = parseInt(field.slice(2));
+                    const arr = [];
+                    for (let i = min; i <= max; i += step) arr.push(i);
+                    return arr;
+                }
+                return field.split(',').map(Number).filter(n => !isNaN(n) && n >= min && n <= max);
+            }
+
+            const allowedSec = expandField(secP, 0, 59);
+            const allowedMin = expandField(minP, 0, 59);
+            const allowedHour = expandField(hourP, 0, 23);
+
+            for (let dayOffset = 0; dayOffset < 365 && results.length < count; dayOffset++) {
+                const d = new Date(now);
+                d.setDate(d.getDate() + dayOffset);
+
+                if (!allowedDow.has(d.getDay())) continue;
+                if (dayP !== '*' && !expandField(dayP, 1, 31).includes(d.getDate())) continue;
+                if (monthP !== '*' && !expandField(monthP, 1, 12).includes(d.getMonth() + 1)) continue;
+
+                for (const h of allowedHour) {
+                    for (const m of allowedMin) {
+                        for (const s of allowedSec) {
+                            const t = new Date(d);
+                            t.setHours(h, m, s, 0);
+                            if (t > now && results.length < count) {
+                                results.push(t);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return results;
+        }
+
+
+        // --- Reference device & components ---
+        function populateRefDeviceSelect() {
+            const select = document.getElementById('sched-ref-device');
+            const allDevices = (window.UI && UI.filteredDevices) ? UI.filteredDevices : [];
+            const online = allDevices.filter(d => UI.deviceStatus[d.id] === true);
+
+            select.innerHTML = `<option value="">${i18n.t('schedules.select_device')}</option>` +
+                online.map(d => `<option value="${d.id}">${d.friendly_name || d.hostname || d.id} (${d.ip})</option>`).join('');
+        }
+
+        // Auto-load components when reference device changes
+        async function onRefDeviceChanged() {
+            const deviceId = document.getElementById('sched-ref-device').value;
+            if (!deviceId) {
+                schedDeviceComponents = [];
+                document.getElementById('sched-no-components-hint').style.display = '';
+                document.getElementById('btn-add-call').style.display = 'none';
+                document.getElementById('sched-calls-list').innerHTML = '';
+                return;
+            }
+            await loadDeviceComponents();
+        }
+
+        async function loadDeviceComponents() {
+            const deviceId = document.getElementById('sched-ref-device').value;
+            if (!deviceId) {
+                UI.showToast(i18n.t('schedules.select_device_first'), 'warning');
+                return;
+            }
+
+            document.getElementById('sched-no-components-hint').textContent = i18n.t('schedules.loading_components');
+
+            try {
+                const resp = await fetch(`/api/schedules/components/${deviceId}`);
+                const data = await resp.json();
+
+                if (data.success) {
+                    schedDeviceComponents = data.components;
+                    document.getElementById('sched-calls-list').innerHTML = '';
+
+                    if (schedDeviceComponents.length === 0) {
+                        document.getElementById('sched-no-components-hint').textContent = i18n.t('schedules.no_components');
+                        document.getElementById('sched-no-components-hint').style.display = '';
+                        document.getElementById('btn-add-call').style.display = 'none';
+                    } else {
+                        document.getElementById('sched-no-components-hint').style.display = 'none';
+                        document.getElementById('btn-add-call').style.display = '';
+                        UI.showToast(`${schedDeviceComponents.length} ${i18n.t('schedules.components_found')}`, 'success');
+
+                        // If editing and we have stored calls, restore them
+                        if (schedEditingCalls.length > 0) {
+                            restoreCallsFromTemplate(schedEditingCalls);
+                        }
+                    }
+                } else {
+                    document.getElementById('sched-no-components-hint').textContent = data.error || i18n.t('schedules.load_failed');
+                    document.getElementById('sched-no-components-hint').style.display = '';
+                    document.getElementById('btn-add-call').style.display = 'none';
+                }
+            } catch (e) {
+                document.getElementById('sched-no-components-hint').textContent = i18n.t('schedules.connection_error');
+                document.getElementById('sched-no-components-hint').style.display = '';
+                document.getElementById('btn-add-call').style.display = 'none';
+            }
+        }
+
+        // --- Call / Action builder ---
+        function addCallRow(preselect) {
+            const list = document.getElementById('sched-calls-list');
+            if (list.children.length >= 5) {
+                UI.showToast(i18n.t('schedules.max_actions'), 'warning');
+                return;
+            }
+
+            const row = document.createElement('div');
+            row.className = 'sched-call-item';
+
+            // Build component+method options
+            let options = '';
+            schedDeviceComponents.forEach(comp => {
+                comp.methods.forEach(m => {
+                    const valObj = { method: m.method, comp_id: comp.id, comp_type: comp.type };
+                    if (m.defaults) valObj.defaults = m.defaults;
+                    const val = JSON.stringify(valObj).replace(/"/g, '&quot;');
+                    const label = `${comp.type}:${comp.id} → ${m.label}`;
+                    options += `<option value="${val}">${label}</option>`;
+                });
+            });
+
+            row.innerHTML = `
+                <select class="sched-call-method" onchange="updateCallParams(this)">${options}</select>
+                <span class="sched-call-params"></span>
+                <button class="sched-call-remove" onclick="this.parentElement.remove()">✕</button>
+            `;
+
+            list.appendChild(row);
+            updateCallParams(row.querySelector('.sched-call-method'));
+        }
+
+        function updateCallParams(selectEl) {
+            const paramsSpan = selectEl.closest('.sched-call-item').querySelector('.sched-call-params');
+            try {
+                const val = JSON.parse(selectEl.value);
+                const comp = schedDeviceComponents.find(c => c.type === val.comp_type && c.id === val.comp_id);
+                const method = comp?.methods.find(m => m.method === val.method);
+
+                if (method && method.params.length > 0) {
+                    paramsSpan.innerHTML = method.params.map(p => {
+                        if (p.type === 'bool') {
+                            return `<select data-param="${p.name}"><option value="true">ON</option><option value="false">OFF</option></select>`;
+                        } else if (p.type === 'int') {
+                            return `<input type="number" data-param="${p.name}" min="${p.min || 0}" max="${p.max || 100}" value="${p.min || 0}" placeholder="${p.label}" title="${p.label}">`;
+                        } else if (p.type === 'select' && p.options) {
+                            const opts = p.options.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+                            return `<select data-param="${p.name}">${opts}</select>`;
+                        }
+                        return '';
+                    }).join('');
+                } else {
+                    paramsSpan.innerHTML = '';
+                }
+            } catch (e) {
+                paramsSpan.innerHTML = '';
+            }
+        }
+
+        function restoreCallsFromTemplate(calls) {
+            // Try to rebuild call rows from template data
+            // Requires components to be loaded first
+            const list = document.getElementById('sched-calls-list');
+            list.innerHTML = '';
+            if (schedDeviceComponents.length === 0) return;
+
+            calls.forEach(call => {
+                addCallRow();
+                // Try to select matching method in last added row
+                const row = list.lastElementChild;
+                if (!row) return;
+                const select = row.querySelector('.sched-call-method');
+                for (const opt of select.options) {
+                    try {
+                        const val = JSON.parse(opt.value);
+                        if (val.method === call.method && val.comp_id === (call.params?.id ?? val.comp_id)) {
+                            select.value = opt.value;
+                            updateCallParams(select);
+                            // Set param values
+                            if (call.params) {
+                                Object.entries(call.params).forEach(([k, v]) => {
+                                    const input = row.querySelector(`[data-param="${k}"]`);
+                                    if (input) input.value = String(v);
+                                });
+                            }
+                            break;
+                        }
+                    } catch (e) {}
+                }
+            });
+        }
+
+        function collectCalls() {
+            const calls = [];
+            document.querySelectorAll('#sched-calls-list .sched-call-item').forEach(row => {
+                try {
+                    const val = JSON.parse(row.querySelector('.sched-call-method').value);
+                    const params = { id: val.comp_id };
+
+                    // Merge default params (e.g. event_type for Input.Trigger)
+                    if (val.defaults) {
+                        Object.assign(params, val.defaults);
+                    }
+
+                    row.querySelectorAll('[data-param]').forEach(input => {
+                        const name = input.dataset.param;
+                        let v = input.value;
+                        if (v === 'true') v = true;
+                        else if (v === 'false') v = false;
+                        else if (!isNaN(v) && v !== '') v = Number(v);
+                        params[name] = v;
+                    });
+
+                    calls.push({ method: val.method, params });
+                } catch (e) {}
+            });
+            return calls;
+        }
+
+        // --- Save template ---
+        async function saveScheduleTemplate() {
+            const name = document.getElementById('sched-name').value.trim();
+            if (!name) {
+                UI.showToast(i18n.t('schedules.name_required'), 'warning');
+                return;
+            }
+
+            const timespec = buildTimespec();
+            if (!timespec) {
+                UI.showToast(i18n.t('schedules.timespec_empty'), 'warning');
+                return;
+            }
+
+            // Validate timespec format
+            if (timespec.startsWith('@')) {
+                if (!/^@(sunrise|sunset)([+-][\dh.m]+)?\s+/.test(timespec)) {
+                    UI.showToast(i18n.t('schedules.invalid_solar'), 'warning');
+                    return;
+                }
+            } else {
+                const parts = timespec.split(/\s+/);
+                if (parts.length !== 6) {
+                    UI.showToast(i18n.t('schedules.invalid_timespec_fields'), 'warning');
+                    return;
+                }
+                // Catch @sunrise/@sunset accidentally placed in a cron field
+                if (parts.some(p => p.includes('@'))) {
+                    UI.showToast(i18n.t('schedules.invalid_timespec_at'), 'warning');
+                    return;
+                }
+            }
+
+            let calls = collectCalls();
+
+            // If no calls collected but we have existing calls from editing, preserve them
+            if (calls.length === 0 && schedEditingCalls.length > 0 && schedDeviceComponents.length === 0) {
+                calls = schedEditingCalls;
+            }
+
+            if (calls.length === 0) {
+                if (!confirm(i18n.t('schedules.no_actions_confirm'))) {
+                    return;
+                }
+            }
+
+            // Determine required components from calls
+            const reqComps = [...new Set(calls.map(c => {
+                const parts = c.method.split('.');
+                return parts[0]; // e.g. "Switch", "Cover"
+            }))];
+
+            const body = {
+                name,
+                description: document.getElementById('sched-description').value.trim(),
+                enable: document.getElementById('sched-enable').checked,
+                timespec,
+                calls,
+                required_components: reqComps,
+                ref_device: document.getElementById('sched-ref-device').value || null
+            };
+
+            if (schedEditingFilename) {
+                body.filename = schedEditingFilename;
+            }
+
+            try {
+                const resp = await fetch('/api/schedules/templates', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    UI.showToast(i18n.t('schedules.schedule_saved'), 'success');
+                    closeScheduleEditor();
+                    loadScheduleTemplates();
+                } else {
+                    UI.showToast(data.error || i18n.t('schedules.save_failed'), 'error');
+                }
+            } catch (e) {
+                UI.showToast(i18n.t('schedules.connection_error'), 'error');
+            }
+        }
+
+        // --- Delete template file ---
+        async function deleteScheduleTemplate() {
+            if (!schedSelectedTemplate) return;
+            if (!confirm('Delete this schedule template?')) return;
+
+            try {
+                const resp = await fetch('/api/schedules/templates/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: schedSelectedTemplate })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    UI.showToast(i18n.t('schedules.template_deleted'), 'success');
+                    loadScheduleTemplates();
+                } else {
+                    UI.showToast(data.error || i18n.t('schedules.failed'), 'error');
+                }
+            } catch (e) {
+                UI.showToast(i18n.t('schedules.connection_error'), 'error');
+            }
+        }
+
+        // --- Target devices ---
+        function updateSchedulesDeviceList() {
+            const listEl = document.getElementById('schedules-device-list');
+            const allDevices = (window.UI && UI.filteredDevices) ? UI.filteredDevices : [];
+            const devices = allDevices.filter(d => UI.deviceStatus[d.id] === true);
+
+            if (devices.length === 0) {
+                listEl.innerHTML = `<div class="no-schedules-hint">${i18n.t('schedules.no_online_devices')}</div>`;
+                schedSelectedDevices.clear();
+                updateSchedSelectionCount();
+                return;
+            }
+
+            schedSelectedDevices = new Set(devices.map(d => d.id));
+
+            listEl.innerHTML = devices.map(d => `
+                <label class="schedules-device-item">
+                    <input type="checkbox" value="${d.id}" checked onchange="toggleSchedDevice('${d.id}')">
+                    <span class="device-name">${d.friendly_name || d.hostname || d.id}</span>
+                    <span class="device-ip">${d.ip}</span>
+                </label>
+            `).join('');
+
+            updateSchedSelectionCount();
+        }
+
+        function toggleSchedDevice(deviceId) {
+            if (schedSelectedDevices.has(deviceId)) schedSelectedDevices.delete(deviceId);
+            else schedSelectedDevices.add(deviceId);
+            updateSchedSelectionCount();
+        }
+
+        function schedSelectAll() {
+            const allDevices = (window.UI && UI.filteredDevices) ? UI.filteredDevices : [];
+            const devices = allDevices.filter(d => UI.deviceStatus[d.id] === true);
+            schedSelectedDevices = new Set(devices.map(d => d.id));
+            document.querySelectorAll('#schedules-device-list input[type="checkbox"]').forEach(cb => cb.checked = true);
+            updateSchedSelectionCount();
+        }
+
+        function schedSelectNone() {
+            schedSelectedDevices.clear();
+            document.querySelectorAll('#schedules-device-list input[type="checkbox"]').forEach(cb => cb.checked = false);
+            updateSchedSelectionCount();
+        }
+
+        function updateSchedSelectionCount() {
+            document.getElementById('sched-selected-count').textContent = schedSelectedDevices.size;
+            updateScheduleButtons();
+        }
+
+        function getSchedTargetDevices() {
+            return Array.from(schedSelectedDevices);
+        }
+
+        // Resolve device name for results display
+        function getSchedDeviceLabel(mac, ip) {
+            const allDevices = (window.UI && UI.filteredDevices) ? UI.filteredDevices : [];
+            const device = allDevices.find(d => d.id === mac || d.ip === ip);
+            const name = device ? (device.friendly_name || device.hostname || '') : '';
+            if (name && ip) return `${name} (${ip})`;
+            return name || ip || mac;
+        }
+
+        function updateScheduleButtons() {
+            const hasTemplate = !!schedSelectedTemplate;
+            const hasTargets = schedSelectedDevices.size > 0;
+            document.getElementById('btn-deploy-schedule').disabled = !hasTemplate || !hasTargets;
+            document.getElementById('btn-sched-status').disabled = !hasTargets;
+            document.getElementById('btn-sched-delete-all').disabled = !hasTargets;
+            document.getElementById('btn-delete-schedule-file').disabled = !hasTemplate;
+            document.getElementById('btn-edit-schedule').disabled = !hasTemplate;
+        }
+
+        // --- Deploy ---
+        async function deploySchedule() {
+            if (!schedSelectedTemplate) return;
+            const targets = getSchedTargetDevices();
+            if (targets.length === 0) return;
+
+            // Check if template has actions by reading the badge info
+            const selectedItem = document.querySelector(`#schedules-list .sched-item[data-filename="${schedSelectedTemplate}"]`);
+            const meta = selectedItem?.querySelector('.sched-item-meta')?.textContent || '';
+            if (meta.includes('0 action(s)')) {
+                UI.showToast(i18n.t('schedules.no_actions_deploy'), 'warning');
+                return;
+            }
+
+            const resultsEl = document.getElementById('schedules-results');
+            resultsEl.innerHTML = '<div class="loading-small">Deploying...</div>';
+
+            try {
+                const resp = await fetch('/api/schedules/deploy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: schedSelectedTemplate, devices: targets })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    const ok = data.results.filter(r => r.success).length;
+                    resultsEl.innerHTML = data.results.map(r => `
+                        <div class="sched-result-item">
+                            <div class="sched-result-device">
+                                <span class="device-name">${getSchedDeviceLabel(r.device, r.ip)}</span>
+                                <span class="result-status ${r.success ? 'success' : 'error'}">${r.success ? '✓ ' + (r.message || 'OK') : '✗ ' + (r.error || 'Error')}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                    UI.showToast(`${i18n.t('schedules.deployed_count')}: ${ok}/${data.results.length}`, 'success');
+                } else {
+                    resultsEl.innerHTML = `<div class="no-schedules-hint">Error: ${data.error}</div>`;
+                }
+            } catch (e) {
+                resultsEl.innerHTML = `<div class="no-schedules-hint">${i18n.t('schedules.connection_error')}</div>`;
+            }
+        }
+
+        // --- Status ---
+        async function checkScheduleStatus() {
+            const targets = getSchedTargetDevices();
+            if (targets.length === 0) return;
+
+            const resultsEl = document.getElementById('schedules-results');
+            resultsEl.innerHTML = `<div class="loading-small">${i18n.t('schedules.checking')}</div>`;
+
+            try {
+                const resp = await fetch('/api/schedules/status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ devices: targets })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    resultsEl.innerHTML = data.results.map(r => {
+                        if (!r.success) {
+                            return `<div class="sched-result-item">
+                                <div class="sched-result-device">
+                                    <span class="device-name">${getSchedDeviceLabel(r.device, r.ip)}</span>
+                                    <span class="result-status error">✗ ${r.error || 'Error'}</span>
+                                </div>
+                            </div>`;
+                        }
+
+                        const schedList = r.schedules.length > 0
+                            ? r.schedules.map(s => {
+                                const toggleLabel = s.enable ? 'Disable' : 'Enable';
+                                const toggleIcon = s.enable ? '▶️' : '⏸️';
+                                return `<div class="sched-entry">
+                                    <span class="sched-entry-info"><span class="${s.enable ? 'sched-entry-enabled' : 'sched-entry-disabled'}">${toggleIcon}</span> ID ${s.id}: ${s.timespec} → ${s.calls.join(', ')}</span>
+                                    <span class="sched-entry-actions">
+                                        <button class="sched-entry-btn" onclick="toggleSingleSchedule('${r.device}', '${r.ip}', ${s.id}, ${!s.enable})" title="${toggleLabel}">${s.enable ? '⏸️' : '▶️'}</button>
+                                        <button class="sched-entry-btn btn-del" onclick="deleteSingleSchedule('${r.device}', '${r.ip}', ${s.id})" title="Delete">🗑️</button>
+                                    </span>
+                                </div>`;
+                            }).join('')
+                            : '<div class="sched-entry">No schedules</div>';
+
+                        return `<div class="sched-result-item">
+                            <div class="sched-result-device">
+                                <span class="device-name">${getSchedDeviceLabel(r.device, r.ip)}</span>
+                                <span class="result-status success">${r.schedules.length} schedule(s)</span>
+                            </div>
+                            <div class="sched-result-schedules">${schedList}</div>
+                        </div>`;
+                    }).join('');
+                } else {
+                    resultsEl.innerHTML = `<div class="no-schedules-hint">Error: ${data.error}</div>`;
+                }
+            } catch (e) {
+                resultsEl.innerHTML = `<div class="no-schedules-hint">${i18n.t('schedules.connection_error')}</div>`;
+            }
+        }
+
+        // --- Toggle single schedule on a device ---
+        async function toggleSingleSchedule(mac, ip, schedId, enable) {
+            try {
+                const resp = await fetch('/api/schedules/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ device: mac, schedule_id: schedId, enable })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    UI.showToast(`Schedule ${schedId} ${enable ? i18n.t('schedules.schedule_enabled') : i18n.t('schedules.schedule_disabled')}`, 'success');
+                    checkScheduleStatus(); // Refresh
+                } else {
+                    UI.showToast(data.error || i18n.t('schedules.failed'), 'error');
+                }
+            } catch (e) {
+                UI.showToast(i18n.t('schedules.connection_error'), 'error');
+            }
+        }
+
+        // --- Delete single schedule from a device ---
+        async function deleteSingleSchedule(mac, ip, schedId) {
+            if (!confirm(`Delete schedule ID ${schedId} from ${getSchedDeviceLabel(mac, ip)}?`)) return;
+
+            try {
+                const resp = await fetch('/api/schedules/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ devices: [mac], schedule_id: schedId })
+                });
+                const data = await resp.json();
+                if (data.success && data.results[0]?.success) {
+                    UI.showToast(`Schedule ${schedId} ${i18n.t('schedules.schedule_deleted')}`, 'success');
+                    checkScheduleStatus(); // Refresh
+                } else {
+                    UI.showToast(data.results?.[0]?.error || i18n.t('schedules.failed'), 'error');
+                }
+            } catch (e) {
+                UI.showToast(i18n.t('schedules.connection_error'), 'error');
+            }
+        }
+
+        // --- Delete all from devices ---
+        async function deleteAllSchedules() {
+            const targets = getSchedTargetDevices();
+            if (targets.length === 0) return;
+            if (!confirm('Delete ALL schedules from selected devices?')) return;
+
+            const resultsEl = document.getElementById('schedules-results');
+            resultsEl.innerHTML = '<div class="loading-small">Deleting...</div>';
+
+            try {
+                const resp = await fetch('/api/schedules/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ devices: targets, delete_all: true })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    const ok = data.results.filter(r => r.success).length;
+                    resultsEl.innerHTML = data.results.map(r => `
+                        <div class="sched-result-item">
+                            <div class="sched-result-device">
+                                <span class="device-name">${getSchedDeviceLabel(r.device, r.ip)}</span>
+                                <span class="result-status ${r.success ? 'success' : 'error'}">${r.success ? '✓ ' + (r.message || 'OK') : '✗ ' + (r.error || 'Error')}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                    UI.showToast(`${i18n.t('schedules.deleted_count')}: ${ok}/${data.results.length}`, 'success');
+                } else {
+                    resultsEl.innerHTML = `<div class="no-schedules-hint">Error: ${data.error}</div>`;
+                }
+            } catch (e) {
+                resultsEl.innerHTML = `<div class="no-schedules-hint">${i18n.t('schedules.connection_error')}</div>`;
+            }
+        }
+
+        // --- Event wiring ---
+        document.getElementById('btn-refresh-schedules').addEventListener('click', loadScheduleTemplates);
+        document.getElementById('btn-new-schedule').addEventListener('click', () => openScheduleEditor(null));
+        document.getElementById('btn-edit-schedule').addEventListener('click', editScheduleTemplate);
+        document.getElementById('btn-close-editor').addEventListener('click', closeScheduleEditor);
+        document.getElementById('btn-delete-schedule-file').addEventListener('click', deleteScheduleTemplate);
+        document.getElementById('btn-add-call').addEventListener('click', () => addCallRow());
+        document.getElementById('btn-save-schedule').addEventListener('click', saveScheduleTemplate);
+
+        document.getElementById('btn-deploy-schedule').addEventListener('click', deploySchedule);
+        document.getElementById('btn-sched-status').addEventListener('click', checkScheduleStatus);
+        document.getElementById('btn-sched-delete-all').addEventListener('click', deleteAllSchedules);
+
+        document.getElementById('btn-sched-select-all').addEventListener('click', schedSelectAll);
+        document.getElementById('btn-sched-select-none').addEventListener('click', schedSelectNone);
+
+        // Init on tab switch
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load templates when tab becomes visible
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.dataset.tab === 'schedules') {
+                        loadScheduleTemplates();
+                        updateSchedulesDeviceList();
+                    }
+                });
+            });
+        });
+
+        document.addEventListener('devicesFiltered', updateSchedulesDeviceList);
+        document.addEventListener('deviceSelectionChanged', updateSchedulesDeviceList);
     </script>
 
     <script>
@@ -8140,6 +9967,57 @@
                 UI.showToast(i18n.t('common.connection_error') || 'Connection error', 'error');
             }
         });
+    </script>
+
+    <!-- Resize Handle for Right Panel -->
+    <script>
+    (function() {
+        const handle = document.getElementById('resize-handle');
+        const container = document.querySelector('.main-container');
+        if (!handle || !container) return;
+
+        const STORAGE_KEY = 'stagebox-right-panel-width';
+        const MIN_WIDTH = 320;
+        const MAX_WIDTH = 900;
+
+        // Restore saved width
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            const w = parseInt(saved, 10);
+            if (w >= MIN_WIDTH && w <= MAX_WIDTH) {
+                container.style.setProperty('--right-panel-width', w + 'px');
+            }
+        }
+
+        let dragging = false;
+
+        handle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            dragging = true;
+            handle.classList.add('dragging');
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!dragging) return;
+            const containerRect = container.getBoundingClientRect();
+            const newWidth = containerRect.right - e.clientX;
+            const clamped = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newWidth));
+            container.style.setProperty('--right-panel-width', clamped + 'px');
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (!dragging) return;
+            dragging = false;
+            handle.classList.remove('dragging');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            // Save to localStorage
+            const w = getComputedStyle(container).getPropertyValue('--right-panel-width');
+            if (w) localStorage.setItem(STORAGE_KEY, parseInt(w, 10));
+        });
+    })();
     </script>
 </body>
 </html>

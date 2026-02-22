@@ -18,6 +18,7 @@ from flask import Blueprint, jsonify, request
 
 from web import config
 from web.services.telemetry import send_telemetry
+from web.utils.helpers import get_mac_address
 
 bp = Blueprint('stagebox_updates', __name__)
 
@@ -113,7 +114,10 @@ def check_updates():
         # Build download URL
         download_file = manifest.get('file', '')
         if is_pro():
-            download_url = f"{base_url}/{edition}/{download_file}"
+            # Route through download.php for MAC whitelist validation
+            download_filename = download_file.split('/')[-1]
+            mac = get_mac_address()
+            download_url = f"{base_url}/{edition}/download.php?file={download_filename}&mac={mac}"
         else:
             # GitHub direct download URL
             download_url = f"{base_url}/{download_file}"
@@ -276,7 +280,7 @@ def install_update():
         if response.status_code != 200:
             return jsonify({
                 'success': False,
-                'error': f'Download failed: HTTP {response.status_code}'
+                'error': 'This device is not authorized for updates. Please contact support.' if response.status_code == 403 else f'Download failed: HTTP {response.status_code}'
             }), 502
         
         with open(tmp_zip, 'wb') as f:

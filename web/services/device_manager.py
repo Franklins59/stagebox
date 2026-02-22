@@ -12,6 +12,8 @@ from typing import Any, Dict, List, Optional
 
 from web.config import MAX_WORKERS
 
+# Number of consecutive ping failures before a device is reported as offline
+OFFLINE_THRESHOLD = 3
 
 # Core module availability flags
 CORE_AVAILABLE = False
@@ -58,6 +60,7 @@ class DeviceManager:
         self.state_file = state_file
         self.devices: List[Dict[str, Any]] = []
         self.state = None
+        self._fail_counts: Dict[str, int] = {}  # Consecutive ping failures per device
         if state_file:
             self.load_devices()
     
@@ -196,7 +199,13 @@ class DeviceManager:
             return False
     
     def check_devices_status(self) -> Dict[str, bool]:
-        """Check online status of all devices in parallel."""
+        """Check online status of all devices in parallel.
+        
+        Uses consecutive failure counting to avoid false offline reports
+        caused by transient timeouts (e.g. BLU gateway devices sharing
+        WiFi/BLE antenna). A device is only reported offline after
+        OFFLINE_THRESHOLD consecutive ping failures.
+        """
         status = {}
         
         if not self.devices:
@@ -216,9 +225,19 @@ class DeviceManager:
                 device = future_to_device[future]
                 device_id = device.get('id', device.get('ip'))
                 try:
-                    status[device_id] = future.result()
+                    ping_ok = future.result()
                 except:
-                    status[device_id] = False
+                    ping_ok = False
+                
+                if ping_ok:
+                    # Reset fail counter on successful ping
+                    self._fail_counts[device_id] = 0
+                    status[device_id] = True
+                else:
+                    # Increment fail counter
+                    self._fail_counts[device_id] = self._fail_counts.get(device_id, 0) + 1
+                    # Only report offline after threshold reached
+                    status[device_id] = self._fail_counts[device_id] < OFFLINE_THRESHOLD
         
         return status
 
