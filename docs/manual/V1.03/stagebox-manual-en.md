@@ -1,7 +1,5 @@
 # Stagebox Web-UI User Manual
 
-> *This manual reflects Stagebox Pro Version 1.1.0*
-
 ## Part 1: Getting Started
 
 This guide walks you through the initial setup of your Stagebox and creating your first building project.
@@ -323,7 +321,7 @@ The Building Page is the main workspace for provisioning and managing devices in
 #### Layout:
 - **Left Sidebar:** Provisioning stages, filters, actions, settings
 - **Center Area:** Device list
-- **Right Sidebar:** Stage panels or device details, Script-, KVS-, Webhook-, Schedules- and OTA tabs
+- **Right Sidebar:** Stage panels or device details, Script-, KVS-, Webhook- and OTA tabs
 
 ### 2.3 Left Sidebar
 
@@ -520,91 +518,17 @@ Configure device webhooks:
 - Delete webhooks
 
 <img src="screenshots/53-device-webhooks-tab.png" width="300" alt="Device Webhooks Tab">
-<div style="page-break-before: always;"></div>
 
 #### 2.5.5 Schedules Tab
 
-The Schedules Tab allows you to create, manage, and deploy time-based automations to Shelly devices. Schedules are stored as templates and can be deployed to multiple compatible devices at once.
+Manage scheduled tasks:
+
+- View existing schedules
+- Add time-based automations
+- Enable/disable schedules
+- Delete schedules
 
 <img src="screenshots/54-device-schedules-tab.png" width="300" alt="Device Schedules Tab">
-
-**Tab Overview:**
-
-The Schedules Tab is divided into three areas:
-
-1. **Template List** — saved schedule templates with edit/delete controls
-2. **Target Devices** — checkbox list to select deployment targets
-3. **Action Buttons** — Deploy, Status, and Delete All
-
-##### Creating a Schedule
-
-1. Click **+ New** to open the Schedule Editor modal
-2. Enter a **Name** and optional **Description**
-
-<img src="screenshots/54a-schedule-editor-modal.png" width="500" alt="Schedule Editor Modal">
-
-**Left Column — Timing:**
-
-Select one of four timing modes:
-
-| Mode | Description |
-|------|-------------|
-| 🕐 **Time** | Set a specific time of day (hours and minutes) |
-| 🌅 **Sunrise** | Trigger at sunrise, with optional offset |
-| 🌇 **Sunset** | Trigger at sunset, with optional offset |
-| 📅 **Interval** | Repeat at regular intervals — choose from presets (every 5 min, 15 min, 30 min, hourly, every 2 hours) or enter custom minute/hour values |
-
-Below the timing mode, select the **weekdays** using checkboxes (Mon–Sun).
-
-The **timespec** field shows the generated Shelly cron expression (read-only). Below it, a preview displays the next scheduled execution times.
-
-The **Enabled** checkbox controls whether the schedule is active after deployment.
-
-**Right Column — Actions:**
-
-3. Select a **Reference Device** from the dropdown — Stagebox queries this device to determine which components and actions are available (e.g., Switch, Cover, Light)
-4. Add one or more **Actions** (up to 5 per schedule) by clicking **+ Add Action**:
-   - The available methods depend on the reference device's components
-   - Examples: `Switch.Set` (on/off), `Cover.GoToPosition` (0–100), `Light.Set` (on/off/brightness)
-   - Remove an action with the **✕** button
-
-5. Click **💾 Save** to store the template, or **Cancel** to discard
-
-> **Tip:** The reference device determines which actions are available. Choose a device that has the components you want to control.
-
-##### Editing a Schedule
-
-- Click the **✏️ Edit** button next to a template, or **double-click** the template name
-- The Schedule Editor modal opens pre-filled with the existing settings
-- Modify and click **💾 Save**
-
-##### Deploying Schedules
-
-1. Select a schedule template from the list
-2. Check the target devices in the **Target Devices** section
-   - Use **Select All** / **None** for quick selection
-   - Incompatible devices (missing required components) are automatically skipped during deployment
-3. Click **📤 Deploy**
-4. Results are shown per device with success/failure status
-
-> **Note:** Before deploying, Stagebox checks each target device for the required components. Devices that lack the necessary components (e.g., deploying a Cover schedule to a Switch-only device) are skipped with an error message.
-
-##### Checking Schedule Status
-
-1. Select target devices
-2. Click **📋 Status**
-3. Stagebox queries each device and displays the schedules currently installed on it, including their timespec, method, and enabled/disabled state
-
-##### Deleting Schedules from Devices
-
-1. Select target devices
-2. Click **🗑️ Delete All**
-3. All schedules on the selected devices are removed
-
-> **Warning:** Delete All removes **all** schedules from the selected devices, not just schedules deployed by Stagebox.
-
-<img src="screenshots/54b-schedule-tab-overview.png" width="300" alt="Schedule Tab Overview">
-<div style="page-break-before: always;"></div>
 
 #### 2.5.6 Virtual Components Tab
 
@@ -1096,4 +1020,4 @@ The audit detects and reports:
 
 ---
 
-*Stagebox Web-UI Manual - Version 1.1.0*
+*Stagebox Web-UI Manual - Version 1.5*
