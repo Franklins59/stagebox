@@ -17,7 +17,7 @@
             <h1>Stagebox <span id="edition-badge" class="edition-badge"></span> <span id="building-name" class="building-name"></span></h1>
         </div>
         <div class="header-right">
-            <a href="/manual" class="manual-btn" id="manual-link">📖 <span data-i18n="manual.title">Manual</span></a>
+            <a href="/manual" class="manual-btn" id="manual-link" target="stagebox-manual">📖 <span data-i18n="manual.title">Manual</span></a>
             <div class="backend-status">
                 <span class="status-label" data-i18n="header.backend">Backend</span>
                 <span class="status-indicator" id="backend-status"></span>
@@ -78,8 +78,11 @@
                     <button class="settings-btn" id="btn-building-settings">
                         <span data-i18n="settings.network_settings">⚙️ Network Settings</span>
                     </button>
-                    <button class="settings-btn" id="btn-export-labels" data-pro-only="true">
-                        <span data-i18n="settings.export_labels">🏷️ Export Labels (CSV)</span>
+                    <button class="settings-btn" id="btn-settings">
+                        <span data-i18n="settings.building_settings">⚙️ Building Settings</span>
+                    </button>
+                    <button class="settings-btn" id="btn-pro-ethernet">
+                        <span data-i18n="settings.pro_ethernet">🔌 Pro Ethernet</span>
                     </button>
                 </div>
 
@@ -97,14 +100,21 @@
                     <button class="settings-btn" id="btn-generate-report" data-pro-only="true" data-i18n="report.generate">
                         <span>📄 Generate Report</span>
                     </button>
-                </div>
-
-                <h2 data-i18n="sidebar.expert">Expert</h2>
-                <div class="admin-buttons">
-                    <button class="admin-btn" id="btn-settings" data-pro-only="true" data-i18n="expert.settings">
-                        <span>⚙️ Building Settings</span>
+                    <button class="settings-btn" id="btn-export-labels">
+                        <span data-i18n="settings.export_labels">🏷️ Export Labels (CSV)</span>
                     </button>
                 </div>
+
+                <h2 data-i18n="sidebar.diagnostics">Diagnostics</h2>
+                <div class="settings-buttons">
+                    <button class="settings-btn" id="btn-health-check" data-pro-only="true" data-i18n="diagnostics.health_check">
+                        <span>🩺 Health Check</span>
+                    </button>
+                    <button class="settings-btn" id="btn-wifi-scan" disabled data-i18n="diagnostics.wifi_scan">
+                        <span>📶 WiFi Scan</span>
+                    </button>
+                </div>
+
             </nav>
         </aside>
 
@@ -220,6 +230,36 @@
                                     <input type="number" id="switch-auto-on-delay" min="0" step="1" value="60">
                                 </div>
                             </div>
+                            
+                            <!-- Switch Protections -->
+                            <div id="switch-protections-section">
+                                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                                    <span class="collapse-icon">▸</span>
+                                    <h4 class="section-title" data-i18n="details.protections">Protections</h4>
+                                </div>
+                                <div class="collapsible-content collapsed">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="switch-power-limit" data-i18n="details.power_limit">Power Limit (W)</label>
+                                            <input type="number" id="switch-power-limit" min="0" max="5000" step="1">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="switch-current-limit" data-i18n="details.current_limit">Current Limit (A)</label>
+                                            <input type="number" id="switch-current-limit" min="0" max="20" step="0.1">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="switch-voltage-limit" data-i18n="details.voltage_limit">Max Voltage (V)</label>
+                                            <input type="number" id="switch-voltage-limit" min="100" max="300" step="1">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="switch-undervoltage-limit" data-i18n="details.undervoltage_limit">Min Voltage (V)</label>
+                                            <input type="number" id="switch-undervoltage-limit" min="0" max="300" step="1">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- Input Settings Section -->
@@ -236,6 +276,14 @@
                             <div class="form-group">
                                 <label for="cover-name" data-i18n="details.cover_name">Cover Name</label>
                                 <input type="text" id="cover-name" maxlength="32" placeholder="e.g. jalousie_sued">
+                            </div>
+                            <div class="form-group">
+                                <label for="cover-initial-state" data-i18n="details.initial_state">Initial State</label>
+                                <select id="cover-initial-state">
+                                    <option value="open" data-i18n="common.open">Open</option>
+                                    <option value="closed" data-i18n="common.closed">Closed</option>
+                                    <option value="stopped" data-i18n="common.stopped">Stopped</option>
+                                </select>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
@@ -259,6 +307,126 @@
                                         <input type="checkbox" id="cover-invert">
                                         <span data-i18n="details.invert_direction">Invert Direction</span>
                                     </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Calibration -->
+                            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                                <span class="collapse-icon">▸</span>
+                                <h4 class="section-title" data-i18n="details.calibration">Calibration</h4>
+                            </div>
+                            <div class="collapsible-content collapsed">
+                            <div class="form-group">
+                                <div id="cover-calib-status" class="cover-calib-status">
+                                    <span id="cover-calib-badge" class="calib-badge unknown">—</span>
+                                </div>
+                                <div class="form-row" style="margin-top: 6px;">
+                                    <button type="button" id="btn-cover-calibrate" class="btn-secondary" onclick="startCoverCalibration()">
+                                        <span data-i18n="details.calibrate">🎯 Calibrate</span>
+                                    </button>
+                                    <button type="button" id="btn-cover-stop-calib" class="btn-warning" onclick="stopCoverCalibration()" style="display: none;">
+                                        <span data-i18n="details.stop_calibration">⏹ Stop</span>
+                                    </button>
+                                </div>
+                                <p class="settings-hint" id="cover-calib-hint" data-i18n="details.calibration_hint">Ensure no obstacles are in the way. The cover will move fully open and closed.</p>
+                            </div>
+                            </div>
+                            
+                            <!-- Obstruction Detection -->
+                            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                                <span class="collapse-icon">▸</span>
+                                <h4 class="section-title" data-i18n="details.obstruction">Obstruction Detection</h4>
+                            </div>
+                            <div class="collapsible-content collapsed">
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="cover-obstruction-enable" onchange="toggleObstructionFields()">
+                                    <span data-i18n="details.obstruction_enable">Enable Obstruction Detection</span>
+                                </label>
+                            </div>
+                            <div id="obstruction-fields" style="display: none;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="cover-obstruction-direction" data-i18n="details.obstruction_direction">Direction</label>
+                                        <select id="cover-obstruction-direction">
+                                            <option value="both" data-i18n="details.dir_both">Both</option>
+                                            <option value="open" data-i18n="details.dir_open">While Opening</option>
+                                            <option value="close" data-i18n="details.dir_close">While Closing</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cover-obstruction-action" data-i18n="details.obstruction_action">Action</label>
+                                        <select id="cover-obstruction-action">
+                                            <option value="stop" data-i18n="common.stop">Stop</option>
+                                            <option value="reverse" data-i18n="details.reverse">Reverse</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cover-obstruction-power" data-i18n="details.power_threshold">Power Threshold (W)</label>
+                                    <input type="number" id="cover-obstruction-power" min="-1" max="1000" step="1" value="-1">
+                                    <p class="settings-hint" data-i18n="details.power_threshold_hint">Set automatically during calibration. -1 = auto.</p>
+                                </div>
+                            </div>
+                            </div>
+                            
+                            <!-- Slat Control (Venetian Blinds) -->
+                            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                                <span class="collapse-icon">▸</span>
+                                <h4 class="section-title" data-i18n="details.slat_control">Slat Control (Venetian Blinds)</h4>
+                            </div>
+                            <div class="collapsible-content collapsed">
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="cover-slat-enable" onchange="toggleSlatFields()">
+                                    <span data-i18n="details.slat_enable">Enable Slat Control</span>
+                                </label>
+                            </div>
+                            <div id="slat-fields" style="display: none;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="cover-slat-open-time" data-i18n="details.slat_open_time">Open Time (sec)</label>
+                                        <input type="number" id="cover-slat-open-time" min="0.5" max="30" step="0.1" value="1.5">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cover-slat-close-time" data-i18n="details.slat_close_time">Close Time (sec)</label>
+                                        <input type="number" id="cover-slat-close-time" min="0.5" max="30" step="0.1" value="1.5">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cover-slat-step" data-i18n="details.slat_step">Step (%)</label>
+                                    <input type="number" id="cover-slat-step" min="1" max="50" step="1" value="5">
+                                </div>
+                            </div>
+                            </div>
+                            
+                            <!-- Cover Protections -->
+                            <div id="cover-protections-section">
+                                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                                    <span class="collapse-icon">▸</span>
+                                    <h4 class="section-title" data-i18n="details.protections">Protections</h4>
+                                </div>
+                                <div class="collapsible-content collapsed">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="cover-power-limit" data-i18n="details.power_limit">Power Limit (W)</label>
+                                            <input type="number" id="cover-power-limit" min="0" max="5000" step="1">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="cover-current-limit" data-i18n="details.current_limit">Current Limit (A)</label>
+                                            <input type="number" id="cover-current-limit" min="0" max="20" step="0.1">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="cover-voltage-limit" data-i18n="details.voltage_limit">Max Voltage (V)</label>
+                                            <input type="number" id="cover-voltage-limit" min="100" max="300" step="1">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="cover-undervoltage-limit" data-i18n="details.undervoltage_limit">Min Voltage (V)</label>
+                                            <input type="number" id="cover-undervoltage-limit" min="0" max="300" step="1">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -290,15 +458,113 @@
                                     <input type="number" id="light-min-brightness" min="0" max="100" step="1" value="0">
                                 </div>
                                 <div class="form-group">
-                                    <label for="light-night-brightness" data-i18n="details.night_brightness">Night Brightness (%)</label>
-                                    <input type="number" id="light-night-brightness" min="1" max="100" step="1" value="50">
+                                    <label for="light-transition" data-i18n="details.transition_duration">Transition (sec)</label>
+                                    <input type="number" id="light-transition" min="0" max="5" step="0.1" value="0">
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <label for="light-fade-rate" data-i18n="details.button_fade_rate">Button Fade Rate</label>
+                                <select id="light-fade-rate">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3" selected>3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="light-in-mode" data-i18n="details.input_mode">Input Mode</label>
+                                <select id="light-in-mode" onchange="syncInputTypeFromInMode()">
+                                    <option value="dim" data-i18n="details.mode_dim">Dim</option>
+                                    <option value="follow" data-i18n="details.mode_follow">Follow</option>
+                                    <option value="flip" data-i18n="details.mode_flip">Flip</option>
+                                    <option value="activate" data-i18n="details.mode_activate">Activate</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Brightness Range -->
+                            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                                <span class="collapse-icon">▸</span>
+                                <h4 class="section-title" data-i18n="details.brightness_range">Brightness Range</h4>
+                            </div>
+                            <div class="collapsible-content collapsed">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="light-range-min" data-i18n="details.range_min">Min (%)</label>
+                                    <input type="number" id="light-range-min" min="0" max="100" step="1" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="light-range-max" data-i18n="details.range_max">Max (%)</label>
+                                    <input type="number" id="light-range-max" min="0" max="100" step="1" value="100">
+                                </div>
+                            </div>
+                            </div>
+                            
+                            <!-- Protections -->
+                            <div id="light-protections-section">
+                                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                                    <span class="collapse-icon">▸</span>
+                                    <h4 class="section-title" data-i18n="details.protections">Protections</h4>
+                                </div>
+                                <div class="collapsible-content collapsed">
+                                <div id="light-protections-fields">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="light-power-limit" data-i18n="details.power_limit">Power Limit (W)</label>
+                                        <input type="number" id="light-power-limit" min="0" max="500" step="1" value="240">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="light-current-limit" data-i18n="details.current_limit">Current Limit (A)</label>
+                                        <input type="number" id="light-current-limit" min="0" max="10" step="0.1" value="1.2">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="light-voltage-limit" data-i18n="details.voltage_limit">Max Voltage (V)</label>
+                                        <input type="number" id="light-voltage-limit" min="100" max="300" step="1" value="280">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="light-undervoltage-limit" data-i18n="details.undervoltage_limit">Min Voltage (V)</label>
+                                        <input type="number" id="light-undervoltage-limit" min="0" max="300" step="1" value="100">
+                                    </div>
+                                </div>
+                                </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Light Calibration -->
+                            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                                <span class="collapse-icon">▸</span>
+                                <h4 class="section-title" data-i18n="details.light_calibration">Calibration</h4>
+                            </div>
+                            <div class="collapsible-content collapsed">
+                            <div class="form-group">
+                                <div id="light-calib-status" class="cover-calib-status">
+                                    <span id="light-calib-badge" class="calib-badge unknown">—</span>
+                                </div>
+                                <div class="form-row" style="margin-top: 6px;">
+                                    <button type="button" id="btn-light-calibrate" class="btn-secondary" onclick="startLightCalibration()">
+                                        <span data-i18n="details.calibrate">🎯 Calibrate</span>
+                                    </button>
+                                    <button type="button" id="btn-light-stop-calib" class="btn-warning" onclick="stopLightCalibration()" style="display: none;">
+                                        <span data-i18n="details.stop_calibration">⏹ Stop</span>
+                                    </button>
+                                </div>
+                                <p class="settings-hint" id="light-calib-hint" data-i18n="details.light_calibration_hint">The dimmer will test the connected load. Ensure the light is properly connected.</p>
+                            </div>
+                            </div>
+                            
+                            <!-- Auto On/Off -->
+                            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                                <span class="collapse-icon">▸</span>
+                                <h4 class="section-title" data-i18n="details.auto_on_off">Auto On/Off</h4>
+                            </div>
+                            <div class="collapsible-content collapsed">
                             <div class="form-row">
                                 <div class="form-group checkbox-group">
                                     <label>
-                                        <input type="checkbox" id="light-night-mode">
-                                        <span data-i18n="details.night_mode">Night Mode</span>
+                                        <input type="checkbox" id="light-auto-on">
+                                        <span data-i18n="details.auto_on">Auto-On</span>
                                     </label>
                                 </div>
                                 <div class="form-group checkbox-group">
@@ -310,13 +576,46 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="light-auto-off-delay" data-i18n="details.auto_off_delay">Auto-Off Delay (sec)</label>
-                                    <input type="number" id="light-auto-off-delay" min="0" step="1" value="60">
-                                </div>
-                                <div class="form-group">
                                     <label for="light-auto-on-delay" data-i18n="details.auto_on_delay">Auto-On Delay (sec)</label>
                                     <input type="number" id="light-auto-on-delay" min="0" step="1" value="60">
                                 </div>
+                                <div class="form-group">
+                                    <label for="light-auto-off-delay" data-i18n="details.auto_off_delay">Auto-Off Delay (sec)</label>
+                                    <input type="number" id="light-auto-off-delay" min="0" step="1" value="60">
+                                </div>
+                            </div>
+                            </div>
+                            
+                            <!-- Night Mode -->
+                            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                                <span class="collapse-icon">▸</span>
+                                <h4 class="section-title" data-i18n="details.night_mode">Night Mode</h4>
+                            </div>
+                            <div class="collapsible-content collapsed">
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="light-night-mode" onchange="toggleNightModeFields()">
+                                    <span data-i18n="details.night_mode_enable">Enable Night Mode</span>
+                                </label>
+                            </div>
+                            <div id="night-mode-fields" style="display: none;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="light-night-brightness" data-i18n="details.night_brightness">Night Brightness (%)</label>
+                                        <input type="number" id="light-night-brightness" min="1" max="100" step="1" value="50">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="light-night-from" data-i18n="details.night_from">Active From</label>
+                                        <input type="time" id="light-night-from" value="22:00">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="light-night-to" data-i18n="details.night_to">Active Until</label>
+                                        <input type="time" id="light-night-to" value="06:00">
+                                    </div>
+                                </div>
+                            </div>
                             </div>
                         </div>
                         
@@ -878,17 +1177,155 @@
             </div>
             
             <div class="settings-tabs">
-                <button class="settings-tab-btn active" data-tab="provisioning" data-i18n="settings.tab_provisioning">Provisioning</button>
-                <button class="settings-tab-btn" data-tab="ota" data-i18n="settings.tab_ota">OTA &amp; Names</button>
-                <button class="settings-tab-btn" data-tab="export" data-i18n="settings.tab_export">Export</button>
+                <button class="settings-tab-btn active" data-tab="object" data-i18n="settings.tab_object">Object</button>
+                <button class="settings-tab-btn" data-tab="flags" data-i18n="settings.tab_flags">Flags</button>
+                <button class="settings-tab-btn" data-tab="input-type" data-i18n="settings.tab_input_type">Input Type</button>
+                <button class="settings-tab-btn" data-tab="provisioning" data-i18n="settings.tab_stage1">Stage 1 Options</button>
+                <button class="settings-tab-btn" data-tab="ota" data-i18n="settings.tab_stage3">Stage 3 Options</button>
                 <button class="settings-tab-btn" data-tab="modelmap" data-i18n="settings.tab_modelmap">Model Map</button>
-                <button class="settings-tab-btn" data-tab="object" data-i18n="settings.tab_object">Object</button>
-                <button class="settings-tab-btn" data-tab="advanced" data-i18n="settings.tab_advanced">Advanced</button>
+                <button class="settings-tab-btn" data-tab="system" data-i18n="settings.tab_system">System</button>
             </div>
             
             <div class="settings-content">
+                <!-- Flags Tab -->
+                <div class="settings-tab-content" data-tab="flags">
+                    <div class="settings-section">
+                        <h4 data-i18n="flags.title">🚩 Device Flags</h4>
+                        <p class="settings-hint" data-i18n="flags.hint">Read and configure device flags (ECO, BLE, AP, MQTT) for selected devices.</p>
+                        
+                        <!-- Flag selectors -->
+                        <div class="flags-controls">
+                            <div class="flags-selectors">
+                                <div class="flag-selector">
+                                    <label>ECO</label>
+                                    <div class="flag-radios">
+                                        <label class="flag-radio"><input type="radio" name="flag-eco" value="skip" checked><span data-i18n="flags.skip_short">Skip</span></label>
+                                        <label class="flag-radio on"><input type="radio" name="flag-eco" value="true"><span>On</span></label>
+                                        <label class="flag-radio off"><input type="radio" name="flag-eco" value="false"><span>Off</span></label>
+                                    </div>
+                                </div>
+                                <div class="flag-selector">
+                                    <label>BLE</label>
+                                    <div class="flag-radios">
+                                        <label class="flag-radio"><input type="radio" name="flag-ble" value="skip" checked><span data-i18n="flags.skip_short">Skip</span></label>
+                                        <label class="flag-radio on"><input type="radio" name="flag-ble" value="true"><span>On</span></label>
+                                        <label class="flag-radio off"><input type="radio" name="flag-ble" value="false"><span>Off</span></label>
+                                    </div>
+                                </div>
+                                <div class="flag-selector">
+                                    <label>AP</label>
+                                    <div class="flag-radios">
+                                        <label class="flag-radio"><input type="radio" name="flag-ap" value="skip" checked><span data-i18n="flags.skip_short">Skip</span></label>
+                                        <label class="flag-radio on"><input type="radio" name="flag-ap" value="true"><span>On</span></label>
+                                        <label class="flag-radio off"><input type="radio" name="flag-ap" value="false"><span>Off</span></label>
+                                    </div>
+                                </div>
+                                <div class="flag-selector">
+                                    <label>MQTT</label>
+                                    <div class="flag-radios">
+                                        <label class="flag-radio"><input type="radio" name="flag-mqtt" value="skip" checked onchange="toggleMqttServer()"><span data-i18n="flags.skip_short">Skip</span></label>
+                                        <label class="flag-radio on"><input type="radio" name="flag-mqtt" value="true" onchange="toggleMqttServer()"><span>On</span></label>
+                                        <label class="flag-radio off"><input type="radio" name="flag-mqtt" value="false" onchange="toggleMqttServer()"><span>Off</span></label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- MQTT server (shown only when MQTT = Enable) -->
+                            <div id="mqtt-server-group" class="flag-mqtt-server" style="display: none; margin-bottom: 10px;">
+                                <label for="flag-mqtt-server" style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">MQTT Server</label>
+                                <input type="text" id="flag-mqtt-server" placeholder="e.g. 192.168.1.100:1883" style="width: 240px; padding: 4px 6px; font-size: 12px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary);">
+                            </div>
+                            
+                            <div class="flags-actions">
+                                <button type="button" class="btn-secondary btn-sm" id="btn-flags-read" data-i18n="flags.read_btn">📡 Read Status</button>
+                                <button type="button" class="btn-primary btn-sm" id="btn-flags-apply" disabled data-i18n="flags.apply_btn">⚡ Apply to Selected</button>
+                                <span class="flags-selection-info" id="flags-selection-info"></span>
+                            </div>
+                        </div>
+                        
+                        <hr style="margin: 12px 0; border-color: var(--border-color);">
+                        
+                        <!-- Device list with checkboxes -->
+                        <div class="flags-device-header">
+                            <label class="flags-select-all-label">
+                                <input type="checkbox" id="flags-select-all" checked>
+                                <span data-i18n="flags.select_all">Select All</span>
+                            </label>
+                            <span class="flags-device-count" id="flags-device-count"></span>
+                        </div>
+                        
+                        <div class="flags-device-list" id="flags-device-list">
+                            <div class="empty-state" data-i18n="flags.no_devices">No devices available</div>
+                        </div>
+                        
+                        <!-- Progress area -->
+                        <div id="flags-progress" style="display: none; margin-top: 12px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <div style="flex: 1; background: var(--bg-secondary); border-radius: 4px; height: 8px; overflow: hidden;">
+                                    <div id="flags-progress-bar" style="height: 100%; background: var(--accent-color); width: 0%; transition: width 0.3s;"></div>
+                                </div>
+                                <span id="flags-progress-counter" style="font-size: 12px; color: var(--text-secondary); white-space: nowrap;">0/0</span>
+                            </div>
+                            <div id="flags-results" style="max-height: 200px; overflow-y: auto; font-size: 12px; font-family: monospace; background: var(--bg-secondary); border-radius: 4px; padding: 8px;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Input Type Tab -->
+                <div class="settings-tab-content" data-tab="input-type">
+                    <div class="settings-section">
+                        <h4 data-i18n="input_type_bulk.title">🔘 Bulk Input Type</h4>
+                        <p class="settings-hint" data-i18n="input_type_bulk.hint">Set the input type (Button or Switch) for all inputs on selected devices.</p>
+                        
+                        <!-- Type selector -->
+                        <div class="flags-controls">
+                            <div class="flags-selectors">
+                                <div class="flag-selector">
+                                    <label data-i18n="input_type_bulk.set_to">Set all inputs to</label>
+                                    <div class="flag-radios">
+                                        <label class="flag-radio on"><input type="radio" name="bulk-input-type" value="button" checked><span>Button</span></label>
+                                        <label class="flag-radio off"><input type="radio" name="bulk-input-type" value="switch"><span>Switch</span></label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flags-actions">
+                                <button type="button" class="btn-secondary btn-sm" id="btn-input-type-read" data-i18n="input_type_bulk.read_btn">📡 Read Status</button>
+                                <button type="button" class="btn-primary btn-sm" id="btn-input-type-apply" disabled data-i18n="input_type_bulk.apply_btn">⚡ Apply to Selected</button>
+                                <span class="flags-selection-info" id="input-type-selection-info"></span>
+                            </div>
+                        </div>
+                        
+                        <hr style="margin: 12px 0; border-color: var(--border-color);">
+                        
+                        <!-- Device list -->
+                        <div class="flags-device-header">
+                            <label class="flags-select-all-label">
+                                <input type="checkbox" id="input-type-select-all" checked>
+                                <span data-i18n="flags.select_all">Select All</span>
+                            </label>
+                            <span class="flags-device-count" id="input-type-device-count"></span>
+                        </div>
+                        
+                        <div class="flags-device-list" id="input-type-device-list">
+                            <div class="empty-state" data-i18n="input_type_bulk.no_devices">No devices available</div>
+                        </div>
+                        
+                        <!-- Progress -->
+                        <div id="input-type-progress" style="display: none; margin-top: 12px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <div style="flex: 1; background: var(--bg-secondary); border-radius: 4px; height: 8px; overflow: hidden;">
+                                    <div id="input-type-progress-bar" style="height: 100%; background: var(--accent-color); width: 0%; transition: width 0.3s;"></div>
+                                </div>
+                                <span id="input-type-progress-counter" style="font-size: 12px; color: var(--text-secondary); white-space: nowrap;">0/0</span>
+                            </div>
+                            <div id="input-type-results" style="max-height: 200px; overflow-y: auto; font-size: 12px; font-family: monospace; background: var(--bg-secondary); border-radius: 4px; padding: 8px;"></div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Provisioning Tab -->
-                <div class="settings-tab-content active" data-tab="provisioning">
+                <div class="settings-tab-content" data-tab="provisioning">
                     <div class="settings-section">
                         <h4 data-i18n="settings.stage1_title">Stage 1 - Provisioning Options</h4>
                         <div class="settings-group">
@@ -941,29 +1378,6 @@
                     </div>
                 </div>
                 
-                <!-- Export Tab -->
-                <div class="settings-tab-content" data-tab="export">
-                    <div class="settings-section">
-                        <h4 data-i18n="settings.export_title">CSV Export Settings</h4>
-                        <div class="settings-group">
-                            <label class="setting-row">
-                                <span data-i18n="settings.csv_delimiter">CSV Delimiter</span>
-                                <select id="setting-csv-delimiter">
-                                    <option value=";">Semicolon (;)</option>
-                                    <option value=",">Comma (,)</option>
-                                    <option value="&#9;">Tab</option>
-                                </select>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="settings-section">
-                        <h4 data-i18n="settings.columns_title">Default Columns</h4>
-                        <div class="settings-columns-grid" id="settings-columns-grid">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
-                </div>
-                
                 <!-- Model Map Tab -->
                 <div class="settings-tab-content" data-tab="modelmap">
                     <div class="settings-section">
@@ -988,7 +1402,7 @@
                 </div>
                 
                 <!-- Object Tab (Building Profile) -->
-                <div class="settings-tab-content" data-tab="object">
+                <div class="settings-tab-content active" data-tab="object">
                     <div class="settings-section">
                         <h4 data-i18n="building_profile.title">🏠 Object Information</h4>
                         <p class="settings-hint" data-i18n="building_profile.hint">Customer and location data for installation reports.</p>
@@ -1021,31 +1435,86 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Advanced Tab -->
-                <div class="settings-tab-content" data-tab="advanced">
+                <!-- System Tab -->
+                <div class="settings-tab-content" data-tab="system">
                     <div class="settings-section">
-                        <div class="advanced-warning">
-                            <span class="warning-icon">⚠️</span>
-                            <span data-i18n="settings.advanced_warning">Direct YAML editing - incorrect changes can break the system!</span>
-                        </div>
-                        <label class="setting-row">
-                            <span data-i18n="settings.select_file">Select File</span>
-                            <select id="advanced-file-select">
-                                <option value="">-- Select --</option>
-                            </select>
-                        </label>
-                        <div class="yaml-editor-container">
-                            <div class="yaml-toolbar">
-                                <div class="yaml-status">
-                                    <span class="yaml-valid-indicator" id="yaml-valid-indicator">●</span>
-                                    <span id="yaml-status-text">-</span>
-                                </div>
-                                <div class="yaml-actions-small">
-                                    <button id="yaml-validate-btn" class="btn-small" title="Validate YAML">✓ Validate</button>
-                                </div>
+                        <h4 data-i18n="settings.system_title">🌐 Device System Configuration</h4>
+                        <p class="settings-hint" data-i18n="settings.system_hint">These settings are applied to all devices during provisioning.</p>
+                        
+                        <div class="settings-form-grid">
+                            <div class="form-group">
+                                <label for="setting-timezone" data-i18n="settings.timezone">Timezone</label>
+                                <select id="setting-timezone">
+                                    <option value="">— Default (device) —</option>
+                                    <option value="Europe/Zurich">Europe/Zurich</option>
+                                    <option value="Europe/Berlin">Europe/Berlin</option>
+                                    <option value="Europe/Vienna">Europe/Vienna</option>
+                                    <option value="Europe/Paris">Europe/Paris</option>
+                                    <option value="Europe/Rome">Europe/Rome</option>
+                                    <option value="Europe/Amsterdam">Europe/Amsterdam</option>
+                                    <option value="Europe/Brussels">Europe/Brussels</option>
+                                    <option value="Europe/London">Europe/London</option>
+                                    <option value="Europe/Madrid">Europe/Madrid</option>
+                                    <option value="Europe/Lisbon">Europe/Lisbon</option>
+                                    <option value="Europe/Warsaw">Europe/Warsaw</option>
+                                    <option value="Europe/Prague">Europe/Prague</option>
+                                    <option value="Europe/Budapest">Europe/Budapest</option>
+                                    <option value="Europe/Stockholm">Europe/Stockholm</option>
+                                    <option value="Europe/Oslo">Europe/Oslo</option>
+                                    <option value="Europe/Copenhagen">Europe/Copenhagen</option>
+                                    <option value="Europe/Helsinki">Europe/Helsinki</option>
+                                    <option value="Europe/Athens">Europe/Athens</option>
+                                    <option value="Europe/Istanbul">Europe/Istanbul</option>
+                                    <option value="Europe/Moscow">Europe/Moscow</option>
+                                    <option value="US/Eastern">US/Eastern</option>
+                                    <option value="US/Central">US/Central</option>
+                                    <option value="US/Mountain">US/Mountain</option>
+                                    <option value="US/Pacific">US/Pacific</option>
+                                    <option value="Asia/Tokyo">Asia/Tokyo</option>
+                                    <option value="Asia/Shanghai">Asia/Shanghai</option>
+                                    <option value="Asia/Dubai">Asia/Dubai</option>
+                                    <option value="Australia/Sydney">Australia/Sydney</option>
+                                </select>
+                                <small data-i18n="settings.timezone_desc">Required for schedules with sunrise/sunset</small>
                             </div>
-                            <textarea id="yaml-editor" class="yaml-textarea" spellcheck="false" placeholder="Select a file to edit..."></textarea>
+                            <div class="form-group">
+                                <label for="setting-ntp-server" data-i18n="settings.ntp_server">NTP Server</label>
+                                <input type="text" id="setting-ntp-server" placeholder="ch.pool.ntp.org" maxlength="100">
+                                <small data-i18n="settings.ntp_desc">Leave empty for device default</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-location-lat" data-i18n="settings.latitude">Latitude</label>
+                                <input type="number" id="setting-location-lat" step="0.0001" min="-90" max="90" placeholder="47.3769">
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-location-lng" data-i18n="settings.longitude">Longitude</label>
+                                <input type="number" id="setting-location-lng" step="0.0001" min="-180" max="180" placeholder="8.5417">
+                                <small data-i18n="settings.location_desc">For correct sunrise/sunset calculation</small>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-group" style="margin-top: 12px;">
+                            <button type="button" class="btn-secondary btn-sm" id="btn-location-swiss-defaults" data-i18n="settings.swiss_defaults">🇨🇭 Swiss Defaults</button>
+                            <small style="margin-left: 8px; color: var(--text-secondary);" data-i18n="settings.swiss_defaults_desc">Zurich timezone, NTP, coordinates</small>
+                        </div>
+                        
+                        <hr style="margin: 16px 0; border-color: var(--border-color);">
+                        
+                        <div class="settings-group">
+                            <h4 style="margin-bottom: 8px;" data-i18n="settings.apply_title">📡 Apply to Devices</h4>
+                            <p class="settings-hint" data-i18n="settings.apply_hint">Push current system settings to all online devices in this building via Sys.SetConfig.</p>
+                            <button type="button" class="btn-primary btn-sm" id="btn-apply-system-config" data-i18n="settings.apply_btn">📡 Apply to All Online Devices</button>
+                        </div>
+                        
+                        <!-- Inline progress area -->
+                        <div id="system-apply-progress" style="display: none; margin-top: 12px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <div style="flex: 1; background: var(--bg-secondary); border-radius: 4px; height: 8px; overflow: hidden;">
+                                    <div id="system-apply-bar" style="height: 100%; background: var(--accent-color); width: 0%; transition: width 0.3s;"></div>
+                                </div>
+                                <span id="system-apply-counter" style="font-size: 12px; color: var(--text-secondary); white-space: nowrap;">0/0</span>
+                            </div>
+                            <div id="system-apply-results" style="max-height: 200px; overflow-y: auto; font-size: 12px; font-family: monospace; background: var(--bg-secondary); border-radius: 4px; padding: 8px;"></div>
                         </div>
                     </div>
                 </div>
@@ -1208,6 +1677,35 @@
                 <p class="export-hint" data-i18n="export.map_hint">Map fields in your label software as needed.</p>
             </div>
             
+            <div class="export-options" style="margin: 12px 0; padding: 12px; background: var(--bg-secondary); border-radius: 6px;">
+                <label class="setting-row" style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                    <span data-i18n="settings.csv_delimiter">CSV Delimiter</span>
+                    <select id="export-csv-delimiter" style="padding: 4px 8px;">
+                        <option value=";">Semicolon (;)</option>
+                        <option value=",">Comma (,)</option>
+                        <option value="&#9;">Tab</option>
+                    </select>
+                </label>
+                <h4 style="margin-bottom: 8px; font-size: 13px;" data-i18n="settings.columns_title">Default Columns</h4>
+                <div class="settings-columns-grid" id="export-columns-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+            
+            <div id="export-preview" style="margin: 0 0 12px 0;">
+                <h4 style="margin-bottom: 6px; font-size: 13px;" data-i18n="export.preview_title">Preview</h4>
+                <div id="export-preview-table" style="overflow-x: auto; max-height: 180px; background: var(--bg-secondary); border-radius: 4px; font-size: 11px; font-family: monospace;">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+            
+            <div id="export-preview" style="margin: 0 0 12px 0; max-height: 180px; overflow: auto; border: 1px solid var(--border-color); border-radius: 4px;">
+                <table style="width: 100%; font-size: 11px; border-collapse: collapse; font-family: monospace;">
+                    <thead id="export-preview-head" style="position: sticky; top: 0; background: var(--bg-secondary);"></thead>
+                    <tbody id="export-preview-body"></tbody>
+                </table>
+            </div>
+            
             <div id="export-result" class="export-result" style="display: none;">
                 <!-- Success message will appear here -->
             </div>
@@ -1333,6 +1831,66 @@
                 <div class="spinner"></div>
                 <p data-i18n="audit.scanning_comparing">Scanning devices and comparing configurations...</p>
                 <p class="progress-hint" data-i18n="audit.progress_hint">This may take up to 2 minutes.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Health Check Results Modal -->
+    <div id="modal-health-check" class="modal-overlay">
+        <div class="modal audit-modal">
+            <div class="modal-header">
+                <h3 data-i18n="diagnostics.health_title">🩺 Health Check</h3>
+                <button class="modal-close" onclick="closeHealthCheckModal()">&times;</button>
+            </div>
+            
+            <div id="health-summary" class="audit-summary"></div>
+            
+            <div id="health-results" class="audit-results">
+                <div class="loading-message" data-i18n="diagnostics.scanning">Scanning devices...</div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeHealthCheckModal()" data-i18n="common.close">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WiFi Scan Results Modal -->
+    <div id="modal-wifi-scan" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 data-i18n="diagnostics.wifi_title">📶 WiFi Scan</h3>
+                <p class="modal-subtitle" id="wifi-scan-subtitle"></p>
+                <button class="modal-close" onclick="closeWifiScanModal()">&times;</button>
+            </div>
+            
+            <div id="wifi-scan-results" class="audit-results">
+                <div class="loading-message" data-i18n="diagnostics.scanning">Scanning...</div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeWifiScanModal()" data-i18n="common.close">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pro Ethernet Modal -->
+    <div id="modal-pro-ethernet" class="modal-overlay">
+        <div class="modal audit-modal">
+            <div class="modal-header">
+                <h3 data-i18n="pro_ethernet.title">🔌 Pro Ethernet</h3>
+                <p class="modal-subtitle" data-i18n="pro_ethernet.subtitle">Switch Pro devices from WiFi to Ethernet</p>
+                <button class="modal-close" onclick="closeProEthernetModal()">&times;</button>
+            </div>
+            
+            <div id="pro-ethernet-body">
+                <div class="loading-message"><div class="spinner"></div> <span data-i18n="pro_ethernet.scanning">Checking Ethernet status on all devices...</span></div>
+            </div>
+            
+            <div class="modal-actions" id="pro-ethernet-actions">
+                <button class="btn-secondary" onclick="closeProEthernetModal()" data-i18n="common.cancel">Cancel</button>
+                <button id="btn-start-eth-revert" class="btn-primary" style="display:none" onclick="startEthernetRevert()" data-i18n="pro_ethernet.revert_btn">📶 Switch to WiFi</button>
+                <button id="btn-start-eth-switch" class="btn-primary" style="display:none" onclick="startEthernetSwitch()" data-i18n="pro_ethernet.switch_btn">🔌 Switch to Ethernet</button>
             </div>
         </div>
     </div>
@@ -2275,6 +2833,189 @@
         }
         
         /* Model Map Table */
+        
+        /* Device Flags */
+        .flags-controls {
+            margin-bottom: 8px;
+        }
+        .flags-selectors {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .flag-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 90px;
+        }
+        .flag-selector label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .flag-radios {
+            display: flex;
+            gap: 2px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 2px;
+        }
+        .flag-radio {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            padding: 3px 7px;
+            font-size: 11px;
+            cursor: pointer;
+            border-radius: 3px;
+            color: var(--text-secondary);
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+        }
+        .flag-radio input[type="radio"] {
+            display: none;
+        }
+        .flag-radio:has(input:checked) {
+            background: var(--bg-tertiary, rgba(255,255,255,0.08));
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .flag-radio.on:has(input:checked) {
+            background: rgba(76, 175, 80, 0.2);
+            color: #66bb6a;
+        }
+        .flag-radio.off:has(input:checked) {
+            background: rgba(244, 67, 54, 0.15);
+            color: #ef5350;
+        }
+        .flags-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .flags-selection-info {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .flags-device-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .flags-select-all-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        .flags-device-count {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        .flags-device-list {
+            max-height: 260px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-secondary);
+        }
+        .flags-device-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 8px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .flags-device-item:last-child {
+            border-bottom: none;
+        }
+        .flags-device-item:hover {
+            background: rgba(255,255,255,0.03);
+        }
+        .flags-device-item .device-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text-primary);
+        }
+        .flags-device-item .device-ip {
+            font-family: monospace;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        .flags-device-item .device-flags {
+            display: flex;
+            gap: 4px;
+            font-size: 10px;
+        }
+        .flag-indicator {
+            display: inline-block;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        .flag-indicator.on {
+            background: rgba(76, 175, 80, 0.2);
+            color: #66bb6a;
+        }
+        .flag-indicator.off {
+            background: rgba(244, 67, 54, 0.15);
+            color: #ef5350;
+        }
+        .flag-indicator.unknown {
+            background: rgba(158, 158, 158, 0.15);
+            color: #9e9e9e;
+        }
+        
+        /* Cover calibration */
+        .cover-calib-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .calib-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .calib-badge.calibrated {
+            background: rgba(76, 175, 80, 0.15);
+            color: #66bb6a;
+        }
+        .calib-badge.not-calibrated {
+            background: rgba(255, 152, 0, 0.15);
+            color: #ffa726;
+        }
+        .calib-badge.calibrating {
+            background: rgba(33, 150, 243, 0.15);
+            color: #42a5f5;
+            animation: pulse-calib 1.5s ease-in-out infinite;
+        }
+        .calib-badge.unknown {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+        @keyframes pulse-calib {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
         .modelmap-table-container {
             max-height: 300px;
             overflow-y: auto;
@@ -2773,7 +3514,7 @@
         
         /* Export Labels Modal */
         .export-modal {
-            max-width: 450px;
+            max-width: 700px;
         }
         
         .export-info {
@@ -4942,6 +5683,115 @@
         .btn-danger-small:hover {
             background: #2563eb;
         }
+
+        /* ===== Diagnostics: Health Check ===== */
+
+        .health-device {
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary, #16213e);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid transparent;
+        }
+        .health-device.ok { border-left-color: var(--accent-success, #4caf50); }
+        .health-device.warning { border-left-color: var(--accent-warning, #ffc107); }
+        .health-device.critical { border-left-color: var(--accent-danger, #ff5252); }
+        .health-device.offline { border-left-color: var(--accent-danger, #ff5252); opacity: 0.6; }
+
+        .health-device-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.4rem;
+        }
+        .health-device-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .health-device-name {
+            font-weight: 500;
+            color: var(--text-primary, #e0e0e0);
+        }
+        .health-device-ip {
+            color: var(--text-secondary, #a0a0a0);
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85rem;
+        }
+        .health-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            font-size: 0.82rem;
+        }
+        .health-metric {
+            background: rgba(255,255,255,0.05);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: var(--text-secondary, #a0a0a0);
+        }
+        .health-metric.bad {
+            background: rgba(255, 82, 82, 0.15);
+            color: var(--accent-danger, #ff5252);
+        }
+        .health-metric.warn {
+            background: rgba(255, 193, 7, 0.15);
+            color: var(--accent-warning, #ffc107);
+        }
+        .health-metric.good {
+            color: var(--accent-success, #4caf50);
+        }
+
+        /* ===== Diagnostics: WiFi Scan ===== */
+
+        .wifi-network-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-secondary, #16213e);
+            border-radius: 6px;
+            margin-bottom: 0.35rem;
+        }
+        .wifi-network-row.connected {
+            border-left: 3px solid var(--accent-success, #4caf50);
+        }
+        .wifi-ssid {
+            font-weight: 500;
+            color: var(--text-primary, #e0e0e0);
+        }
+        .wifi-details {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.82rem;
+            color: var(--text-secondary, #a0a0a0);
+        }
+        .rssi-bar {
+            display: inline-block;
+            width: 50px;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            vertical-align: middle;
+        }
+        .rssi-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        /* ===== Diagnostics: Device Network ===== */
+
+        .network-section {
+            margin-bottom: 1.2rem;
+        }
+        .network-section h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.6rem;
+            color: var(--accent-primary, #4fc3f7);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
     </style>
 
     <script src="{{ url_for('static', filename='js/i18n.js') }}?v=1"></script>
@@ -5150,19 +6000,9 @@
             currentTab: 'provisioning',
             settings: {},
             modelMap: [],
-            buildingProfile: {},
-            advancedFile: '',
-            advancedContent: '',
-            advancedOriginal: ''
+            buildingProfile: {}
         };
         const settingsState = window.settingsState;
-        
-        // Available columns for export
-        const AVAILABLE_COLUMNS = [
-            'id', 'ip', 'hostname', 'fw', 'model', 'hw_model', 
-            'friendly_name', 'room', 'location', 'assigned_at', 
-            'last_seen', 'stage3_friendly_status', 'stage3_ota_status', 'stage4_status_result'
-        ];
         
         // DOM Elements
         const settingsBtn = document.getElementById('btn-settings');
@@ -5170,9 +6010,6 @@
         const adminSettingsModal = document.getElementById('modal-settings');
         const pinInput = document.getElementById('admin-pin-input');
         const pinError = document.getElementById('pin-error');
-        const yamlEditor = document.getElementById('yaml-editor');
-        const yamlStatusText = document.getElementById('yaml-status-text');
-        const yamlValidIndicator = document.getElementById('yaml-valid-indicator');
         
         // Event Listeners
         settingsBtn.addEventListener('click', openSettings);
@@ -5184,41 +6021,11 @@
         
         document.getElementById('admin-settings-cancel-btn').addEventListener('click', closeSettings);
         document.getElementById('admin-settings-save-btn').addEventListener('click', saveSettings);
-        document.getElementById('yaml-validate-btn').addEventListener('click', validateAdvancedYaml);
         document.getElementById('modelmap-add-btn').addEventListener('click', addModelMapRow);
         
         // Tab switching
         document.querySelectorAll('.settings-tab-btn').forEach(btn => {
             btn.addEventListener('click', () => switchSettingsTab(btn.dataset.tab));
-        });
-        
-        // Advanced file selector
-        document.getElementById('advanced-file-select').addEventListener('change', (e) => {
-            loadAdvancedFile(e.target.value);
-        });
-        
-        // Track changes in YAML editor
-        yamlEditor.addEventListener('input', () => {
-            settingsState.advancedContent = yamlEditor.value;
-            settingsState.hasChanges = true;
-            
-            // Live validation (debounced)
-            clearTimeout(settingsState.validateTimeout);
-            settingsState.validateTimeout = setTimeout(() => {
-                validateAdvancedYamlSilent();
-            }, 500);
-        });
-        
-        // Handle Tab key in textarea
-        yamlEditor.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                const start = yamlEditor.selectionStart;
-                const end = yamlEditor.selectionEnd;
-                yamlEditor.value = yamlEditor.value.substring(0, start) + '  ' + yamlEditor.value.substring(end);
-                yamlEditor.selectionStart = yamlEditor.selectionEnd = start + 2;
-                yamlEditor.dispatchEvent(new Event('input'));
-            }
         });
         
         // Track changes in building profile fields
@@ -5347,12 +6154,8 @@
             // Load all data
             await Promise.all([
                 loadSettings(),
-                loadModelMap(),
-                loadProfilesList()
+                loadModelMap()
             ]);
-            
-            // Render columns grid
-            renderColumnsGrid();
         }
         
         function closeSettings() {
@@ -5436,33 +6239,11 @@
             document.getElementById('setting-ota-mode').value = settings.stage3?.ota_mode || 'check_and_update';
             document.getElementById('setting-ota-timeout').value = settings.stage3?.ota_timeout || 20;
             
-            // Report
-            document.getElementById('setting-csv-delimiter').value = settings.report?.csv_delimiter || ';';
-            settingsState.selectedColumns = settings.report?.default_columns || [];
-        }
-        
-        function renderColumnsGrid() {
-            const grid = document.getElementById('settings-columns-grid');
-            const selected = settingsState.selectedColumns || [];
-            
-            grid.innerHTML = AVAILABLE_COLUMNS.map(col => `
-                <label>
-                    <input type="checkbox" value="${col}" ${selected.includes(col) ? 'checked' : ''}>
-                    ${col}
-                </label>
-            `).join('');
-            
-            // Add change listeners
-            grid.querySelectorAll('input').forEach(cb => {
-                cb.addEventListener('change', () => {
-                    settingsState.hasChanges = true;
-                });
-            });
-        }
-        
-        function getSelectedColumns() {
-            const grid = document.getElementById('settings-columns-grid');
-            return Array.from(grid.querySelectorAll('input:checked')).map(cb => cb.value);
+            // System
+            document.getElementById('setting-timezone').value = settings.system?.timezone || '';
+            document.getElementById('setting-ntp-server').value = settings.system?.ntp_server || '';
+            document.getElementById('setting-location-lat').value = settings.system?.latitude ?? '';
+            document.getElementById('setting-location-lng').value = settings.system?.longitude ?? '';
         }
         
         // =====================================================================
@@ -5531,114 +6312,6 @@
         // Advanced Tab (Profiles)
         // =====================================================================
         
-        async function loadProfilesList() {
-            try {
-                const response = await fetch('/api/admin/profiles');
-                const data = await response.json();
-                
-                if (data.success) {
-                    const select = document.getElementById('advanced-file-select');
-                    select.innerHTML = '<option value="">-- Select file --</option>';
-                    
-                    data.files.forEach(file => {
-                        const option = document.createElement('option');
-                        option.value = file.path;
-                        option.textContent = file.name;
-                        select.appendChild(option);
-                    });
-                }
-            } catch (error) {
-                console.error('Failed to load profiles:', error);
-            }
-        }
-        
-        async function loadAdvancedFile(filepath) {
-            if (!filepath) {
-                yamlEditor.value = '';
-                yamlStatusText.textContent = '-';
-                yamlValidIndicator.className = 'yaml-valid-indicator';
-                settingsState.advancedFile = '';
-                return;
-            }
-            
-            yamlStatusText.textContent = 'Loading...';
-            
-            try {
-                const response = await fetch(`/api/admin/profiles/${encodeURIComponent(filepath)}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    yamlEditor.value = data.content || '';
-                    settingsState.advancedFile = filepath;
-                    settingsState.advancedContent = data.content || '';
-                    settingsState.advancedOriginal = data.content || '';
-                    
-                    if (data.valid) {
-                        yamlStatusText.textContent = 'Valid YAML';
-                        yamlValidIndicator.className = 'yaml-valid-indicator valid';
-                    } else {
-                        yamlStatusText.textContent = 'Syntax error';
-                        yamlValidIndicator.className = 'yaml-valid-indicator invalid';
-                    }
-                } else {
-                    yamlStatusText.textContent = 'Error: ' + (data.error || 'Unknown');
-                    yamlValidIndicator.className = 'yaml-valid-indicator invalid';
-                }
-            } catch (error) {
-                yamlStatusText.textContent = 'Connection error';
-                yamlValidIndicator.className = 'yaml-valid-indicator invalid';
-            }
-        }
-        
-        async function validateAdvancedYaml() {
-            const content = yamlEditor.value;
-            if (!settingsState.advancedFile) return;
-            
-            yamlStatusText.textContent = 'Validating...';
-            
-            try {
-                const response = await fetch(`/api/admin/profiles/${encodeURIComponent(settingsState.advancedFile)}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content, validate_only: true })
-                });
-                const data = await response.json();
-                
-                // For validation, we just check if the YAML is parseable
-                // Since we're using PUT for saving, we'll do a simple client-side check
-                try {
-                    // Basic YAML validation - if it has valid structure
-                    if (content.trim() && !content.includes('\t')) {
-                        yamlStatusText.textContent = 'Valid YAML';
-                        yamlValidIndicator.className = 'yaml-valid-indicator valid';
-                    }
-                } catch (e) {
-                    yamlStatusText.textContent = 'Syntax error';
-                    yamlValidIndicator.className = 'yaml-valid-indicator invalid';
-                }
-            } catch (error) {
-                yamlStatusText.textContent = 'Validation failed';
-            }
-        }
-        
-        function validateAdvancedYamlSilent() {
-            const content = yamlEditor.value;
-            if (!content.trim()) {
-                yamlValidIndicator.className = 'yaml-valid-indicator';
-                yamlStatusText.textContent = '-';
-                return;
-            }
-            
-            // Basic validation - check for tabs (common YAML error)
-            if (content.includes('\t')) {
-                yamlValidIndicator.className = 'yaml-valid-indicator warning';
-                yamlStatusText.textContent = 'Warning: tabs detected';
-            } else {
-                yamlValidIndicator.className = 'yaml-valid-indicator valid';
-                yamlStatusText.textContent = 'Valid YAML';
-            }
-        }
-        
         // =====================================================================
         // Save All Settings
         // =====================================================================
@@ -5663,9 +6336,11 @@
                         ota_mode: document.getElementById('setting-ota-mode').value,
                         ota_timeout: parseInt(document.getElementById('setting-ota-timeout').value) || 20,
                     },
-                    report: {
-                        csv_delimiter: document.getElementById('setting-csv-delimiter').value,
-                        default_columns: getSelectedColumns(),
+                    system: {
+                        timezone: document.getElementById('setting-timezone').value,
+                        ntp_server: document.getElementById('setting-ntp-server').value.trim(),
+                        latitude: document.getElementById('setting-location-lat').value ? parseFloat(document.getElementById('setting-location-lat').value) : null,
+                        longitude: document.getElementById('setting-location-lng').value ? parseFloat(document.getElementById('setting-location-lng').value) : null,
                     }
                 };
                 
@@ -5704,27 +6379,6 @@
                 
                 if (!mapData.success) {
                     throw new Error(mapData.error || 'Failed to save model map');
-                }
-                
-                // Save advanced file if modified
-                if (settingsState.advancedFile && settingsState.advancedContent !== settingsState.advancedOriginal) {
-                    const advResp = await fetch(`/api/admin/profiles/${encodeURIComponent(settingsState.advancedFile)}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ content: settingsState.advancedContent })
-                    });
-                    
-                    if (!advResp.ok) {
-                        const text = await advResp.text();
-                        throw new Error(`Profile save failed: ${advResp.status}`);
-                    }
-                    
-                    const advData = await advResp.json();
-                    
-                    if (!advData.success) {
-                        throw new Error(advData.error || 'Failed to save profile');
-                    }
-                    settingsState.advancedOriginal = settingsState.advancedContent;
                 }
                 
                 // Save building profile
@@ -5772,8 +6426,983 @@
             }
         }
         
-        // Track form changes
+        // Swiss Defaults button
+        document.getElementById('btn-location-swiss-defaults')?.addEventListener('click', () => {
+            document.getElementById('setting-timezone').value = 'Europe/Zurich';
+            document.getElementById('setting-ntp-server').value = 'ch.pool.ntp.org';
+            document.getElementById('setting-location-lat').value = '47.3769';
+            document.getElementById('setting-location-lng').value = '8.5417';
+            settingsState.hasChanges = true;
+            if (typeof UI !== 'undefined' && UI.showToast) {
+                UI.showToast('Swiss defaults applied', 'info');
+            }
+        });
+        
+        // Apply System Config to all online devices
+        document.getElementById('btn-apply-system-config')?.addEventListener('click', async () => {
+            const timezone = document.getElementById('setting-timezone').value;
+            const ntpServer = document.getElementById('setting-ntp-server').value.trim();
+            const lat = document.getElementById('setting-location-lat').value;
+            const lng = document.getElementById('setting-location-lng').value;
+            
+            // Validate: at least one field set
+            if (!timezone && !ntpServer && !lat && !lng) {
+                alert(i18n.t('settings.apply_nothing') || 'No system settings configured to apply.');
+                return;
+            }
+            
+            const btn = document.getElementById('btn-apply-system-config');
+            const progressDiv = document.getElementById('system-apply-progress');
+            const bar = document.getElementById('system-apply-bar');
+            const counter = document.getElementById('system-apply-counter');
+            const resultsDiv = document.getElementById('system-apply-results');
+            
+            btn.disabled = true;
+            progressDiv.style.display = 'block';
+            bar.style.width = '0%';
+            counter.textContent = '...';
+            resultsDiv.innerHTML = '';
+            
+            try {
+                const payload = {
+                    timezone: timezone || null,
+                    ntp_server: ntpServer || null,
+                    latitude: lat ? parseFloat(lat) : null,
+                    longitude: lng ? parseFloat(lng) : null,
+                };
+                
+                const resp = await fetch('/api/admin/apply-system-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await resp.json();
+                
+                if (!data.success) {
+                    resultsDiv.innerHTML = `<span style="color: var(--danger-color);">Error: ${data.error}</span>`;
+                    return;
+                }
+                
+                const results = data.results || [];
+                const total = results.length;
+                
+                if (total === 0) {
+                    resultsDiv.innerHTML = `<span style="color: var(--text-secondary);">${i18n.t('settings.apply_no_devices') || 'No online devices found.'}</span>`;
+                    return;
+                }
+                
+                // Animate results one by one
+                let ok = 0, fail = 0;
+                for (let i = 0; i < total; i++) {
+                    const r = results[i];
+                    const pct = Math.round(((i + 1) / total) * 100);
+                    bar.style.width = pct + '%';
+                    counter.textContent = `${i + 1}/${total}`;
+                    
+                    const icon = r.success ? '✅' : '❌';
+                    const detail = r.success ? '' : ` — ${r.error || 'failed'}`;
+                    const line = document.createElement('div');
+                    line.textContent = `${icon} ${r.name || r.ip}${detail}`;
+                    if (!r.success) line.style.color = 'var(--danger-color)';
+                    resultsDiv.appendChild(line);
+                    resultsDiv.scrollTop = resultsDiv.scrollHeight;
+                    
+                    if (r.success) ok++; else fail++;
+                    
+                    // Brief delay for visual feedback
+                    await new Promise(res => setTimeout(res, 40));
+                }
+                
+                // Summary line
+                const summary = document.createElement('div');
+                summary.style.marginTop = '6px';
+                summary.style.fontWeight = 'bold';
+                summary.textContent = `Done: ${ok} ✅  ${fail > 0 ? fail + ' ❌' : ''}`;
+                resultsDiv.appendChild(summary);
+                
+                if (typeof UI !== 'undefined' && UI.showToast) {
+                    UI.showToast(`System config applied: ${ok}/${total}`, fail > 0 ? 'warning' : 'success');
+                }
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<span style="color: var(--danger-color);">Error: ${error.message}</span>`;
+            } finally {
+                btn.disabled = false;
+            }
+        });
+        
+        // =====================================================================
+        // Device Flags (ECO, BLE, LED, AP, MQTT)
+        // =====================================================================
+        const flagsState = {
+            selectedDevices: new Set(),
+            deviceFlags: {},  // mac -> { eco, ble, led, ap, mqtt }
+        };
+        
+        const inputTypeState = {
+            selectedDevices: new Set(),
+            deviceInputs: {},  // mac -> [{id, name, type}, ...]
+        };
+        
+        const FLAG_NAMES = ['eco', 'ble', 'ap', 'mqtt'];
+        
+        // =====================================================================
+        // Cover Calibration & Field Toggles
+        // =====================================================================
+        
+        let coverCalibPolling = null;
+        let coverCalibDeviceId = null;
+        
+        function toggleObstructionFields() {
+            const enabled = document.getElementById('cover-obstruction-enable').checked;
+            document.getElementById('obstruction-fields').style.display = enabled ? '' : 'none';
+        }
+        
+        function toggleSlatFields() {
+            const enabled = document.getElementById('cover-slat-enable').checked;
+            document.getElementById('slat-fields').style.display = enabled ? '' : 'none';
+        }
+        
+        function toggleNightModeFields() {
+            const enabled = document.getElementById('light-night-mode').checked;
+            document.getElementById('night-mode-fields').style.display = enabled ? '' : 'none';
+        }
+        
+        // =====================================================================
+        // Light in_mode ↔ Input.type sync
+        // =====================================================================
+        
+        function filterInModeOptions() {
+            const inputTypeEl = document.getElementById('input-type-0');
+            if (!inputTypeEl) return;
+            
+            const inModeEl = document.getElementById('light-in-mode');
+            if (!inModeEl) return;
+            
+            // For dimmers (inputModeSource='light'), all in_mode options are allowed
+            // because syncInputTypeFromInMode() auto-adjusts the Input.type
+            if (inputTypeEl.style.display === 'none') {
+                Array.from(inModeEl.options).forEach(opt => { opt.disabled = false; });
+                return;
+            }
+            
+            const inputType = inputTypeEl.value;
+            
+            // Enable/disable options based on Input.type
+            Array.from(inModeEl.options).forEach(opt => {
+                if (inputType === 'switch') {
+                    // switch: follow, flip allowed
+                    opt.disabled = (opt.value === 'dim' || opt.value === 'activate');
+                } else {
+                    // button: dim, flip, activate allowed
+                    opt.disabled = (opt.value === 'follow');
+                }
+            });
+            
+            // If current selection is now disabled, switch to compatible default
+            if (inModeEl.selectedOptions[0]?.disabled) {
+                inModeEl.value = (inputType === 'switch') ? 'follow' : 'dim';
+            }
+        }
+        
+        // =====================================================================
+        // Collapsible Accordion Sections
+        // =====================================================================
+        
+        function toggleCollapsible(header) {
+            const content = header.nextElementSibling;
+            if (!content || !content.classList.contains('collapsible-content')) return;
+            
+            const isOpen = header.classList.contains('open');
+            if (isOpen) {
+                content.classList.add('collapsed');
+                header.classList.remove('open');
+            } else {
+                content.classList.remove('collapsed');
+                header.classList.add('open');
+            }
+        }
+        
+        function syncInputTypeFromInMode() {
+            const inMode = document.getElementById('light-in-mode')?.value;
+            if (!inMode) return;
+            
+            const inputTypeEl = document.getElementById('input-type-0');
+            if (!inputTypeEl) return;
+            
+            // dim, activate → button required
+            // follow → switch required
+            // flip → both OK, don't change
+            if (inMode === 'dim' || inMode === 'activate') {
+                inputTypeEl.value = 'button';
+            } else if (inMode === 'follow') {
+                inputTypeEl.value = 'switch';
+            }
+            
+            // Also update available in_mode options
+            filterInModeOptions();
+        }
+        
+        // =====================================================================
+        // Light Calibration
+        // =====================================================================
+        
+        let lightCalibPolling = null;
+        let lightCalibDeviceId = null;
+        let lightCalibSeenCalib = false;
+        let lightCalibPollCount = 0;
+        
+        async function startLightCalibration() {
+            const deviceEl = document.querySelector('.device-item.selected');
+            if (!deviceEl) {
+                UI.showToast('No device selected', 'error');
+                return;
+            }
+            lightCalibDeviceId = deviceEl.dataset.id;
+            
+            const msg = i18n.t('details.light_calibration_confirm') || 
+                'Start calibration? The dimmer will test the connected load.';
+            if (!confirm(msg)) return;
+            
+            try {
+                const resp = await fetch(`/api/devices/${lightCalibDeviceId}/light/calibrate`, { method: 'POST' });
+                const data = await resp.json();
+                
+                if (!data.success) {
+                    UI.showToast(data.error || 'Calibration failed', 'error');
+                    return;
+                }
+                
+                // Update UI to calibrating state
+                const badge = document.getElementById('light-calib-badge');
+                badge.className = 'calib-badge calibrating';
+                badge.textContent = '⏳ ' + (i18n.t('details.calibrating') || 'Calibrating...');
+                
+                document.getElementById('btn-light-calibrate').style.display = 'none';
+                document.getElementById('btn-light-stop-calib').style.display = '';
+                document.getElementById('light-calib-hint').style.display = 'none';
+                
+                // Start polling after grace period
+                lightCalibSeenCalib = false;
+                lightCalibPollCount = 0;
+                setTimeout(() => {
+                    lightCalibPolling = setInterval(pollLightCalibration, 2000);
+                }, 3000);
+                
+            } catch (e) {
+                UI.showToast('Connection error', 'error');
+            }
+        }
+        
+        async function pollLightCalibration() {
+            if (!lightCalibDeviceId) return;
+            lightCalibPollCount++;
+            
+            try {
+                const resp = await fetch(`/api/devices/${lightCalibDeviceId}/light/status`);
+                const data = await resp.json();
+                
+                if (!data.success) return;
+                
+                // Track if we've seen calibrating state
+                if (data.calibrating === true) {
+                    lightCalibSeenCalib = true;
+                    // Update progress if available
+                    if (data.calib_progress != null) {
+                        const badge = document.getElementById('light-calib-badge');
+                        badge.textContent = '⏳ ' + (i18n.t('details.calibrating') || 'Calibrating...') + ' ' + data.calib_progress + '%';
+                    }
+                    return;
+                }
+                
+                // Not calibrating — but only finish if we've seen it or enough polls
+                if (!lightCalibSeenCalib && lightCalibPollCount < 5) {
+                    return;  // Grace period
+                }
+                
+                // Calibration finished
+                clearInterval(lightCalibPolling);
+                lightCalibPolling = null;
+                
+                const badge = document.getElementById('light-calib-badge');
+                badge.className = 'calib-badge calibrated';
+                badge.textContent = '✅ ' + (i18n.t('details.calibration_complete') || 'Calibration Complete');
+                UI.showToast(i18n.t('details.calibration_success') || 'Calibration successful!', 'success');
+                
+                document.getElementById('btn-light-calibrate').style.display = '';
+                document.getElementById('btn-light-stop-calib').style.display = 'none';
+                document.getElementById('light-calib-hint').style.display = '';
+            } catch (e) {
+                // Connection error — keep trying
+            }
+        }
+        
+        async function stopLightCalibration() {
+            // Light calibration can't really be stopped via API,
+            // but we stop polling and reset UI
+            if (lightCalibPolling) {
+                clearInterval(lightCalibPolling);
+                lightCalibPolling = null;
+            }
+            
+            const badge = document.getElementById('light-calib-badge');
+            badge.className = 'calib-badge not-calibrated';
+            badge.textContent = '⚠️ ' + (i18n.t('details.calibration_stopped') || 'Calibration Stopped');
+            
+            document.getElementById('btn-light-calibrate').style.display = '';
+            document.getElementById('btn-light-stop-calib').style.display = 'none';
+            document.getElementById('light-calib-hint').style.display = '';
+        }
+        
+        async function startCoverCalibration() {
+            // Get current device ID from detail panel
+            const deviceEl = document.querySelector('.device-item.selected');
+            if (!deviceEl) {
+                UI.showToast('No device selected', 'error');
+                return;
+            }
+            coverCalibDeviceId = deviceEl.dataset.id;
+            
+            // Confirm dialog
+            const msg = i18n.t('details.calibration_confirm') || 
+                'Start calibration? The cover will move fully open and closed. Ensure no obstacles are in the way.';
+            if (!confirm(msg)) return;
+            
+            try {
+                const resp = await fetch(`/api/devices/${coverCalibDeviceId}/cover/calibrate`, { method: 'POST' });
+                const data = await resp.json();
+                
+                if (!data.success) {
+                    UI.showToast(data.error || 'Calibration failed', 'error');
+                    return;
+                }
+                
+                // Update UI to calibrating state
+                const badge = document.getElementById('cover-calib-badge');
+                badge.className = 'calib-badge calibrating';
+                badge.textContent = '⏳ ' + (i18n.t('details.calibrating') || 'Calibrating...');
+                
+                document.getElementById('btn-cover-calibrate').style.display = 'none';
+                document.getElementById('btn-cover-stop-calib').style.display = '';
+                document.getElementById('cover-calib-hint').style.display = 'none';
+                
+                // Start polling after initial grace period (device needs time to enter calib state)
+                coverCalibSeenCalib = false;
+                coverCalibPollCount = 0;
+                setTimeout(() => {
+                    coverCalibPolling = setInterval(pollCoverCalibration, 2000);
+                }, 4000);
+                
+            } catch (e) {
+                UI.showToast('Connection error', 'error');
+            }
+        }
+        
+        let coverCalibSeenCalib = false;
+        let coverCalibPollCount = 0;
+        
+        async function pollCoverCalibration() {
+            if (!coverCalibDeviceId) return;
+            coverCalibPollCount++;
+            
+            try {
+                const resp = await fetch(`/api/devices/${coverCalibDeviceId}/cover/status`);
+                const data = await resp.json();
+                
+                if (!data.success) return;
+                
+                const state = data.state;
+                
+                // Track if we've ever seen "calibrating" state
+                if (state === 'calibrating') {
+                    coverCalibSeenCalib = true;
+                }
+                
+                // Still calibrating
+                if (state === 'calibrating') {
+                    return;  // Keep polling
+                }
+                
+                // State is stopped/idle — but only declare finished if we've seen calib,
+                // or if we've polled enough times (grace period exhausted)
+                if (!coverCalibSeenCalib && coverCalibPollCount < 5) {
+                    return;  // Still in grace period, keep polling
+                }
+                
+                // Calibration finished
+                clearInterval(coverCalibPolling);
+                coverCalibPolling = null;
+                
+                const badge = document.getElementById('cover-calib-badge');
+                if (data.pos_control) {
+                    badge.className = 'calib-badge calibrated';
+                    badge.textContent = '✅ ' + (i18n.t('details.calibrated') || 'Calibrated');
+                    UI.showToast(i18n.t('details.calibration_success') || 'Calibration successful!', 'success');
+                } else {
+                    badge.className = 'calib-badge not-calibrated';
+                    badge.textContent = '⚠️ ' + (i18n.t('details.calibration_failed') || 'Calibration Failed');
+                    UI.showToast(i18n.t('details.calibration_failed') || 'Calibration failed', 'error');
+                }
+                
+                document.getElementById('btn-cover-calibrate').style.display = '';
+                document.getElementById('btn-cover-stop-calib').style.display = 'none';
+                document.getElementById('cover-calib-hint').style.display = '';
+            } catch (e) {
+                // Connection error during poll — keep trying
+            }
+        }
+        
+        async function stopCoverCalibration() {
+            if (!coverCalibDeviceId) return;
+            
+            try {
+                await fetch(`/api/devices/${coverCalibDeviceId}/cover/stop`, { method: 'POST' });
+            } catch (e) {
+                // Ignore
+            }
+            
+            // Stop polling
+            if (coverCalibPolling) {
+                clearInterval(coverCalibPolling);
+                coverCalibPolling = null;
+            }
+            
+            const badge = document.getElementById('cover-calib-badge');
+            badge.className = 'calib-badge not-calibrated';
+            badge.textContent = '⚠️ ' + (i18n.t('details.calibration_stopped') || 'Calibration Stopped');
+            
+            document.getElementById('btn-cover-calibrate').style.display = '';
+            document.getElementById('btn-cover-stop-calib').style.display = 'none';
+            document.getElementById('cover-calib-hint').style.display = '';
+        }
+        
+        // =====================================================================
+        // Flags Functions
+        // =====================================================================
+        
+        function toggleMqttServer() {
+            const val = document.querySelector('input[name="flag-mqtt"]:checked')?.value;
+            document.getElementById('mqtt-server-group').style.display = val === 'true' ? '' : 'none';
+        }
+        
+        function getFlagValue(name) {
+            return document.querySelector(`input[name="flag-${name}"]:checked`)?.value || 'skip';
+        }
+        
+        function setFlagValue(name, value) {
+            const radio = document.querySelector(`input[name="flag-${name}"][value="${value}"]`);
+            if (radio) radio.checked = true;
+        }
+        
+        function updateFlagsDeviceList() {
+            const listEl = document.getElementById('flags-device-list');
+            const allDevices = (window.UI && UI.filteredDevices) ? UI.filteredDevices : [];
+            const onlineDevices = allDevices.filter(d => UI.deviceStatus[d.id] === true);
+            
+            if (onlineDevices.length === 0) {
+                const offlineCount = allDevices.length;
+                listEl.innerHTML = `<div class="empty-state">${i18n.t('flags.no_online') || 'No online devices'}${offlineCount > 0 ? ` (${offlineCount} total)` : ''}</div>`;
+                flagsState.selectedDevices.clear();
+                updateFlagsSelectionInfo();
+                return;
+            }
+            
+            // Pre-select all online devices
+            flagsState.selectedDevices = new Set(onlineDevices.map(d => d.id));
+            
+            listEl.innerHTML = onlineDevices.map(d => {
+                const name = d.friendly_name || d.hostname || d.id;
+                const flags = flagsState.deviceFlags[d.id];
+                let flagsHtml = '';
+                if (flags) {
+                    flagsHtml = FLAG_NAMES.map(f => {
+                        const val = flags[f];
+                        if (val === null || val === undefined) return `<span class="flag-indicator unknown">${f.toUpperCase()}</span>`;
+                        return `<span class="flag-indicator ${val ? 'on' : 'off'}">${f.toUpperCase()}</span>`;
+                    }).join('');
+                }
+                return `<label class="flags-device-item">
+                    <input type="checkbox" value="${d.id}" checked onchange="toggleFlagDevice('${d.id}')">
+                    <span class="device-name">${name}</span>
+                    <span class="device-flags">${flagsHtml}</span>
+                    <span class="device-ip">${d.ip}</span>
+                </label>`;
+            }).join('');
+            
+            document.getElementById('flags-device-count').textContent = `${onlineDevices.length} online`;
+            document.getElementById('flags-select-all').checked = true;
+            updateFlagsSelectionInfo();
+        }
+        
+        function toggleFlagDevice(mac) {
+            if (flagsState.selectedDevices.has(mac)) {
+                flagsState.selectedDevices.delete(mac);
+            } else {
+                flagsState.selectedDevices.add(mac);
+            }
+            updateFlagsSelectionInfo();
+        }
+        
+        function updateFlagsSelectionInfo() {
+            const count = flagsState.selectedDevices.size;
+            document.getElementById('flags-selection-info').textContent =
+                count > 0 ? `${count} ${i18n.t('flags.selected') || 'selected'}` : '';
+            document.getElementById('btn-flags-apply').disabled = count === 0;
+        }
+        
+        document.getElementById('flags-select-all')?.addEventListener('change', (e) => {
+            const checked = e.target.checked;
+            const allDevices = (window.UI && UI.filteredDevices) ? UI.filteredDevices : [];
+            const onlineDevices = allDevices.filter(d => UI.deviceStatus[d.id] === true);
+            
+            if (checked) {
+                flagsState.selectedDevices = new Set(onlineDevices.map(d => d.id));
+            } else {
+                flagsState.selectedDevices.clear();
+            }
+            
+            document.querySelectorAll('#flags-device-list input[type="checkbox"]').forEach(cb => cb.checked = checked);
+            updateFlagsSelectionInfo();
+        });
+        
+        // Read flags from devices
+        document.getElementById('btn-flags-read')?.addEventListener('click', async () => {
+            const macs = Array.from(flagsState.selectedDevices);
+            if (macs.length === 0) {
+                UI.showToast(i18n.t('flags.no_selection') || 'No devices selected', 'warning');
+                return;
+            }
+            
+            const btn = document.getElementById('btn-flags-read');
+            const progressDiv = document.getElementById('flags-progress');
+            const bar = document.getElementById('flags-progress-bar');
+            const counter = document.getElementById('flags-progress-counter');
+            const resultsDiv = document.getElementById('flags-results');
+            
+            btn.disabled = true;
+            progressDiv.style.display = 'block';
+            bar.style.width = '0%';
+            counter.textContent = `0/${macs.length}`;
+            resultsDiv.innerHTML = '';
+            
+            try {
+                const resp = await fetch('/api/devices/flags/read', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ macs })
+                });
+                const data = await resp.json();
+                
+                if (!data.success) {
+                    resultsDiv.innerHTML = `<span style="color: var(--danger-color);">Error: ${data.error}</span>`;
+                    return;
+                }
+                
+                const results = data.results || [];
+                let ok = 0, fail = 0;
+                
+                for (let i = 0; i < results.length; i++) {
+                    const r = results[i];
+                    const pct = Math.round(((i + 1) / results.length) * 100);
+                    bar.style.width = pct + '%';
+                    counter.textContent = `${i + 1}/${results.length}`;
+                    
+                    if (r.success) {
+                        flagsState.deviceFlags[r.mac] = r.flags;
+                        const flagStr = FLAG_NAMES.map(f => {
+                            const v = r.flags[f];
+                            if (v === null || v === undefined) return `${f}:?`;
+                            return `${f}:${v ? '✓' : '✗'}`;
+                        }).join(' ');
+                        const line = document.createElement('div');
+                        line.textContent = `✅ ${r.name} — ${flagStr}`;
+                        resultsDiv.appendChild(line);
+                        ok++;
+                    } else {
+                        const line = document.createElement('div');
+                        line.textContent = `❌ ${r.name} — ${r.error || 'failed'}`;
+                        line.style.color = 'var(--danger-color)';
+                        resultsDiv.appendChild(line);
+                        fail++;
+                    }
+                    resultsDiv.scrollTop = resultsDiv.scrollHeight;
+                    await new Promise(res => setTimeout(res, 30));
+                }
+                
+                // Summary
+                const summary = document.createElement('div');
+                summary.style.marginTop = '6px';
+                summary.style.fontWeight = 'bold';
+                summary.textContent = `Done: ${ok} ✅  ${fail > 0 ? fail + ' ❌' : ''}`;
+                resultsDiv.appendChild(summary);
+                
+                // Update device list to show flag indicators
+                updateFlagsDeviceList();
+                
+                // Auto-set global selectors based on read results
+                const successResults = results.filter(r => r.success && r.flags);
+                if (successResults.length > 0) {
+                    FLAG_NAMES.forEach(f => {
+                        const values = successResults.map(r => r.flags[f]).filter(v => v !== null && v !== undefined);
+                        if (values.length === 0) {
+                            setFlagValue(f, 'skip');
+                        } else if (values.every(v => v === true)) {
+                            setFlagValue(f, 'true');
+                        } else if (values.every(v => v === false)) {
+                            setFlagValue(f, 'false');
+                        } else {
+                            setFlagValue(f, 'skip');  // mixed
+                        }
+                    });
+                    toggleMqttServer();
+                }
+                
+                UI.showToast(`Flags read: ${ok}/${results.length}`, fail > 0 ? 'warning' : 'success');
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<span style="color: var(--danger-color);">Error: ${error.message}</span>`;
+            } finally {
+                btn.disabled = false;
+            }
+        });
+        
+        // Apply flags to devices
+        document.getElementById('btn-flags-apply')?.addEventListener('click', async () => {
+            const macs = Array.from(flagsState.selectedDevices);
+            if (macs.length === 0) {
+                UI.showToast(i18n.t('flags.no_selection') || 'No devices selected', 'warning');
+                return;
+            }
+            
+            // Build flags payload
+            const flags = {};
+            FLAG_NAMES.forEach(f => {
+                const val = getFlagValue(f);
+                if (val === 'true') flags[f] = true;
+                else if (val === 'false') flags[f] = false;
+                else flags[f] = null;  // skip
+            });
+            
+            const activeFlags = Object.entries(flags).filter(([k, v]) => v !== null);
+            if (activeFlags.length === 0) {
+                UI.showToast(i18n.t('flags.no_flags_selected') || 'No flags selected (all set to Skip)', 'warning');
+                return;
+            }
+            
+            // MQTT enable requires server
+            const mqttServer = document.getElementById('flag-mqtt-server').value.trim();
+            if (flags.mqtt === true && !mqttServer) {
+                UI.showToast(i18n.t('flags.mqtt_server_required') || 'MQTT server address required when enabling MQTT', 'warning');
+                return;
+            }
+            
+            // Confirm
+            const flagSummary = activeFlags.map(([k, v]) => `${k.toUpperCase()}=${v ? 'ON' : 'OFF'}`).join(', ');
+            if (!confirm(`${i18n.t('flags.confirm_apply') || 'Apply to'} ${macs.length} ${i18n.t('flags.devices') || 'devices'}?\n${flagSummary}`)) {
+                return;
+            }
+            
+            const btn = document.getElementById('btn-flags-apply');
+            const progressDiv = document.getElementById('flags-progress');
+            const bar = document.getElementById('flags-progress-bar');
+            const counter = document.getElementById('flags-progress-counter');
+            const resultsDiv = document.getElementById('flags-results');
+            
+            btn.disabled = true;
+            progressDiv.style.display = 'block';
+            bar.style.width = '0%';
+            counter.textContent = `0/${macs.length}`;
+            resultsDiv.innerHTML = '';
+            
+            try {
+                const resp = await fetch('/api/devices/flags/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ macs, flags, mqtt_server: mqttServer })
+                });
+                const data = await resp.json();
+                
+                if (!data.success) {
+                    resultsDiv.innerHTML = `<span style="color: var(--danger-color);">Error: ${data.error}</span>`;
+                    return;
+                }
+                
+                const results = data.results || [];
+                let ok = 0, fail = 0;
+                
+                for (let i = 0; i < results.length; i++) {
+                    const r = results[i];
+                    const pct = Math.round(((i + 1) / results.length) * 100);
+                    bar.style.width = pct + '%';
+                    counter.textContent = `${i + 1}/${results.length}`;
+                    
+                    const icon = r.success ? '✅' : '❌';
+                    const detail = r.success ? '' : ` — ${r.error || 'failed'}`;
+                    const line = document.createElement('div');
+                    line.textContent = `${icon} ${r.name}${detail}`;
+                    if (!r.success) line.style.color = 'var(--danger-color)';
+                    resultsDiv.appendChild(line);
+                    resultsDiv.scrollTop = resultsDiv.scrollHeight;
+                    
+                    if (r.success) ok++; else fail++;
+                    await new Promise(res => setTimeout(res, 30));
+                }
+                
+                const summary = document.createElement('div');
+                summary.style.marginTop = '6px';
+                summary.style.fontWeight = 'bold';
+                summary.textContent = `Done: ${ok} ✅  ${fail > 0 ? fail + ' ❌' : ''}`;
+                resultsDiv.appendChild(summary);
+                
+                UI.showToast(`Flags applied: ${ok}/${results.length}`, fail > 0 ? 'warning' : 'success');
+                
+                // Auto-read flags after apply to show updated status
+                setTimeout(() => {
+                    document.getElementById('btn-flags-read')?.click();
+                }, 500);
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<span style="color: var(--danger-color);">Error: ${error.message}</span>`;
+            } finally {
+                btn.disabled = false;
+                updateFlagsSelectionInfo();
+            }
+        });
+        
+        // Refresh flags device list when tab opens
+        document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.dataset.tab === 'flags') {
+                    updateFlagsDeviceList();
+                }
+                if (btn.dataset.tab === 'input-type') {
+                    updateInputTypeDeviceList();
+                }
+            });
+        });
+        
+        // =====================================================================
+        // Bulk Input Type
+        // =====================================================================
+        
+        // Auto-refresh when device filters change (like scripts/schedules)
+        document.addEventListener('devicesFiltered', () => {
+            const inputTypeTab = document.querySelector('.settings-tab-btn[data-tab="input-type"]');
+            if (inputTypeTab && inputTypeTab.classList.contains('active')) {
+                updateInputTypeDeviceList();
+            }
+        });
+        
+        function updateInputTypeDeviceList() {
+            const listEl = document.getElementById('input-type-device-list');
+            if (!listEl) return;
+            
+            const allDevices = (window.UI && UI.filteredDevices) ? UI.filteredDevices : [];
+            const onlineDevices = allDevices.filter(d => UI.deviceStatus[d.id] === true);
+            
+            if (onlineDevices.length === 0) {
+                const offlineCount = allDevices.length;
+                listEl.innerHTML = `<div class="empty-state">${i18n.t('input_type_bulk.no_devices') || 'No devices online'}${offlineCount > 0 ? ` (${offlineCount} total)` : ''}</div>`;
+                inputTypeState.selectedDevices.clear();
+                updateInputTypeSelectionInfo();
+                return;
+            }
+            
+            // Pre-select all online devices
+            inputTypeState.selectedDevices = new Set(onlineDevices.map(d => d.id));
+            
+            listEl.innerHTML = onlineDevices.map(d => {
+                const name = d.friendly_name || d.hostname || d.id;
+                const inputs = inputTypeState.deviceInputs[d.id];
+                let inputsHtml = '';
+                if (inputs) {
+                    inputsHtml = inputs.map(inp => 
+                        `<span class="flag-indicator ${inp.type === 'button' ? 'on' : 'off'}">${inp.id}:${inp.type}</span>`
+                    ).join('');
+                }
+                return `<label class="flags-device-item">
+                    <input type="checkbox" value="${d.id}" checked onchange="toggleInputTypeDevice('${d.id}')">
+                    <span class="device-name">${name}</span>
+                    <span class="device-flags">${inputsHtml}</span>
+                    <span class="device-ip">${d.ip}</span>
+                </label>`;
+            }).join('');
+            
+            document.getElementById('input-type-device-count').textContent = `${onlineDevices.length} online`;
+            document.getElementById('input-type-select-all').checked = true;
+            updateInputTypeSelectionInfo();
+        }
+        
+        function toggleInputTypeDevice(mac) {
+            if (inputTypeState.selectedDevices.has(mac)) {
+                inputTypeState.selectedDevices.delete(mac);
+            } else {
+                inputTypeState.selectedDevices.add(mac);
+            }
+            updateInputTypeSelectionInfo();
+        }
+        
+        function updateInputTypeSelectionInfo() {
+            const count = inputTypeState.selectedDevices.size;
+            document.getElementById('input-type-selection-info').textContent =
+                `${count} ${i18n.t('flags.selected') || 'selected'}`;
+            document.getElementById('btn-input-type-apply').disabled = count === 0;
+        }
+        
+        document.getElementById('input-type-select-all')?.addEventListener('change', (e) => {
+            const allDevices = (window.UI && UI.filteredDevices) ? UI.filteredDevices : [];
+            const onlineDevices = allDevices.filter(d => UI.deviceStatus[d.id] === true);
+            if (e.target.checked) {
+                inputTypeState.selectedDevices = new Set(onlineDevices.map(d => d.id));
+            } else {
+                inputTypeState.selectedDevices.clear();
+            }
+            document.querySelectorAll('#input-type-device-list input[type="checkbox"]').forEach(cb => cb.checked = e.target.checked);
+            updateInputTypeSelectionInfo();
+        });
+        
+        // Read input types
+        document.getElementById('btn-input-type-read')?.addEventListener('click', async () => {
+            const macs = Array.from(inputTypeState.selectedDevices);
+            
+            if (macs.length === 0) return;
+            
+            const btn = document.getElementById('btn-input-type-read');
+            const progressDiv = document.getElementById('input-type-progress');
+            const bar = document.getElementById('input-type-progress-bar');
+            const counter = document.getElementById('input-type-progress-counter');
+            const resultsDiv = document.getElementById('input-type-results');
+            
+            btn.disabled = true;
+            progressDiv.style.display = 'block';
+            bar.style.width = '0%';
+            counter.textContent = `0/${macs.length}`;
+            resultsDiv.innerHTML = '';
+            
+            try {
+                const resp = await fetch('/api/devices/input-type/read', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ macs })
+                });
+                const data = await resp.json();
+                
+                if (!data.success) {
+                    resultsDiv.innerHTML = `<span style="color: var(--danger-color);">Error: ${data.error}</span>`;
+                    return;
+                }
+                
+                const results = data.results || [];
+                for (let i = 0; i < results.length; i++) {
+                    const r = results[i];
+                    const pct = Math.round(((i + 1) / results.length) * 100);
+                    bar.style.width = pct + '%';
+                    counter.textContent = `${i + 1}/${results.length}`;
+                    
+                    if (r.success && r.inputs) {
+                        inputTypeState.deviceInputs[r.mac] = r.inputs;
+                    }
+                    
+                    await new Promise(res => setTimeout(res, 30));
+                }
+                
+                // Refresh list to show read values
+                updateInputTypeDeviceList();
+                
+                const ok = results.filter(r => r.success).length;
+                resultsDiv.innerHTML = `<span>${i18n.t('input_type_bulk.read_done') || 'Read complete'}: ${ok}/${results.length}</span>`;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<span style="color: var(--danger-color);">Error: ${error.message}</span>`;
+            } finally {
+                btn.disabled = false;
+            }
+        });
+        
+        // Apply input type
+        document.getElementById('btn-input-type-apply')?.addEventListener('click', async () => {
+            const macs = Array.from(inputTypeState.selectedDevices);
+            
+            if (macs.length === 0) return;
+            
+            const inputType = document.querySelector('input[name="bulk-input-type"]:checked')?.value;
+            if (!inputType) return;
+            
+            if (!confirm(`${i18n.t('input_type_bulk.confirm') || 'Set all inputs to'} "${inputType}" ${i18n.t('flags.on') || 'on'} ${macs.length} ${i18n.t('flags.devices') || 'devices'}?`)) {
+                return;
+            }
+            
+            const btn = document.getElementById('btn-input-type-apply');
+            const progressDiv = document.getElementById('input-type-progress');
+            const bar = document.getElementById('input-type-progress-bar');
+            const counter = document.getElementById('input-type-progress-counter');
+            const resultsDiv = document.getElementById('input-type-results');
+            
+            btn.disabled = true;
+            progressDiv.style.display = 'block';
+            bar.style.width = '0%';
+            counter.textContent = `0/${macs.length}`;
+            resultsDiv.innerHTML = '';
+            
+            try {
+                const resp = await fetch('/api/devices/input-type/apply', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ macs, input_type: inputType })
+                });
+                const data = await resp.json();
+                
+                if (!data.success) {
+                    resultsDiv.innerHTML = `<span style="color: var(--danger-color);">Error: ${data.error}</span>`;
+                    return;
+                }
+                
+                const results = data.results || [];
+                let ok = 0, fail = 0;
+                
+                for (let i = 0; i < results.length; i++) {
+                    const r = results[i];
+                    const pct = Math.round(((i + 1) / results.length) * 100);
+                    bar.style.width = pct + '%';
+                    counter.textContent = `${i + 1}/${results.length}`;
+                    
+                    const icon = r.success ? '✅' : '❌';
+                    const detail = r.success ? ` (${r.changed}/${r.total} changed)` : ` — ${r.error || 'failed'}`;
+                    const line = document.createElement('div');
+                    line.textContent = `${icon} ${r.name}${detail}`;
+                    if (!r.success) line.style.color = 'var(--danger-color)';
+                    resultsDiv.appendChild(line);
+                    resultsDiv.scrollTop = resultsDiv.scrollHeight;
+                    
+                    if (r.success) ok++; else fail++;
+                    await new Promise(res => setTimeout(res, 30));
+                }
+                
+                const summary = document.createElement('div');
+                summary.style.marginTop = '6px';
+                summary.style.fontWeight = 'bold';
+                summary.textContent = `Done: ${ok} ✅  ${fail > 0 ? fail + ' ❌' : ''}`;
+                resultsDiv.appendChild(summary);
+                
+                UI.showToast(`Input type applied: ${ok}/${results.length}`, fail > 0 ? 'warning' : 'success');
+                
+                // Auto-read after apply
+                setTimeout(() => {
+                    document.getElementById('btn-input-type-read')?.click();
+                }, 500);
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<span style="color: var(--danger-color);">Error: ${error.message}</span>`;
+            } finally {
+                btn.disabled = false;
+                updateInputTypeSelectionInfo();
+            }
+        });
+        
+        // Track form changes (exclude flags + input-type tabs — those are apply-on-click, not save-on-close)
         document.querySelectorAll('#modal-settings input, #modal-settings select').forEach(el => {
+            if (el.closest('[data-tab="flags"]') || el.closest('[data-tab="input-type"]')) return;
             el.addEventListener('change', () => {
                 settingsState.hasChanges = true;
             });
@@ -5796,6 +7425,78 @@
         // Export Labels CSV
         document.getElementById('btn-export-labels').addEventListener('click', openExportModal);
         
+        const EXPORT_COLUMNS = [
+            'friendly_name', 'label_line1', 'label_line2', 
+            'ip_short', 'room', 'location', 'model', 'mac_short', 'ip_full', 'mac_full'
+        ];
+        const DEFAULT_EXPORT_COLUMNS = [
+            'friendly_name', 'label_line1', 'label_line2', 
+            'ip_short', 'room', 'location', 'model', 'mac_short'
+        ];
+        
+        function buildExportRow(device) {
+            const ip = device.ip || '';
+            const mac = device.id || '';
+            const ipParts = ip.split('.');
+            const ipShort = ipParts.length === 4 ? `${ipParts[2]}.${ipParts[3]}` : ip;
+            const macShort = mac.length >= 6 ? mac.slice(-6) : mac;
+            const room = device.room || '';
+            const location = device.location || '';
+            const model = device.model || '';
+            const line1Parts = [ipShort];
+            if (room) line1Parts.push(room);
+            if (location) line1Parts.push(location);
+            return {
+                friendly_name: device.friendly_name || '',
+                label_line1: line1Parts.join(' '),
+                label_line2: model ? `${model} ${macShort}` : macShort,
+                ip_short: ipShort,
+                room: room,
+                location: location,
+                model: model,
+                mac_short: macShort,
+                ip_full: ip,
+                mac_full: mac
+            };
+        }
+        
+        function updateExportPreview() {
+            const grid = document.getElementById('export-columns-grid');
+            const cols = Array.from(grid.querySelectorAll('input:checked')).map(cb => cb.value);
+            const delimiter = document.getElementById('export-csv-delimiter').value || ';';
+            const devices = (UI.filteredDevices || []).slice(0, 5);
+            const container = document.getElementById('export-preview-table');
+            
+            if (cols.length === 0 || devices.length === 0) {
+                container.innerHTML = '<p style="padding: 8px; color: var(--text-secondary);">—</p>';
+                return;
+            }
+            
+            const rows = devices.map(d => buildExportRow(d));
+            
+            let html = '<table style="width: 100%; border-collapse: collapse; white-space: nowrap;">';
+            html += '<thead><tr>';
+            cols.forEach(c => {
+                html += `<th style="padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-weight: bold;">${c}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            rows.forEach(row => {
+                html += '<tr>';
+                cols.forEach(c => {
+                    const val = row[c] || '';
+                    html += `<td style="padding: 3px 8px; border-bottom: 1px solid var(--border-color); opacity: 0.85;">${val || '<span style="opacity:0.3">—</span>'}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            if (devices.length < (UI.filteredDevices || []).length) {
+                html += `<p style="padding: 4px 8px; font-size: 10px; color: var(--text-secondary);">… ${(UI.filteredDevices || []).length - devices.length} more</p>`;
+            }
+            container.innerHTML = html;
+        }
+        
         function openExportModal() {
             const filteredDevices = UI.filteredDevices || [];
             
@@ -5806,6 +7507,29 @@
             
             // Update count in modal
             document.getElementById('export-device-count').textContent = filteredDevices.length;
+            
+            // Render columns grid
+            const grid = document.getElementById('export-columns-grid');
+            grid.innerHTML = EXPORT_COLUMNS.map(col => `
+                <label>
+                    <input type="checkbox" value="${col}" ${DEFAULT_EXPORT_COLUMNS.includes(col) ? 'checked' : ''}>
+                    ${col}
+                </label>
+            `).join('');
+            
+            // Live preview on column change
+            grid.querySelectorAll('input').forEach(cb => cb.addEventListener('change', updateExportPreview));
+            
+            // Reset result area
+            document.getElementById('export-result').style.display = 'none';
+            const btn = document.getElementById('export-download-btn');
+            btn.disabled = false;
+            btn.textContent = '📥 Download CSV';
+            btn.onclick = exportLabelsCSV;
+            
+            // Initial preview
+            updateExportPreview();
+            
             document.getElementById('modal-export-labels').classList.add('active');
         }
         
@@ -5814,6 +7538,7 @@
         }
         
         document.getElementById('export-cancel-btn').addEventListener('click', closeExportModal);
+        document.getElementById('export-csv-delimiter').addEventListener('change', updateExportPreview);
         document.getElementById('export-download-btn').addEventListener('click', exportLabelsCSV);
         
         document.getElementById('modal-export-labels').addEventListener('click', (e) => {
@@ -5824,16 +7549,23 @@
             try {
                 const filteredDevices = UI.filteredDevices || [];
                 const macs = filteredDevices.map(d => d.id);
+                const delimiter = document.getElementById('export-csv-delimiter').value || ';';
+                const columns = Array.from(document.getElementById('export-columns-grid').querySelectorAll('input:checked')).map(cb => cb.value);
+                
+                if (columns.length === 0) {
+                    UI.showToast('Select at least one column', 'warning');
+                    return;
+                }
                 
                 const btn = document.getElementById('export-download-btn');
                 btn.disabled = true;
                 btn.textContent = 'Exportiere...';
                 
-                // POST the MAC list, receive CSV
+                // POST the MAC list, delimiter and columns, receive CSV
                 const response = await fetch('/api/devices/export/labels', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ macs })
+                    body: JSON.stringify({ macs, delimiter, columns })
                 });
                 
                 if (!response.ok) {
@@ -7031,17 +8763,15 @@
                         document.getElementById('setting-ota-mode').value = settings.stage3?.ota_mode || 'check_and_update';
                         document.getElementById('setting-ota-timeout').value = settings.stage3?.ota_timeout || 20;
                         
-                        // Export
-                        document.getElementById('setting-csv-delimiter').value = settings.report?.csv_delimiter || ';';
-                        buildingSettingsState.selectedColumns = settings.report?.default_columns || [];
-                        renderBuildingColumnsGrid();
+                        // System
+                        document.getElementById('setting-timezone').value = settings.system?.timezone || '';
+                        document.getElementById('setting-ntp-server').value = settings.system?.ntp_server || '';
+                        document.getElementById('setting-location-lat').value = settings.system?.latitude ?? '';
+                        document.getElementById('setting-location-lng').value = settings.system?.longitude ?? '';
                     }
                     
                     // Load model map - Pro only
                     await loadBuildingModelMap();
-                    
-                    // Load profiles list for advanced tab - Pro only
-                    await loadBuildingProfilesList();
                 }
                 
                 // Load building profile (both editions)
@@ -7055,38 +8785,8 @@
         
         // State for building settings dialog
         let buildingSettingsState = {
-            selectedColumns: [],
-            modelMap: [],
-            advancedFile: '',
-            advancedContent: '',
-            advancedOriginal: ''
+            modelMap: []
         };
-        
-        function renderBuildingColumnsGrid() {
-            const grid = document.getElementById('settings-columns-grid');
-            if (!grid) return;
-            
-            const AVAILABLE_COLUMNS = [
-                'id', 'ip', 'hostname', 'fw', 'model', 'hw_model', 
-                'friendly_name', 'room', 'location', 'assigned_at', 
-                'last_seen', 'stage3_friendly_status', 'stage3_ota_status', 'stage4_status_result'
-            ];
-            
-            const selected = buildingSettingsState.selectedColumns || [];
-            
-            grid.innerHTML = AVAILABLE_COLUMNS.map(col => `
-                <label>
-                    <input type="checkbox" value="${col}" ${selected.includes(col) ? 'checked' : ''}>
-                    ${col}
-                </label>
-            `).join('');
-        }
-        
-        function getBuildingSelectedColumns() {
-            const grid = document.getElementById('settings-columns-grid');
-            if (!grid) return [];
-            return Array.from(grid.querySelectorAll('input:checked')).map(cb => cb.value);
-        }
         
         async function loadBuildingModelMap() {
             try {
@@ -7150,22 +8850,6 @@
                 }
             } catch (error) {
                 console.error('Failed to load building profile:', error);
-            }
-        }
-        
-        async function loadBuildingProfilesList() {
-            try {
-                const response = await fetch('/api/admin/profiles');
-                const data = await response.json();
-                if (data.success) {
-                    const select = document.getElementById('advanced-file-select');
-                    if (select) {
-                        select.innerHTML = '<option value="">Select file...</option>' +
-                            data.files.map(f => `<option value="${f.path}">${f.name}</option>`).join('');
-                    }
-                }
-            } catch (error) {
-                console.error('Failed to load profiles list:', error);
             }
         }
         
@@ -7295,9 +8979,11 @@
                                 ota_mode: document.getElementById('setting-ota-mode').value,
                                 ota_timeout: parseInt(document.getElementById('setting-ota-timeout').value) || 20,
                             },
-                            report: {
-                                csv_delimiter: document.getElementById('setting-csv-delimiter').value,
-                                default_columns: getBuildingSelectedColumns(),
+                            system: {
+                                timezone: document.getElementById('setting-timezone').value,
+                                ntp_server: document.getElementById('setting-ntp-server').value.trim(),
+                                latitude: document.getElementById('setting-location-lat').value ? parseFloat(document.getElementById('setting-location-lat').value) : null,
+                                longitude: document.getElementById('setting-location-lng').value ? parseFloat(document.getElementById('setting-location-lng').value) : null,
                             }
                         }
                     };
@@ -9967,6 +11653,503 @@
                 UI.showToast(i18n.t('common.connection_error') || 'Connection error', 'error');
             }
         });
+    </script>
+
+    <!-- ============================================ -->
+    <!-- Diagnostics Feature                          -->
+    <!-- ============================================ -->
+    <script>
+    (function() {
+        // Track selected device for per-device diagnostics
+        let diagSelectedMac = null;
+        let diagSelectedIp = null;
+        let diagSelectedName = null;
+
+        document.addEventListener('deviceSelected', (e) => {
+            if (e.detail) {
+                diagSelectedMac = e.detail.mac;
+                diagSelectedIp = e.detail.ip;
+                const dev = e.detail.device || {};
+                diagSelectedName = dev.friendly_name || dev.room || e.detail.ip || e.detail.mac;
+                document.getElementById('btn-wifi-scan').disabled = false;
+            }
+        });
+        document.addEventListener('deviceDeselected', () => {
+            diagSelectedMac = null;
+            diagSelectedIp = null;
+            diagSelectedName = null;
+            document.getElementById('btn-wifi-scan').disabled = true;
+        });
+
+        // ----- Modal helpers -----
+        function openModal(id)  { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        window.closeHealthCheckModal  = () => closeModal('modal-health-check');
+        window.closeWifiScanModal     = () => closeModal('modal-wifi-scan');
+
+        // Close modals on overlay click
+        ['modal-health-check', 'modal-wifi-scan'].forEach(id => {
+            document.getElementById(id).addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) closeModal(id);
+            });
+        });
+
+        // ----- RSSI helpers -----
+        function rssiPercent(rssi) {
+            // Convert RSSI (-30 best, -90 worst) to 0-100%
+            if (rssi == null) return 0;
+            return Math.max(0, Math.min(100, (rssi + 90) * (100 / 60)));
+        }
+
+        function rssiColor(rssi) {
+            if (rssi == null) return '#666';
+            if (rssi >= -50) return '#4caf50';
+            if (rssi >= -65) return '#8bc34a';
+            if (rssi >= -75) return '#ffc107';
+            return '#ff5252';
+        }
+
+        function rssiClass(rssi) {
+            if (rssi == null) return '';
+            if (rssi >= -70) return 'good';
+            if (rssi >= -80) return 'warn';
+            return 'bad';
+        }
+
+        function formatUptime(seconds) {
+            if (!seconds) return '—';
+            const d = Math.floor(seconds / 86400);
+            const h = Math.floor((seconds % 86400) / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            if (d > 0) return `${d}d ${h}h`;
+            if (h > 0) return `${h}h ${m}m`;
+            return `${m}m`;
+        }
+
+        /**
+         * Classify device severity into 4 levels:
+         *   ok       — all healthy
+         *   warning  — weak WiFi (-65…-80), warm (50-70°C), RAM 75-90%
+         *   critical — very weak WiFi (<-80), hot (>70°C), RAM >90%
+         *   offline  — handled separately by caller
+         */
+        function deviceSeverity(d) {
+            let worst = 'ok';
+            const escalate = (lvl) => {
+                if (lvl === 'critical') worst = 'critical';
+                else if (lvl === 'warning' && worst !== 'critical') worst = 'warning';
+            };
+
+            // WiFi RSSI
+            if (d.wifi_rssi != null) {
+                if (d.wifi_rssi < -80) escalate('critical');
+                else if (d.wifi_rssi < -70) escalate('warning');
+            }
+
+            // Temperature
+            if (d.temp_c != null) {
+                if (d.temp_c > 85) escalate('critical');
+                else if (d.temp_c > 70) escalate('warning');
+            }
+
+            // RAM usage
+            if (d.ram_size > 0) {
+                const pct = (d.ram_size - d.ram_free) / d.ram_size * 100;
+                if (pct > 95) escalate('critical');
+                else if (pct > 80) escalate('warning');
+            }
+
+            return worst;
+        }
+
+        // ========================================================
+        // Health Check (Pro only)
+        // ========================================================
+        document.getElementById('btn-health-check').addEventListener('click', async () => {
+            openModal('modal-health-check');
+            const resultsEl = document.getElementById('health-results');
+            const summaryEl = document.getElementById('health-summary');
+            resultsEl.innerHTML = `<div class="loading-message"><div class="spinner"></div> ${i18n.t('diagnostics.scanning') || 'Scanning devices...'}</div>`;
+            summaryEl.innerHTML = '';
+
+            try {
+                const data = await API.healthCheck();
+                if (!data.success) {
+                    resultsEl.innerHTML = `<p class="error-message">${data.error || 'Error'}</p>`;
+                    return;
+                }
+
+                const s = data.summary;
+
+                // Classify each device for summary
+                let countOk = 0, countWarning = 0, countCritical = 0;
+                for (const d of data.results) {
+                    if (d.offline) continue;
+                    const sev = deviceSeverity(d);
+                    if (sev === 'critical') countCritical++;
+                    else if (sev === 'warning') countWarning++;
+                    else countOk++;
+                }
+
+                // Summary bar
+                summaryEl.innerHTML = `
+                    <div class="audit-stats">
+                        <div class="audit-stat ok">✅ ${i18n.t('diagnostics.healthy') || 'Healthy'}: ${countOk}</div>
+                        ${countWarning > 0 ? `<div class="audit-stat warning">⚠️ ${i18n.t('diagnostics.warnings') || 'Warnings'}: ${countWarning}</div>` : ''}
+                        ${countCritical > 0 ? `<div class="audit-stat offline">🔴 ${i18n.t('diagnostics.critical') || 'Critical'}: ${countCritical}</div>` : ''}
+                        ${s.offline > 0 ? `<div class="audit-stat offline">❌ ${i18n.t('diagnostics.offline_count') || 'Offline'}: ${s.offline}</div>` : ''}
+                        ${s.updates_available > 0 ? `<div class="audit-stat unknown">⬆️ ${i18n.t('diagnostics.updates') || 'Updates'}: ${s.updates_available}</div>` : ''}
+                    </div>`;
+
+                // Device rows
+                if (data.results.length === 0) {
+                    resultsEl.innerHTML = `<p>${i18n.t('diagnostics.no_devices') || 'No devices found'}</p>`;
+                    return;
+                }
+
+                let html = '';
+                for (const d of data.results) {
+                    const status = d.offline ? 'offline' : deviceSeverity(d);
+                    const icons = {ok: '✅', warning: '⚠️', critical: '🔴', offline: '❌'};
+                    const icon = icons[status] || '✅';
+
+                    html += `<div class="health-device ${status}">
+                        <div class="health-device-header">
+                            <div class="health-device-info">
+                                <span>${icon}</span>
+                                <span class="health-device-name">${d.name || d.mac}</span>
+                                <span class="health-device-ip">${d.ip || '—'}</span>
+                            </div>
+                            <span style="font-size:0.8rem;color:var(--text-secondary)">${d.model || ''}</span>
+                        </div>`;
+
+                    if (!d.offline) {
+                        html += `<div class="health-metrics">`;
+
+                        // WiFi RSSI
+                        if (d.wifi_rssi != null) {
+                            const rc = rssiClass(d.wifi_rssi);
+                            const pct = rssiPercent(d.wifi_rssi);
+                            const col = rssiColor(d.wifi_rssi);
+                            html += `<span class="health-metric ${rc}">📶 ${d.wifi_rssi} dBm
+                                <span class="rssi-bar"><span class="rssi-bar-fill" style="width:${pct}%;background:${col}"></span></span></span>`;
+                        }
+
+                        // Temperature
+                        if (d.temp_c != null) {
+                            const tc = d.temp_c > 85 ? 'bad' : (d.temp_c > 70 ? 'warn' : '');
+                            html += `<span class="health-metric ${tc}">🌡️ ${d.temp_c.toFixed(1)}°C</span>`;
+                        }
+
+                        // Uptime
+                        html += `<span class="health-metric">⏱️ ${formatUptime(d.uptime)}</span>`;
+
+                        // RAM
+                        if (d.ram_size > 0) {
+                            const ramPct = ((d.ram_size - d.ram_free) / d.ram_size * 100).toFixed(0);
+                            const ramCls = ramPct > 95 ? 'bad' : (ramPct > 80 ? 'warn' : '');
+                            html += `<span class="health-metric ${ramCls}">💾 RAM ${ramPct}%</span>`;
+                        }
+
+                        // ECO mode
+                        if (d.eco_mode) {
+                            html += `<span class="health-metric good">🌿 ECO</span>`;
+                        }
+
+                        // Ethernet
+                        if (d.eth_ip) {
+                            html += `<span class="health-metric">🔌 ETH ${d.eth_ip}</span>`;
+                        }
+
+                        // Update available
+                        if (d.available_updates && d.available_updates.stable) {
+                            html += `<span class="health-metric warn">⬆️ ${i18n.t('diagnostics.update_available') || 'Update'}</span>`;
+                        }
+
+                        html += `</div>`;
+                    } else {
+                        html += `<div class="health-metrics"><span class="health-metric bad">${d.error || 'Unreachable'}</span></div>`;
+                    }
+
+                    html += `</div>`;
+                }
+                resultsEl.innerHTML = html;
+
+            } catch (error) {
+                resultsEl.innerHTML = `<p class="error-message">${error.message || 'Connection error'}</p>`;
+            }
+        });
+
+        // ========================================================
+        // WiFi Scan (per device)
+        // ========================================================
+        document.getElementById('btn-wifi-scan').addEventListener('click', async () => {
+            if (!diagSelectedMac) {
+                UI.showToast(i18n.t('diagnostics.select_device') || 'Select a device first', 'warning');
+                return;
+            }
+
+            openModal('modal-wifi-scan');
+            const resultsEl = document.getElementById('wifi-scan-results');
+            const subtitleEl = document.getElementById('wifi-scan-subtitle');
+            subtitleEl.textContent = diagSelectedName || diagSelectedIp;
+            resultsEl.innerHTML = `<div class="loading-message"><div class="spinner"></div> ${i18n.t('diagnostics.wifi_scanning') || 'Scanning WiFi networks...'}</div>`;
+
+            try {
+                const data = await API.wifiScan(diagSelectedMac);
+                if (!data.success) {
+                    resultsEl.innerHTML = `<p class="error-message">${data.error || 'Error'}</p>`;
+                    return;
+                }
+
+                if (!data.networks || data.networks.length === 0) {
+                    resultsEl.innerHTML = `<p>${i18n.t('diagnostics.no_networks') || 'No networks found'}</p>`;
+                    return;
+                }
+
+                let html = '';
+                for (const net of data.networks) {
+                    const ssid = net.ssid || '(hidden)';
+                    const rssi = net.rssi || -100;
+                    const ch = net.channel || '?';
+                    const auth = net.auth !== undefined ? net.auth : '';
+                    const pct = rssiPercent(rssi);
+                    const col = rssiColor(rssi);
+                    const isConnected = ssid === data.connected_ssid;
+
+                    html += `<div class="wifi-network-row ${isConnected ? 'connected' : ''}">
+                        <div>
+                            <span class="wifi-ssid">${isConnected ? '✅ ' : ''}${ssid}</span>
+                        </div>
+                        <div class="wifi-details">
+                            <span>Ch ${ch}</span>
+                            <span>${rssi} dBm</span>
+                            <span class="rssi-bar"><span class="rssi-bar-fill" style="width:${pct}%;background:${col}"></span></span>
+                        </div>
+                    </div>`;
+                }
+                resultsEl.innerHTML = html;
+
+            } catch (error) {
+                resultsEl.innerHTML = `<p class="error-message">${error.message || 'Connection error'}</p>`;
+            }
+        });
+
+    })();
+    </script>
+
+    <!-- ============================================ -->
+    <!-- Pro Ethernet Feature                         -->
+    <!-- ============================================ -->
+    <script>
+    (function() {
+        let ethCandidates = [];
+        let ethRevertCandidates = [];
+
+        function openModal(id)  { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        window.closeProEthernetModal = () => closeModal('modal-pro-ethernet');
+
+        document.getElementById('modal-pro-ethernet').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeModal('modal-pro-ethernet');
+        });
+
+        // ----- Scan -----
+        document.getElementById('btn-pro-ethernet').addEventListener('click', async () => {
+            openModal('modal-pro-ethernet');
+            const bodyEl = document.getElementById('pro-ethernet-body');
+            const switchBtn = document.getElementById('btn-start-eth-switch');
+            const revertBtn = document.getElementById('btn-start-eth-revert');
+            switchBtn.style.display = 'none';
+            revertBtn.style.display = 'none';
+            ethCandidates = [];
+            ethRevertCandidates = [];
+
+            bodyEl.innerHTML = `<div class="loading-message"><div class="spinner"></div> ${i18n.t('pro_ethernet.scanning') || 'Checking Ethernet status on all devices...'}</div>`;
+
+            try {
+                const data = await API.proEthernetScan();
+                if (!data.success) {
+                    bodyEl.innerHTML = `<p class="error-message">${data.error || 'Error'}</p>`;
+                    return;
+                }
+
+                if (!data.devices || data.devices.length === 0) {
+                    bodyEl.innerHTML = `<p style="padding:1rem;color:var(--text-secondary)">${i18n.t('pro_ethernet.no_devices') || 'No devices with Ethernet cable found.'}</p>`;
+                    return;
+                }
+
+                // Separate: already switched vs. candidates
+                const already = data.devices.filter(d => d.already_ethernet);
+                const switchable = data.devices.filter(d => !d.already_ethernet);
+                ethCandidates = switchable;
+                ethRevertCandidates = already;
+
+                let html = '';
+
+                // Show already-on-ethernet devices with revert checkboxes
+                if (already.length > 0) {
+                    html += `<div style="padding:0.5rem 1rem;margin-bottom:0.5rem">
+                        <small style="color:var(--accent-success, #4caf50)">🔌 ${i18n.t('pro_ethernet.already_ethernet') || 'Already on Ethernet:'}</small>
+                    </div>`;
+                    for (const d of already) {
+                        html += `<div class="health-device ok" style="cursor:pointer" onclick="this.querySelector('input').click()">
+                            <div class="health-device-header">
+                                <div class="health-device-info">
+                                    <input type="checkbox" class="eth-revert-cb" data-mac="${d.mac}"
+                                        onclick="event.stopPropagation(); updateEthButtons()">
+                                    <span class="health-device-name">${d.name || d.mac}</span>
+                                    <span class="health-device-ip">${d.ip}</span>
+                                </div>
+                                <span style="font-size:0.8rem;color:var(--text-secondary)">${d.model || ''}</span>
+                            </div>
+                        </div>`;
+                    }
+                }
+
+                // Show switchable candidates with checkboxes
+                if (switchable.length > 0) {
+                    html += `<div style="padding:0.5rem 1rem;margin-bottom:0.5rem">
+                        <small style="color:var(--accent-primary)">${switchable.length} ${i18n.t('pro_ethernet.candidates') || 'device(s) can be switched to Ethernet:'}</small>
+                    </div>`;
+                    for (const d of switchable) {
+                        html += `<div class="health-device warning" style="cursor:pointer" onclick="this.querySelector('input').click()">
+                            <div class="health-device-header">
+                                <div class="health-device-info">
+                                    <input type="checkbox" class="eth-candidate-cb" data-mac="${d.mac}" checked
+                                        onclick="event.stopPropagation(); updateEthButtons()">
+                                    <span class="health-device-name">${d.name || d.mac}</span>
+                                    <span class="health-device-ip">${d.ip}</span>
+                                </div>
+                                <span style="font-size:0.8rem;color:var(--text-secondary)">${d.model || ''}</span>
+                            </div>
+                        </div>`;
+                    }
+
+                    switchBtn.style.display = '';
+                }
+
+                html += `<div style="padding:0.75rem 1rem;font-size:0.85rem;color:var(--text-secondary)">
+                    ℹ️ ${i18n.t('pro_ethernet.info') || 'IP stays the same. WiFi will be disabled. 2 reboots per device (~30 sec).'}
+                </div>`;
+
+                bodyEl.innerHTML = html;
+
+            } catch (error) {
+                bodyEl.innerHTML = `<p class="error-message">${error.message || 'Connection error'}</p>`;
+            }
+        });
+
+        window.updateEthButtons = function() {
+            const switchChecked = document.querySelectorAll('.eth-candidate-cb:checked');
+            const revertChecked = document.querySelectorAll('.eth-revert-cb:checked');
+            const switchBtn = document.getElementById('btn-start-eth-switch');
+            const revertBtn = document.getElementById('btn-start-eth-revert');
+
+            switchBtn.style.display = switchChecked.length > 0 ? '' : 'none';
+            switchBtn.disabled = switchChecked.length === 0;
+            revertBtn.style.display = revertChecked.length > 0 ? '' : 'none';
+            revertBtn.disabled = revertChecked.length === 0;
+        };
+        // Keep backward compat
+        window.updateEthSwitchBtn = window.updateEthButtons;
+
+        // ----- Helper: run switch/revert with progress UI -----
+        async function runEthAction(macs, allDevices, apiFn, actionLabel, doneLabel) {
+            const bodyEl = document.getElementById('pro-ethernet-body');
+            const switchBtn = document.getElementById('btn-start-eth-switch');
+            const revertBtn = document.getElementById('btn-start-eth-revert');
+            switchBtn.style.display = 'none';
+            revertBtn.style.display = 'none';
+
+            let html = `<div style="padding:0.5rem 1rem">
+                <p style="margin-bottom:0.75rem"><strong>${actionLabel}</strong></p>`;
+            for (const mac of macs) {
+                const dev = allDevices.find(d => d.mac === mac) || {};
+                html += `<div class="health-device" id="eth-prog-${mac}" style="border-left-color:var(--accent-primary)">
+                    <div class="health-device-header">
+                        <div class="health-device-info">
+                            <span id="eth-icon-${mac}">⏳</span>
+                            <span class="health-device-name">${dev.name || mac}</span>
+                            <span class="health-device-ip">${dev.ip || ''}</span>
+                        </div>
+                        <span id="eth-phase-${mac}" style="font-size:0.8rem;color:var(--text-secondary)">${i18n.t('pro_ethernet.waiting') || 'Waiting...'}</span>
+                    </div>
+                </div>`;
+            }
+            html += `</div>`;
+            bodyEl.innerHTML = html;
+
+            try {
+                const data = await apiFn(macs);
+
+                if (data.success && data.results) {
+                    for (const r of data.results) {
+                        const iconEl = document.getElementById(`eth-icon-${r.mac}`);
+                        const phaseEl = document.getElementById(`eth-phase-${r.mac}`);
+                        const rowEl = document.getElementById(`eth-prog-${r.mac}`);
+
+                        if (r.status === 'ok') {
+                            if (iconEl) iconEl.textContent = '✅';
+                            if (phaseEl) phaseEl.textContent = doneLabel;
+                            if (rowEl) rowEl.style.borderLeftColor = 'var(--accent-success, #4caf50)';
+                        } else {
+                            if (iconEl) iconEl.textContent = '❌';
+                            if (phaseEl) phaseEl.textContent = r.error || r.phase || 'Error';
+                            if (rowEl) rowEl.style.borderLeftColor = 'var(--accent-danger, #ff5252)';
+                        }
+                    }
+
+                    const ok = data.switched || data.reverted || 0;
+                    const fail = data.failed || 0;
+                    UI.showToast(
+                        `${ok} ${doneLabel}` + (fail > 0 ? `, ${fail} ${i18n.t('pro_ethernet.failed_count') || 'failed'}` : ''),
+                        fail > 0 ? 'warning' : 'success'
+                    );
+                } else {
+                    UI.showToast(data.error || 'Error', 'error');
+                }
+            } catch (error) {
+                UI.showToast(error.message || 'Connection error', 'error');
+            }
+        }
+
+        // ----- Switch to Ethernet -----
+        window.startEthernetSwitch = async function() {
+            const macs = Array.from(document.querySelectorAll('.eth-candidate-cb:checked')).map(cb => cb.dataset.mac);
+            if (macs.length === 0) return;
+
+            const confirmMsg = i18n.t('pro_ethernet.confirm') ||
+                `Switch ${macs.length} device(s) to Ethernet? This will disable WiFi and reboot each device twice.`;
+            if (!confirm(confirmMsg)) return;
+
+            await runEthAction(
+                macs, ethCandidates,
+                (m) => API.proEthernetSwitch(m),
+                i18n.t('pro_ethernet.switching') || 'Switching to Ethernet...',
+                i18n.t('pro_ethernet.switched') || 'switched'
+            );
+        };
+
+        // ----- Revert to WiFi -----
+        window.startEthernetRevert = async function() {
+            const macs = Array.from(document.querySelectorAll('.eth-revert-cb:checked')).map(cb => cb.dataset.mac);
+            if (macs.length === 0) return;
+
+            const confirmMsg = i18n.t('pro_ethernet.confirm_revert') ||
+                `Switch ${macs.length} device(s) back to WiFi? Ethernet will be set to DHCP.`;
+            if (!confirm(confirmMsg)) return;
+
+            await runEthAction(
+                macs, ethRevertCandidates,
+                (m) => API.proEthernetRevert(m),
+                i18n.t('pro_ethernet.reverting') || 'Switching back to WiFi...',
+                i18n.t('pro_ethernet.reverted') || 'reverted to WiFi'
+            );
+        };
+    })();
     </script>
 
     <!-- Resize Handle for Right Panel -->

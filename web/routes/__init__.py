@@ -31,6 +31,10 @@ def register_blueprints(app: Flask):
     app.register_blueprint(updates.bp)
     app.register_blueprint(schedules.bp)
     
+    # Diagnostics routes (both editions, health-check gated internally)
+    from web.routes import diagnostics
+    app.register_blueprint(diagnostics.bp)
+    
     # Admin routes (both editions - PIN, auth, settings)
     from web.routes.pro import admin
     app.register_blueprint(admin.bp)

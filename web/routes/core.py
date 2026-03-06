@@ -9,7 +9,7 @@ Basic routes available in both Personal and Pro editions:
 - Hardware info
 """
 
-from flask import Blueprint, render_template, jsonify, request
+from flask import Blueprint, render_template, jsonify, request, send_file, abort
 from pathlib import Path
 
 from web.config import get_version, VERSION
@@ -34,19 +34,25 @@ def index():
 
 @bp.route('/manual')
 def manual():
-    """Serve the user manual page in the requested language."""
+    """Serve the user manual PDF in the requested language."""
     lang = request.args.get('lang', 'en')
     
     supported_langs = ['en', 'de', 'fr', 'it', 'nl']
     if lang not in supported_langs:
         lang = 'en'
     
-    manual_template = f'manual_{lang}.html'
-    template_path = Path(__file__).parent.parent / 'templates' / manual_template
-    if not template_path.exists():
-        manual_template = 'manual.html'
+    # PDF path: /home/coredev/stagebox/web/static/docs/manual/stagebox-manual-xx.pdf
+    docs_dir = Path(__file__).parent.parent / 'static' / 'docs' / 'manual'
+    pdf_path = docs_dir / f'stagebox-manual-{lang}.pdf'
     
-    return render_template(manual_template)
+    # Fallback to English
+    if not pdf_path.exists() and lang != 'en':
+        pdf_path = docs_dir / 'stagebox-manual-en.pdf'
+    
+    if not pdf_path.exists():
+        abort(404)
+    
+    return send_file(pdf_path, mimetype='application/pdf')
 
 
 @bp.route('/api/system/version', methods=['GET'])

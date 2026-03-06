@@ -1,6 +1,6 @@
 # Stagebox Web-UI Benutzerhandbuch
 
-> *Dieses Handbuch entspricht der Stagebox Pro Version 1.2.0*
+> *Dieses Handbuch entspricht der Stagebox Pro Version 1.1.0*
 
 ## Teil 1: Erste Schritte
 
@@ -320,7 +320,7 @@ Die Gebäudeseite ist der Hauptarbeitsbereich für die Provisionierung und Verwa
 <img src="screenshots/30-building-page-overview.png" width="500" alt="Building Page Overview">
 
 #### Layout:
-- **Linke Seitenleiste:** Provisionierungsstufen, Filter, Aktionen, Einstellungen, Diagnose, Audit
+- **Linke Seitenleiste:** Provisionierungsstufen, Filter, Aktionen, Einstellungen
 - **Mittlerer Bereich:** Geräteliste
 - **Rechte Seitenleiste:** Stage-Panels oder Gerätedetails, Script-, KVS-, Webhook-, Zeitplan- und OTA-Tabs
 
@@ -483,17 +483,6 @@ Grundlegende Geräteinformationen:
 | Firmware | Aktuelle Version |
 
 <img src="screenshots/50-device-info-tab.png" width="300" alt="Device Info Tab">
-
-##### Kalibrierung (Cover / Dimmer)
-
-Bei unterstützten Geräten zeigt der Geräteinfo-Tab zusätzlich einen Kalibrierungsbereich:
-
-- **Cover-Kalibrierung**: Startet die Motorkalibrierung auf dem ausgewählten Rollladengerät. Das Gerät fährt einmal vollständig auf und zu, um die Endpositionen zu ermitteln.
-- **Dimmer-Kalibrierung**: Startet die Kalibrierung auf dem ausgewählten Dimmer-Gerät, um die korrekte Ansteuerung der angeschlossenen Leuchtmittel sicherzustellen.
-
-<img src="screenshots/57-cover-dimmer-calibration.png" width="300" alt="Cover / Dimmer Calibration">
-
-> **Hinweis:** Kalibrierungsbereiche werden nur angezeigt, wenn das ausgewählte Gerät die entsprechende Komponente besitzt (Cover bzw. Light/Dimmer).
 
 <div style="page-break-before: always;"></div>
 
@@ -667,80 +656,21 @@ Gemeinsame Skripte für die Bereitstellung verwalten:
 
 <div style="page-break-before: always;"></div>
 
-### 2.7 Gebäudeeinstellungen
+### 2.7 Experteneinstellungen (Erweitert)
 
-Zugriff über **Einstellungen**-Bereich → **⚙️ Gebäudeeinstellungen** in der Seitenleiste der Gebäudeseite.
+> ⚠️ **Warnung:** Die Experteneinstellungen ermöglichen die direkte Konfiguration des Provisionierungsverhaltens und der Systemparameter. Falsche Änderungen können die Geräte-Provisionierung beeinträchtigen. Mit Vorsicht verwenden!
 
-Der Dialog Gebäudeeinstellungen bietet eine Tab-basierte Oberfläche zur Konfiguration aller gebäudespezifischen Optionen.
+Zugriff über **Experten**-Bereich → **⚙️ Gebäudeeinstellungen** in der Seitenleiste der Gebäudeseite.
 
-**Tabs:** Objekt → Flags → Eingangstyp → Stage 1 Optionen → Stage 3 Optionen → Model Map → System
+Der Dialog Gebäudeeinstellungen bietet eine Tab-basierte Oberfläche zur Konfiguration erweiterter Optionen.
 
 ---
 
-#### 2.7.1 Objekt-Tab
-
-Projekt- und kundenspezifische Informationen für dieses Gebäude. Diese Daten erscheinen in den generierten Berichten.
-
-**Verfügbare Felder:**
-
-| Feld | Beschreibung |
-|------|-------------|
-| Objektname | Projekt- oder Liegenschaftsname (z.B. «Villa Müller») |
-| Kundenname | Name des Kunden |
-| Adresse | Liegenschaftsadresse (mehrzeilig möglich) |
-| Kontakttelefon | Telefonnummer des Kunden |
-| Kontakt-E-Mail | E-Mail-Adresse des Kunden |
-| Notizen | Zusätzliche Anmerkungen (erscheinen in Berichten) |
-
-> **Hinweis:** Der Objektname wird als Berichtstitel verwendet. Wenn nicht gesetzt, wird stattdessen der Gebäudename verwendet.
-
-<img src="screenshots/91-building-profile-tab.png" width="450" alt="Building Profile Tab">
-
-<div style="page-break-before: always;"></div>
-
-#### 2.7.2 Flags-Tab
-
-Geräte-Flags für alle Geräte im Gebäude gleichzeitig konfigurieren.
-
-<img src="screenshots/75-settings-flags-tab.png" width="450" alt="Flags Tab">
-
-**Verfügbare Flags:**
-
-| Flag | Beschreibung |
-|------|-------------|
-| **ECO Mode** | Energiesparmodus aktivieren/deaktivieren |
-| **BLE** | Bluetooth Low Energy aktivieren/deaktivieren |
-| **AP Mode** | Access-Point-Modus aktivieren/deaktivieren |
-
-**Verwendung:**
-
-1. Wählen Sie die gewünschten Geräte über die Checkboxen aus
-2. Setzen oder entfernen Sie die gewünschten Flags
-3. Klicken Sie auf **Anwenden**, um die Einstellungen auf die ausgewählten Geräte zu übertragen
-
-<div style="page-break-before: always;"></div>
-
-#### 2.7.3 Eingangstyp-Tab
-
-Eingangstypen für alle Geräteeingänge im Gebäude gleichzeitig konfigurieren.
-
-<img src="screenshots/76-settings-input-type-tab.png" width="450" alt="Input Type Tab">
-
-Jeder physische Eingang eines Shelly-Geräts kann als **Button** (Taster) oder **Switch** (Schalter) konfiguriert werden. Geräte mit mehreren Eingängen (z.B. I4 mit 4 Eingängen) werden vollständig unterstützt.
-
-**Verwendung:**
-
-1. Wählen Sie die gewünschten Geräte über die Checkboxen aus
-2. Wählen Sie den gewünschten Eingangstyp: **Button** oder **Switch**
-3. Klicken Sie auf **Anwenden**, um die Einstellung auf alle Eingänge der ausgewählten Geräte zu übertragen
-
-<div style="page-break-before: always;"></div>
-
-#### 2.7.4 Stage 1 Optionen
+#### 2.7.1 Provisionierungs-Tab
 
 Steuert das Verhalten der Stage 1 (AP-Modus) Provisionierung.
 
-<img src="screenshots/70-expert-provisioning-tab.png" width="450" alt="Stage 1 Options Tab">
+<img src="screenshots/70-expert-provisioning-tab.png" width="450" alt="Expert Provisioning Tab">
 
 | Einstellung | Beschreibung | Standard |
 |-------------|-------------|----------|
@@ -752,11 +682,11 @@ Steuert das Verhalten der Stage 1 (AP-Modus) Provisionierung.
 
 ---
 
-#### 2.7.5 Stage 3 Optionen
+#### 2.7.2 OTA & Namen-Tab
 
 Firmware-Update-Verhalten und Anzeigenamen-Behandlung während Stage 3 konfigurieren.
 
-<img src="screenshots/71-expert-ota-tab.png" width="450" alt="Stage 3 Options Tab">
+<img src="screenshots/71-expert-ota-tab.png" width="450" alt="Expert OTA & Names Tab">
 
 **Firmware-Updates (OTA):**
 
@@ -775,7 +705,43 @@ Firmware-Update-Verhalten und Anzeigenamen-Behandlung während Stage 3 konfiguri
 
 <div style="page-break-before: always;"></div>
 
-#### 2.7.6 Modell-Map-Tab
+#### 2.7.3 Export-Tab
+
+CSV-Exporteinstellungen für Gerätelabels und Berichte konfigurieren.
+
+<img src="screenshots/72-expert-export-tab.png" width="450" alt="Expert Export Tab">
+
+**CSV-Trennzeichen:**
+
+Wählen Sie das Spaltentrennzeichen für exportierte CSV-Dateien:
+- **Semikolon (;)** — Standard, funktioniert mit europäischen Excel-Versionen
+- **Komma (,)** — Standard-CSV-Format
+- **Tab** — Für tabulatorgetrennte Werte
+
+**Standardspalten:**
+
+Wählen Sie, welche Spalten in exportierten CSV-Dateien erscheinen. Verfügbare Spalten:
+
+| Spalte | Beschreibung |
+|--------|-------------|
+| `id` | Geräte-MAC-Adresse (eindeutiger Bezeichner) |
+| `ip` | Aktuelle IP-Adresse |
+| `hostname` | Geräte-Hostname |
+| `fw` | Firmware-Version |
+| `model` | Anzeige-Modellname |
+| `hw_model` | Hardware-Modell-ID |
+| `friendly_name` | Zugewiesener Gerätename |
+| `room` | Raumzuweisung |
+| `location` | Standort innerhalb des Raums |
+| `assigned_at` | Zeitpunkt der Provisionierung |
+| `last_seen` | Letzter Kommunikationszeitpunkt |
+| `stage3_friendly_status` | Namenzuweisungsstatus |
+| `stage3_ota_status` | Firmware-Update-Status |
+| `stage4_status_result` | Ergebnis der Konfigurationsstufe |
+
+<div style="page-break-before: always;"></div>
+
+#### 2.7.4 Modell-Map-Tab
 
 Benutzerdefinierte Anzeigenamen für Shelly-Hardware-Modell-IDs definieren.
 
@@ -793,110 +759,36 @@ Die Modell-Map übersetzt interne Hardware-Bezeichner (z.B. `SNSW-001X16EU`) in 
 
 <div style="page-break-before: always;"></div>
 
-#### 2.7.7 System-Tab
+#### 2.7.5 Erweitert-Tab (YAML-Editor)
 
-Systemweite Einstellungen pro Gebäude konfigurieren.
+Direkte Bearbeitung von Konfigurationsdateien für erweiterte Szenarien.
 
-<img src="screenshots/77-settings-system-tab.png" width="450" alt="System Tab">
+<img src="screenshots/74-expert-advanced-tab.png" width="450" alt="Expert Advanced Tab">
 
-| Einstellung | Beschreibung |
-|-------------|-------------|
-| **Zeitzone** | Zeitzone für Zeitpläne und zeitgesteuerte Aktionen |
-| **NTP-Server** | Server für die Zeitsynchronisation der Geräte |
-| **GPS-Koordinaten** | Breitengrad und Längengrad des Gebäudestandorts, benötigt für Sonnenauf-/Sonnenuntergangsberechnungen in Zeitplänen |
+**Verfügbare Dateien:**
 
-**Schweizer Standardwerte:** Klicken Sie auf die Schaltfläche **Schweizer Standardwerte**, um Zeitzone (`Europe/Zurich`), NTP-Server und einen zentralen Schweizer Standort automatisch einzutragen.
+| Datei | Beschreibung |
+|-------|-------------|
+| `config.yaml` | Haupt-Gebäudekonfiguration (IP-Bereiche, Gerätedatenbank, Provisionierungseinstellungen) |
+| `profiles/*.yaml` | Geräte-Konfigurationsprofile für Stage 4 |
 
-**Auf Geräte anwenden:** Klicken Sie auf **Auf Geräte anwenden**, um die Einstellungen per `Sys.SetConfig` auf alle Geräte im Gebäude zu übertragen.
+**Funktionen:**
+- Syntaxvalidierung (grüner/roter Indikator)
+- Datei aus Dropdown auswählen
+- Inhalt direkt bearbeiten
+- Alle Änderungen werden vor dem Speichern automatisch gesichert
 
-<div style="page-break-before: always;"></div>
+**Validierungsindikator:**
+- 🟢 Grün: Gültige YAML-Syntax
+- 🔴 Rot: Syntaxfehler (Details beim Hovern)
 
-### 2.8 Pro Ethernet
-
-Shelly Pro-Geräte zwischen WLAN und Ethernet umschalten — in beide Richtungen.
-
-Zugriff über **Einstellungen**-Bereich → **🔌 Pro Ethernet** in der Seitenleiste der Gebäudeseite.
-
-<img src="screenshots/78-pro-ethernet-modal.png" width="450" alt="Pro Ethernet Modal">
-
-**Funktionsweise:**
-
-- Erkennt automatisch Pro-Geräte, die bereits auf Ethernet sind
-- IP-Adresse bleibt beim Umschalten unverändert
-- Beim Wechsel auf Ethernet wird WLAN deaktiviert (und umgekehrt)
-- 2 Neustarts pro Gerät erforderlich (~30 Sekunden)
-
-**Verwendung:**
-
-1. Klicken Sie auf **🔌 Pro Ethernet**
-2. Wählen Sie die gewünschte Richtung (WLAN → Ethernet oder Ethernet → WLAN)
-3. Wählen Sie die Geräte aus
-4. Klicken Sie auf **Umschalten**
-
-> **Hinweis:** Nur Shelly Pro-Geräte (z.B. Pro4PM, Pro2PM) unterstützen Ethernet. Andere Geräte werden nicht angezeigt.
+> **Empfehlung:** Verwenden Sie die anderen Tabs für die normale Konfiguration. Nutzen Sie den YAML-Editor nur, wenn Sie Einstellungen ändern müssen, die nicht in der UI verfügbar sind, oder zur Fehlerbehebung.
 
 <div style="page-break-before: always;"></div>
 
-### 2.9 Diagnose
+### 2.8 Systemwartung
 
-Der Diagnose-Bereich in der Seitenleiste bietet Werkzeuge zur Fehlersuche und Statusüberwachung.
-
-#### 2.9.1 Health Check
-
-Der Health Check fragt alle Geräte im Gebäude ab und zeigt eine detaillierte Statusübersicht.
-
-<img src="screenshots/79-health-check-modal.png" width="450" alt="Health Check Modal">
-
-**Zusammenfassung:**
-
-Oben werden drei Statusbadges angezeigt:
-- ✅ **Gesund**: Geräte ohne Auffälligkeiten
-- ⚠️ **Warnungen**: Geräte mit Auffälligkeiten (z.B. schwaches WLAN-Signal, hohe Temperatur)
-- ⬆️ **Updates**: Geräte mit verfügbaren Firmware-Updates
-
-**Pro Gerät werden angezeigt:**
-
-| Information | Beschreibung |
-|-------------|-------------|
-| WLAN-Signal | Signalstärke in dBm mit grafischem Indikator |
-| CPU-Temperatur | Aktuelle Prozessortemperatur |
-| Uptime | Laufzeit seit dem letzten Neustart |
-| RAM | Speicherauslastung in Prozent |
-| Update-Hinweis | Falls eine neuere Firmware verfügbar ist |
-
-Geräte mit Warnungen werden farblich hervorgehoben.
-
-<div style="page-break-before: always;"></div>
-
-#### 2.9.2 WLAN Scan
-
-Der WLAN Scan zeigt die verfügbaren WLAN-Netzwerke aus der Perspektive eines ausgewählten Geräts.
-
-<img src="screenshots/79a-wlan-scan-modal.png" width="450" alt="WLAN Scan Modal">
-
-**Verwendung:**
-
-1. Wählen Sie ein Gerät in der Geräteliste aus
-2. Klicken Sie auf **📡 WLAN Scan** im Diagnose-Bereich
-3. Das Gerät scannt die Umgebung und zeigt alle sichtbaren Netzwerke
-
-**Pro Netzwerk werden angezeigt:**
-
-| Information | Beschreibung |
-|-------------|-------------|
-| SSID | Netzwerkname |
-| Kanal | WLAN-Kanal |
-| Signal | Signalstärke in dBm mit grafischem Indikator |
-
-Das aktuell verbundene Netzwerk wird hervorgehoben.
-
-> **Tipp:** Verwenden Sie den WLAN Scan zur Diagnose von Verbindungsproblemen — z.B. um zu prüfen, ob das Ziel-WLAN am Standort des Geräts überhaupt sichtbar ist und wie stark das Signal ist.
-
-<div style="page-break-before: always;"></div>
-
-### 2.10 Systemwartung
-
-#### 2.10.1 Stagebox-Updates
+#### 2.8.1 Stagebox-Updates
 
 Stagebox-Software-Updates prüfen und installieren:
 
@@ -909,7 +801,7 @@ Stagebox-Software-Updates prüfen und installieren:
 <img src="screenshots/80-stagebox-update.png" width="450" alt="Stagebox Update Dialog">
 <div style="page-break-before: always;"></div>
 
-#### 2.10.2 System-Updates
+#### 2.8.2 System-Updates
 
 Betriebssystem-Updates prüfen und installieren:
 
@@ -925,11 +817,11 @@ Betriebssystem-Updates prüfen und installieren:
 
 <div style="page-break-before: always;"></div>
 
-### 2.11 Berichte & Dokumentation
+### 2.9 Berichte & Dokumentation
 
 Stagebox bietet umfassende Berichtsfunktionen für professionelle Installationsdokumentation. Berichte enthalten Gerätebestände, Konfigurationsdetails und können mit Installateur-Branding angepasst werden.
 
-#### 2.11.1 Installateur-Profil
+#### 2.9.1 Installateur-Profil
 
 Das Installateur-Profil enthält Ihre Firmeninformationen, die auf allen generierten Berichten erscheinen. Dies ist eine globale Einstellung, die für alle Gebäude gilt.
 
@@ -961,32 +853,35 @@ Das Installateur-Profil enthält Ihre Firmeninformationen, die auf allen generie
 
 <div style="page-break-before: always;"></div>
 
-#### 2.11.2 Label Export
+#### 2.9.2 Gebäudeprofil (Objektinformationen)
 
-Gerätelabels als CSV-Datei exportieren. Der Label Export befindet sich im **Audit**-Bereich der Seitenleiste.
+Jedes Gebäude kann ein eigenes Profil mit kunden- und projektspezifischen Informationen haben. Diese Daten erscheinen in den für dieses Gebäude generierten Berichten.
 
-<img src="screenshots/96-label-export-dialog.png" width="450" alt="Label Export Dialog">
+**Zugriff auf das Gebäudeprofil:**
 
-**CSV-Trennzeichen:**
+1. Öffnen Sie die Gebäudeseite
+2. Gehen Sie zum **Experten**-Bereich in der Seitenleiste
+3. Klicken Sie auf **⚙️ Gebäudeeinstellungen**
+4. Wählen Sie den **Objekt**-Tab
 
-Wählen Sie das Spaltentrennzeichen direkt im Export-Dialog:
-- **Semikolon (;)** — Standard, funktioniert mit europäischen Excel-Versionen
-- **Komma (,)** — Standard-CSV-Format
-- **Tab** — Für tabulatorgetrennte Werte
+**Verfügbare Felder:**
 
-**Spaltenauswahl:**
+| Feld | Beschreibung |
+|------|-------------|
+| Objektname | Projekt- oder Liegenschaftsname (z.B. «Villa Müller») |
+| Kundenname | Name des Kunden |
+| Adresse | Liegenschaftsadresse (mehrzeilig möglich) |
+| Kontakttelefon | Telefonnummer des Kunden |
+| Kontakt-E-Mail | E-Mail-Adresse des Kunden |
+| Notizen | Zusätzliche Anmerkungen (erscheinen in Berichten) |
 
-Wählen Sie über Checkboxen, welche Spalten in der exportierten CSV-Datei erscheinen. Verfügbare Spalten umfassen unter anderem: MAC, IP, Hostname, Firmware, Modell, Name, Raum, Standort und weitere gerätespezifische Felder.
+> **Hinweis:** Der Objektname wird als Berichtstitel verwendet. Wenn nicht gesetzt, wird stattdessen der Gebäudename verwendet.
 
-**Vorschau:**
-
-Der Dialog zeigt eine Live-Vorschau der ersten 5 Geräte mit den aktuell ausgewählten Spalten und dem gewählten Trennzeichen.
-
-> **Hinweis:** Die exportierte CSV-Datei enthält einen UTF-8 BOM-Header für die korrekte Darstellung von Umlauten und Sonderzeichen in Excel.
+<img src="screenshots/91-building-profile-tab.png" width="450" alt="Building Profile Tab">
 
 <div style="page-break-before: always;"></div>
 
-#### 2.11.3 Snapshots
+#### 2.9.3 Snapshots
 
 Ein Snapshot erfasst den vollständigen Zustand aller Geräte in einem Gebäude zu einem bestimmten Zeitpunkt. Snapshots werden als ZIP-Pakete gespeichert, die Gerätedaten und Konfigurationsdateien enthalten.
 
@@ -1029,7 +924,7 @@ Stagebox behält automatisch nur die 5 neuesten Snapshots pro Gebäude, um Speic
 
 <div style="page-break-before: always;"></div>
 
-#### 2.11.4 Berichtsgenerator
+#### 2.9.4 Berichtsgenerator
 
 Professionelle Installationsberichte im PDF- oder Excel-Format generieren.
 
@@ -1094,7 +989,7 @@ Der Excel-Export enthält dieselben Informationen wie der PDF-Bericht im Tabelle
 
 <div style="page-break-before: always;"></div>
 
-#### 2.11.5 Konfigurations-Audit
+#### 2.9.5 Konfigurations-Audit
 
 Die Audit-Funktion vergleicht den aktuellen Live-Zustand aller Geräte mit einem Referenz-Snapshot, um Konfigurationsänderungen, neue Geräte oder Offline-Geräte zu erkennen.
 
@@ -1200,4 +1095,4 @@ Das Audit erkennt und meldet:
 
 ---
 
-*Stagebox Web-UI Handbuch — Version 1.2.0*
+*Stagebox Web-UI Handbuch — Version 1.1.0*

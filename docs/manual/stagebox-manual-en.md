@@ -1,6 +1,6 @@
 # Stagebox Web-UI User Manual
 
-> *This manual reflects Stagebox Pro Version 1.1.0*
+> *This manual reflects Stagebox Pro Version 1.2.0*
 
 ## Part 1: Getting Started
 
@@ -321,7 +321,7 @@ The Building Page is the main workspace for provisioning and managing devices in
 <img src="screenshots/30-building-page-overview.png" width="500" alt="Building Page Overview">
 
 #### Layout:
-- **Left Sidebar:** Provisioning stages, filters, actions, settings
+- **Left Sidebar:** Provisioning stages, filters, actions, settings, diagnostics, audit
 - **Center Area:** Device list
 - **Right Sidebar:** Stage panels or device details, Script-, KVS-, Webhook-, Schedules- and OTA tabs
 
@@ -484,6 +484,17 @@ Basic device information:
 | Firmware | Current version |
 
 <img src="screenshots/50-device-info-tab.png" width="300" alt="Device Info Tab">
+
+##### Calibration (Cover / Dimmer)
+
+For supported devices, the Device Info Tab shows an additional calibration section:
+
+- **Cover Calibration**: Starts motor calibration on the selected cover device. The device performs a full open/close cycle to determine the end positions.
+- **Dimmer Calibration**: Starts calibration on the selected dimmer device to ensure correct control of the connected light source.
+
+<img src="screenshots/57-cover-dimmer-calibration.png" width="300" alt="Cover / Dimmer Calibration">
+
+> **Note:** Calibration sections are only shown when the selected device has the corresponding component (Cover or Light/Dimmer).
 
 <div style="page-break-before: always;"></div>
 
@@ -657,21 +668,80 @@ Manage shared scripts available for deployment:
 
 <div style="page-break-before: always;"></div>
 
-### 2.7 Expert Settings (Advanced)
+### 2.7 Building Settings
 
-> ⚠️ **Warning:** The Expert Settings allow direct configuration of provisioning behavior and system parameters. Incorrect changes can affect device provisioning. Use with caution!
+Access via **Settings** section → **⚙️ Building Settings** in the Building Page sidebar.
 
-Access via **Expert** section → **⚙️ Building Settings** in the Building Page sidebar.
+The Building Settings dialog provides a tabbed interface for configuring all building-specific options.
 
-The Building Settings dialog provides a tabbed interface for configuring advanced options.
+**Tabs:** Object → Flags → Input Type → Stage 1 Options → Stage 3 Options → Model Map → System
 
 ---
 
-#### 2.7.1 Provisioning Tab
+#### 2.7.1 Object Tab
+
+Project and customer information for this building. This data appears in generated reports.
+
+**Available Fields:**
+
+| Field | Description |
+|-------|-------------|
+| Object Name | Project or property name (e.g., "Villa Müller") |
+| Customer Name | Customer's name |
+| Address | Property address (multi-line supported) |
+| Contact Phone | Customer's phone number |
+| Contact Email | Customer's email address |
+| Notes | Additional remarks (appear in reports) |
+
+> **Note:** The Object Name is used as the report title. If not set, the building name is used instead.
+
+<img src="screenshots/91-building-profile-tab.png" width="450" alt="Building Profile Tab">
+
+<div style="page-break-before: always;"></div>
+
+#### 2.7.2 Flags Tab
+
+Configure device flags for all devices in the building at once.
+
+<img src="screenshots/75-settings-flags-tab.png" width="450" alt="Flags Tab">
+
+**Available Flags:**
+
+| Flag | Description |
+|------|-------------|
+| **ECO Mode** | Enable/disable energy saving mode |
+| **BLE** | Enable/disable Bluetooth Low Energy |
+| **AP Mode** | Enable/disable Access Point mode |
+
+**Usage:**
+
+1. Select the desired devices using the checkboxes
+2. Set or clear the desired flags
+3. Click **Apply** to push the settings to the selected devices
+
+<div style="page-break-before: always;"></div>
+
+#### 2.7.3 Input Type Tab
+
+Configure input types for all device inputs in the building at once.
+
+<img src="screenshots/76-settings-input-type-tab.png" width="450" alt="Input Type Tab">
+
+Each physical input of a Shelly device can be configured as **Button** (momentary) or **Switch** (toggle). Devices with multiple inputs (e.g., I4 with 4 inputs) are fully supported.
+
+**Usage:**
+
+1. Select the desired devices using the checkboxes
+2. Choose the desired input type: **Button** or **Switch**
+3. Click **Apply** to push the setting to all inputs of the selected devices
+
+<div style="page-break-before: always;"></div>
+
+#### 2.7.4 Stage 1 Options
 
 Controls how Stage 1 (AP Mode) provisioning behaves.
 
-<img src="screenshots/70-expert-provisioning-tab.png" width="450" alt="Expert Provisioning Tab">
+<img src="screenshots/70-expert-provisioning-tab.png" width="450" alt="Stage 1 Options Tab">
 
 | Setting | Description | Default |
 |---------|-------------|---------|
@@ -683,11 +753,11 @@ Controls how Stage 1 (AP Mode) provisioning behaves.
 
 ---
 
-#### 2.7.2 OTA & Names Tab
+#### 2.7.5 Stage 3 Options
 
 Configure firmware update behavior and friendly name handling during Stage 3.
 
-<img src="screenshots/71-expert-ota-tab.png" width="450" alt="Expert OTA & Names Tab">
+<img src="screenshots/71-expert-ota-tab.png" width="450" alt="Stage 3 Options Tab">
 
 **Firmware Updates (OTA):**
 
@@ -706,43 +776,7 @@ Configure firmware update behavior and friendly name handling during Stage 3.
 
 <div style="page-break-before: always;"></div>
 
-#### 2.7.3 Export Tab
-
-Configure CSV export settings for device labels and reports.
-
-<img src="screenshots/72-expert-export-tab.png" width="450" alt="Expert Export Tab">
-
-**CSV Delimiter:**
-
-Choose the column separator for exported CSV files:
-- **Semicolon (;)** - Default, works with European Excel versions
-- **Comma (,)** - Standard CSV format
-- **Tab** - For tab-separated values
-
-**Default Columns:**
-
-Select which columns appear in exported CSV files. Available columns:
-
-| Column | Description |
-|--------|-------------|
-| `id` | Device MAC address (unique identifier) |
-| `ip` | Current IP address |
-| `hostname` | Device hostname |
-| `fw` | Firmware version |
-| `model` | Friendly model name |
-| `hw_model` | Hardware model ID |
-| `friendly_name` | Assigned device name |
-| `room` | Room assignment |
-| `location` | Location within room |
-| `assigned_at` | When the device was provisioned |
-| `last_seen` | Last communication timestamp |
-| `stage3_friendly_status` | Name assignment status |
-| `stage3_ota_status` | Firmware update status |
-| `stage4_status_result` | Configuration stage result |
-
-<div style="page-break-before: always;"></div>
-
-#### 2.7.4 Model Map Tab
+#### 2.7.6 Model Map Tab
 
 Define custom display names for Shelly hardware model IDs.
 
@@ -760,36 +794,110 @@ The Model Map translates internal hardware identifiers (e.g., `SNSW-001X16EU`) t
 
 <div style="page-break-before: always;"></div>
 
-#### 2.7.5 Advanced Tab (YAML Editor)
+#### 2.7.7 System Tab
 
-Direct editing of configuration files for advanced scenarios.
+Configure system-wide settings per building.
 
-<img src="screenshots/74-expert-advanced-tab.png" width="450" alt="Expert Advanced Tab">
+<img src="screenshots/77-settings-system-tab.png" width="450" alt="System Tab">
 
-**Available Files:**
+| Setting | Description |
+|---------|-------------|
+| **Timezone** | Timezone for schedules and time-based automations |
+| **NTP Server** | Server for device time synchronization |
+| **GPS Coordinates** | Latitude and longitude of the building location, required for sunrise/sunset calculations in schedules |
 
-| File | Description |
-|------|-------------|
-| `config.yaml` | Main building configuration (IP ranges, device database, provisioning settings) |
-| `profiles/*.yaml` | Device configuration profiles for Stage 4 |
+**Swiss Defaults:** Click the **Swiss Defaults** button to automatically fill in timezone (`Europe/Zurich`), NTP server, and a central Swiss location.
 
-**Features:**
-- Syntax validation (green/red indicator)
-- Select file from dropdown
-- Edit content directly
-- All changes are backed up automatically before saving
-
-**Validation Indicator:**
-- 🟢 Green: Valid YAML syntax
-- 🔴 Red: Syntax error (hover for details)
-
-> **Recommendation:** Use the other tabs for normal configuration. Only use the YAML Editor when you need to modify settings not exposed in the UI, or when troubleshooting.
+**Apply to Devices:** Click **Apply to Devices** to push the settings to all devices in the building via `Sys.SetConfig`.
 
 <div style="page-break-before: always;"></div>
 
-### 2.8 System Maintenance
+### 2.8 Pro Ethernet
 
-#### 2.8.1 Stagebox Updates
+Switch Shelly Pro devices between WiFi and Ethernet — in both directions.
+
+Access via **Settings** section → **🔌 Pro Ethernet** in the Building Page sidebar.
+
+<img src="screenshots/78-pro-ethernet-modal.png" width="450" alt="Pro Ethernet Modal">
+
+**How it works:**
+
+- Automatically detects Pro devices already on Ethernet
+- IP address remains unchanged during switchover
+- WiFi is disabled when switching to Ethernet (and vice versa)
+- 2 reboots per device required (~30 seconds)
+
+**Usage:**
+
+1. Click **🔌 Pro Ethernet**
+2. Choose the desired direction (WiFi → Ethernet or Ethernet → WiFi)
+3. Select the devices
+4. Click **Switch**
+
+> **Note:** Only Shelly Pro devices (e.g., Pro4PM, Pro2PM) support Ethernet. Other devices are not shown.
+
+<div style="page-break-before: always;"></div>
+
+### 2.9 Diagnostics
+
+The Diagnostics section in the sidebar provides tools for troubleshooting and status monitoring.
+
+#### 2.9.1 Health Check
+
+The Health Check queries all devices in the building and displays a detailed status overview.
+
+<img src="screenshots/79-health-check-modal.png" width="450" alt="Health Check Modal">
+
+**Summary:**
+
+Three status badges are shown at the top:
+- ✅ **Healthy**: Devices without issues
+- ⚠️ **Warnings**: Devices with issues (e.g., weak WiFi signal, high temperature)
+- ⬆️ **Updates**: Devices with available firmware updates
+
+**Per device:**
+
+| Information | Description |
+|-------------|-------------|
+| WiFi Signal | Signal strength in dBm with graphical indicator |
+| CPU Temperature | Current processor temperature |
+| Uptime | Time since last reboot |
+| RAM | Memory usage in percent |
+| Update notice | If a newer firmware is available |
+
+Devices with warnings are highlighted.
+
+<div style="page-break-before: always;"></div>
+
+#### 2.9.2 WiFi Scan
+
+The WiFi Scan shows available wireless networks from the perspective of a selected device.
+
+<img src="screenshots/79a-wlan-scan-modal.png" width="450" alt="WiFi Scan Modal">
+
+**Usage:**
+
+1. Select a device in the device list
+2. Click **📡 WiFi Scan** in the Diagnostics section
+3. The device scans its surroundings and shows all visible networks
+
+**Per network:**
+
+| Information | Description |
+|-------------|-------------|
+| SSID | Network name |
+| Channel | WiFi channel |
+| Signal | Signal strength in dBm with graphical indicator |
+
+The currently connected network is highlighted.
+
+> **Tip:** Use the WiFi Scan to diagnose connectivity issues — e.g., to check whether the target WiFi is visible at the device's location and how strong the signal is.
+
+<div style="page-break-before: always;"></div>
+
+### 2.10 System Maintenance
+
+#### 2.10.1 Stagebox Updates
 
 Check for and install Stagebox software updates:
 
@@ -802,7 +910,7 @@ Check for and install Stagebox software updates:
 <img src="screenshots/80-stagebox-update.png" width="450" alt="Stagebox Update Dialog">
 <div style="page-break-before: always;"></div>
 
-#### 2.8.2 System Updates
+#### 2.10.2 System Updates
 
 Check for and install operating system updates:
 
@@ -818,11 +926,11 @@ Check for and install operating system updates:
 
 <div style="page-break-before: always;"></div>
 
-### 2.9 Reports & Documentation
+### 2.11 Reports & Documentation
 
 Stagebox provides comprehensive reporting features for professional installation documentation. Reports include device inventories, configuration details, and can be customized with installer branding.
 
-#### 2.9.1 Installer Profile
+#### 2.11.1 Installer Profile
 
 The Installer Profile contains your company information that appears on all generated reports. This is a global setting shared across all buildings.
 
@@ -854,35 +962,32 @@ The Installer Profile contains your company information that appears on all gene
 
 <div style="page-break-before: always;"></div>
 
-#### 2.9.2 Building Profile (Object Information)
+#### 2.11.2 Label Export
 
-Each building can have its own profile with customer and project-specific information. This data appears in reports generated for that building.
+Export device labels as a CSV file. The Label Export is located in the **Audit** section of the sidebar.
 
-**Accessing Building Profile:**
+<img src="screenshots/96-label-export-dialog.png" width="450" alt="Label Export Dialog">
 
-1. Open the Building Page
-2. Go to **Expert** section in the sidebar
-3. Click **⚙️ Building Settings**
-4. Select the **Object** tab
+**CSV Delimiter:**
 
-**Available Fields:**
+Choose the column separator directly in the export dialog:
+- **Semicolon (;)** — Default, works with European Excel versions
+- **Comma (,)** — Standard CSV format
+- **Tab** — For tab-separated values
 
-| Field | Description |
-|-------|-------------|
-| Object Name | Project or property name (e.g., "Villa Müller") |
-| Customer Name | Client's name |
-| Address | Property address (multi-line supported) |
-| Contact Phone | Customer's phone number |
-| Contact Email | Customer's email address |
-| Notes | Additional notes (appears in reports) |
+**Column Selection:**
 
-> **Note:** The Object Name is used as the report title. If not set, the building name is used instead.
+Use checkboxes to choose which columns appear in the exported CSV file. Available columns include: MAC, IP, Hostname, Firmware, Model, Name, Room, Location, and other device-specific fields.
 
-<img src="screenshots/91-building-profile-tab.png" width="450" alt="Building Profile Tab">
+**Preview:**
+
+The dialog shows a live preview of the first 5 devices with the currently selected columns and delimiter.
+
+> **Note:** The exported CSV file includes a UTF-8 BOM header for correct display of umlauts and special characters in Excel.
 
 <div style="page-break-before: always;"></div>
 
-#### 2.9.3 Snapshots
+#### 2.11.3 Snapshots
 
 A snapshot captures the complete state of all devices in a building at a specific point in time. Snapshots are stored as ZIP bundles containing device data and configuration files.
 
@@ -925,7 +1030,7 @@ Stagebox automatically keeps only the 5 most recent snapshots per building to co
 
 <div style="page-break-before: always;"></div>
 
-#### 2.9.4 Report Generator
+#### 2.11.4 Report Generator
 
 Generate professional installation reports in PDF or Excel format.
 
@@ -990,7 +1095,7 @@ The Excel export contains the same information as the PDF in spreadsheet format:
 
 <div style="page-break-before: always;"></div>
 
-#### 2.9.5 Configuration Audit
+#### 2.11.5 Configuration Audit
 
 The Audit feature compares the current live state of all devices against a reference snapshot to detect configuration changes, new devices, or offline devices.
 
@@ -1096,4 +1201,4 @@ The audit detects and reports:
 
 ---
 
-*Stagebox Web-UI Manual - Version 1.1.0*
+*Stagebox Web-UI Manual - Version 1.2.0*

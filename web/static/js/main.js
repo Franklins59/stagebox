@@ -39,7 +39,7 @@ const App = {
     updateManualLink() {
         const lang = i18n.getLanguage();
         const manualLink = document.getElementById('manual-link');
-        if (manualLink && lang !== 'en') {
+        if (manualLink) {
             manualLink.href = `/manual?lang=${lang}`;
         }
     },

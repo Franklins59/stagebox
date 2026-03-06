@@ -119,10 +119,10 @@ def int_to_ip(i: int) -> str:
     return f"{(i >> 24) & 0xFF}.{(i >> 16) & 0xFF}.{(i >> 8) & 0xFF}.{i & 0xFF}"
 
 
-def escape_csv(val) -> str:
+def escape_csv(val, delimiter=',') -> str:
     """Escape a value for CSV output."""
     val = str(val)
-    if ',' in val or '"' in val or '\n' in val:
+    if delimiter in val or ',' in val or '"' in val or '\n' in val or ';' in val:
         return '"' + val.replace('"', '""') + '"'
     return val
 

@@ -1,6 +1,6 @@
 # Manuel d'utilisation Stagebox Web-UI
 
-> *Ce manuel correspond à la Stagebox Pro Version 1.2.0*
+> *Ce manuel correspond à la Stagebox Pro Version 1.1.0*
 
 ## Partie 1 : Premiers pas
 
@@ -320,7 +320,7 @@ La page du bâtiment est l'espace de travail principal pour le provisionnement e
 <img src="screenshots/30-building-page-overview.png" width="500" alt="Building Page Overview">
 
 #### Disposition :
-- **Barre latérale gauche :** Étapes de provisionnement, filtres, actions, paramètres, diagnostic, audit
+- **Barre latérale gauche :** Étapes de provisionnement, filtres, actions, paramètres
 - **Zone centrale :** Liste des appareils
 - **Barre latérale droite :** Panneaux Stage ou détails de l'appareil, onglets Script, KVS, Webhook, Planification et OTA
 
@@ -483,17 +483,6 @@ Informations de base sur l'appareil :
 | Firmware | Version actuelle |
 
 <img src="screenshots/50-device-info-tab.png" width="300" alt="Device Info Tab">
-
-##### Calibration (Cover / Dimmer)
-
-Pour les appareils compatibles, l'onglet Informations affiche une section de calibration supplémentaire :
-
-- **Calibration Cover** : Lance la calibration du moteur sur l'appareil volet roulant sélectionné. L'appareil effectue un cycle complet d'ouverture/fermeture pour déterminer les positions de fin de course.
-- **Calibration Dimmer** : Lance la calibration sur le variateur sélectionné pour assurer le contrôle correct de la source lumineuse connectée.
-
-<img src="screenshots/57-cover-dimmer-calibration.png" width="300" alt="Cover / Dimmer Calibration">
-
-> **Remarque :** Les sections de calibration ne s'affichent que si l'appareil sélectionné possède le composant correspondant (Cover ou Light/Dimmer).
 
 <div style="page-break-before: always;"></div>
 
@@ -667,80 +656,21 @@ Gérer les scripts partagés disponibles pour le déploiement :
 
 <div style="page-break-before: always;"></div>
 
-### 2.7 Paramètres du bâtiment
+### 2.7 Paramètres Expert (Avancé)
 
-Accès via la section **Paramètres** → **⚙️ Paramètres du bâtiment** dans la barre latérale de la page du bâtiment.
+> ⚠️ **Avertissement :** Les paramètres Expert permettent la configuration directe du comportement de provisionnement et des paramètres système. Des modifications incorrectes peuvent affecter le provisionnement des appareils. À utiliser avec précaution !
 
-Le dialogue Paramètres du bâtiment fournit une interface à onglets pour configurer toutes les options spécifiques au bâtiment.
+Accès via la section **Expert** → **⚙️ Paramètres du bâtiment** dans la barre latérale de la page du bâtiment.
 
-**Onglets :** Objet → Flags → Type d'entrée → Options Stage 1 → Options Stage 3 → Carte des modèles → Système
+Le dialogue Paramètres du bâtiment fournit une interface à onglets pour configurer les options avancées.
 
 ---
 
-#### 2.7.1 Onglet Objet
-
-Informations projet et client pour ce bâtiment. Ces données apparaissent dans les rapports générés.
-
-**Champs disponibles :**
-
-| Champ | Description |
-|-------|-------------|
-| Nom de l'objet | Nom du projet ou de la propriété (par ex. « Villa Müller ») |
-| Nom du client | Nom du client |
-| Adresse | Adresse de la propriété (multi-lignes possible) |
-| Téléphone de contact | Numéro de téléphone du client |
-| E-mail de contact | Adresse e-mail du client |
-| Notes | Remarques supplémentaires (apparaissent dans les rapports) |
-
-> **Remarque :** Le nom de l'objet est utilisé comme titre de rapport. S'il n'est pas défini, le nom du bâtiment est utilisé à la place.
-
-<img src="screenshots/91-building-profile-tab.png" width="450" alt="Building Profile Tab">
-
-<div style="page-break-before: always;"></div>
-
-#### 2.7.2 Onglet Flags
-
-Configurer les flags d'appareils pour tous les appareils du bâtiment en une seule opération.
-
-<img src="screenshots/75-settings-flags-tab.png" width="450" alt="Flags Tab">
-
-**Flags disponibles :**
-
-| Flag | Description |
-|------|-------------|
-| **ECO Mode** | Activer/désactiver le mode économie d'énergie |
-| **BLE** | Activer/désactiver le Bluetooth Low Energy |
-| **AP Mode** | Activer/désactiver le mode point d'accès |
-
-**Utilisation :**
-
-1. Sélectionnez les appareils souhaités via les cases à cocher
-2. Activez ou désactivez les flags souhaités
-3. Cliquez sur **Appliquer** pour transmettre les paramètres aux appareils sélectionnés
-
-<div style="page-break-before: always;"></div>
-
-#### 2.7.3 Onglet Type d'entrée
-
-Configurer les types d'entrée pour toutes les entrées d'appareils du bâtiment en une seule opération.
-
-<img src="screenshots/76-settings-input-type-tab.png" width="450" alt="Input Type Tab">
-
-Chaque entrée physique d'un appareil Shelly peut être configurée comme **Bouton** (poussoir) ou **Interrupteur** (bascule). Les appareils à entrées multiples (par ex. I4 avec 4 entrées) sont entièrement pris en charge.
-
-**Utilisation :**
-
-1. Sélectionnez les appareils souhaités via les cases à cocher
-2. Choisissez le type d'entrée souhaité : **Bouton** ou **Interrupteur**
-3. Cliquez sur **Appliquer** pour transmettre le paramètre à toutes les entrées des appareils sélectionnés
-
-<div style="page-break-before: always;"></div>
-
-#### 2.7.4 Options Stage 1
+#### 2.7.1 Onglet Provisionnement
 
 Contrôle le comportement du provisionnement Stage 1 (mode AP).
 
-<img src="screenshots/70-expert-provisioning-tab.png" width="450" alt="Stage 1 Options Tab">
+<img src="screenshots/70-expert-provisioning-tab.png" width="450" alt="Expert Provisioning Tab">
 
 | Paramètre | Description | Défaut |
 |-----------|-------------|--------|
@@ -752,11 +682,11 @@ Contrôle le comportement du provisionnement Stage 1 (mode AP).
 
 ---
 
-#### 2.7.5 Options Stage 3
+#### 2.7.2 Onglet OTA & Noms
 
 Configurer le comportement des mises à jour firmware et la gestion des noms conviviaux pendant le Stage 3.
 
-<img src="screenshots/71-expert-ota-tab.png" width="450" alt="Stage 3 Options Tab">
+<img src="screenshots/71-expert-ota-tab.png" width="450" alt="Expert OTA & Names Tab">
 
 **Mises à jour firmware (OTA) :**
 
@@ -775,7 +705,43 @@ Configurer le comportement des mises à jour firmware et la gestion des noms con
 
 <div style="page-break-before: always;"></div>
 
-#### 2.7.6 Onglet Carte des modèles
+#### 2.7.3 Onglet Export
+
+Configurer les paramètres d'export CSV pour les étiquettes d'appareils et les rapports.
+
+<img src="screenshots/72-expert-export-tab.png" width="450" alt="Expert Export Tab">
+
+**Délimiteur CSV :**
+
+Choisissez le séparateur de colonnes pour les fichiers CSV exportés :
+- **Point-virgule (;)** — Par défaut, fonctionne avec les versions européennes d'Excel
+- **Virgule (,)** — Format CSV standard
+- **Tabulation** — Pour les valeurs séparées par des tabulations
+
+**Colonnes par défaut :**
+
+Sélectionnez les colonnes qui apparaissent dans les fichiers CSV exportés. Colonnes disponibles :
+
+| Colonne | Description |
+|---------|-------------|
+| `id` | Adresse MAC de l'appareil (identifiant unique) |
+| `ip` | Adresse IP actuelle |
+| `hostname` | Nom d'hôte de l'appareil |
+| `fw` | Version du firmware |
+| `model` | Nom de modèle convivial |
+| `hw_model` | ID du modèle matériel |
+| `friendly_name` | Nom attribué à l'appareil |
+| `room` | Attribution de pièce |
+| `location` | Emplacement dans la pièce |
+| `assigned_at` | Date de provisionnement |
+| `last_seen` | Dernier horodatage de communication |
+| `stage3_friendly_status` | Statut d'attribution du nom |
+| `stage3_ota_status` | Statut de mise à jour firmware |
+| `stage4_status_result` | Résultat de l'étape de configuration |
+
+<div style="page-break-before: always;"></div>
+
+#### 2.7.4 Onglet Carte des modèles
 
 Définir des noms d'affichage personnalisés pour les ID de modèles matériels Shelly.
 
@@ -793,110 +759,36 @@ La carte des modèles traduit les identifiants matériels internes (par ex. `SNS
 
 <div style="page-break-before: always;"></div>
 
-#### 2.7.7 Onglet Système
+#### 2.7.5 Onglet Avancé (Éditeur YAML)
 
-Configurer les paramètres système par bâtiment.
+Édition directe des fichiers de configuration pour les scénarios avancés.
 
-<img src="screenshots/77-settings-system-tab.png" width="450" alt="System Tab">
+<img src="screenshots/74-expert-advanced-tab.png" width="450" alt="Expert Advanced Tab">
 
-| Paramètre | Description |
-|-----------|-------------|
-| **Fuseau horaire** | Fuseau horaire pour les planifications et les automatisations temporelles |
-| **Serveur NTP** | Serveur pour la synchronisation horaire des appareils |
-| **Coordonnées GPS** | Latitude et longitude de l'emplacement du bâtiment, nécessaires pour les calculs de lever/coucher du soleil dans les planifications |
+**Fichiers disponibles :**
 
-**Valeurs par défaut suisses :** Cliquez sur le bouton **Valeurs par défaut suisses** pour remplir automatiquement le fuseau horaire (`Europe/Zurich`), le serveur NTP et un emplacement central suisse.
+| Fichier | Description |
+|---------|-------------|
+| `config.yaml` | Configuration principale du bâtiment (plages IP, base de données d'appareils, paramètres de provisionnement) |
+| `profiles/*.yaml` | Profils de configuration d'appareils pour le Stage 4 |
 
-**Appliquer aux appareils :** Cliquez sur **Appliquer aux appareils** pour transmettre les paramètres à tous les appareils du bâtiment via `Sys.SetConfig`.
+**Fonctionnalités :**
+- Validation de syntaxe (indicateur vert/rouge)
+- Sélection de fichier depuis le menu déroulant
+- Édition directe du contenu
+- Toutes les modifications sont automatiquement sauvegardées avant l'enregistrement
 
-<div style="page-break-before: always;"></div>
+**Indicateur de validation :**
+- 🟢 Vert : Syntaxe YAML valide
+- 🔴 Rouge : Erreur de syntaxe (détails au survol)
 
-### 2.8 Pro Ethernet
-
-Basculer les appareils Shelly Pro entre WiFi et Ethernet — dans les deux sens.
-
-Accès via la section **Paramètres** → **🔌 Pro Ethernet** dans la barre latérale de la page du bâtiment.
-
-<img src="screenshots/78-pro-ethernet-modal.png" width="450" alt="Pro Ethernet Modal">
-
-**Fonctionnement :**
-
-- Détecte automatiquement les appareils Pro déjà sur Ethernet
-- L'adresse IP reste inchangée lors du basculement
-- Le WiFi est désactivé lors du passage à Ethernet (et vice versa)
-- 2 redémarrages par appareil nécessaires (~30 secondes)
-
-**Utilisation :**
-
-1. Cliquez sur **🔌 Pro Ethernet**
-2. Choisissez la direction souhaitée (WiFi → Ethernet ou Ethernet → WiFi)
-3. Sélectionnez les appareils
-4. Cliquez sur **Basculer**
-
-> **Remarque :** Seuls les appareils Shelly Pro (par ex. Pro4PM, Pro2PM) supportent Ethernet. Les autres appareils ne sont pas affichés.
+> **Recommandation :** Utilisez les autres onglets pour la configuration normale. N'utilisez l'éditeur YAML que lorsque vous devez modifier des paramètres non exposés dans l'UI, ou pour le dépannage.
 
 <div style="page-break-before: always;"></div>
 
-### 2.9 Diagnostic
+### 2.8 Maintenance système
 
-La section Diagnostic dans la barre latérale fournit des outils de dépannage et de surveillance.
-
-#### 2.9.1 Health Check
-
-Le Health Check interroge tous les appareils du bâtiment et affiche un aperçu détaillé de leur état.
-
-<img src="screenshots/79-health-check-modal.png" width="450" alt="Health Check Modal">
-
-**Résumé :**
-
-Trois badges de statut sont affichés en haut :
-- ✅ **Sain** : Appareils sans problèmes
-- ⚠️ **Avertissements** : Appareils avec des anomalies (par ex. signal WiFi faible, température élevée)
-- ⬆️ **Mises à jour** : Appareils avec des mises à jour firmware disponibles
-
-**Par appareil :**
-
-| Information | Description |
-|-------------|-------------|
-| Signal WiFi | Puissance du signal en dBm avec indicateur graphique |
-| Température CPU | Température actuelle du processeur |
-| Uptime | Durée depuis le dernier redémarrage |
-| RAM | Utilisation mémoire en pourcentage |
-| Avis de mise à jour | Si un firmware plus récent est disponible |
-
-Les appareils avec des avertissements sont mis en évidence.
-
-<div style="page-break-before: always;"></div>
-
-#### 2.9.2 Scan WiFi
-
-Le Scan WiFi affiche les réseaux sans fil disponibles du point de vue d'un appareil sélectionné.
-
-<img src="screenshots/79a-wlan-scan-modal.png" width="450" alt="WiFi Scan Modal">
-
-**Utilisation :**
-
-1. Sélectionnez un appareil dans la liste
-2. Cliquez sur **📡 Scan WiFi** dans la section Diagnostic
-3. L'appareil scanne son environnement et affiche tous les réseaux visibles
-
-**Par réseau :**
-
-| Information | Description |
-|-------------|-------------|
-| SSID | Nom du réseau |
-| Canal | Canal WiFi |
-| Signal | Puissance du signal en dBm avec indicateur graphique |
-
-Le réseau actuellement connecté est mis en évidence.
-
-> **Astuce :** Utilisez le Scan WiFi pour diagnostiquer les problèmes de connexion — par ex. pour vérifier si le WiFi cible est visible à l'emplacement de l'appareil et quelle est la puissance du signal.
-
-<div style="page-break-before: always;"></div>
-
-### 2.10 Maintenance système
-
-#### 2.10.1 Mises à jour Stagebox
+#### 2.8.1 Mises à jour Stagebox
 
 Vérifier et installer les mises à jour logicielles de la Stagebox :
 
@@ -909,7 +801,7 @@ Vérifier et installer les mises à jour logicielles de la Stagebox :
 <img src="screenshots/80-stagebox-update.png" width="450" alt="Stagebox Update Dialog">
 <div style="page-break-before: always;"></div>
 
-#### 2.10.2 Mises à jour système
+#### 2.8.2 Mises à jour système
 
 Vérifier et installer les mises à jour du système d'exploitation :
 
@@ -925,11 +817,11 @@ Vérifier et installer les mises à jour du système d'exploitation :
 
 <div style="page-break-before: always;"></div>
 
-### 2.11 Rapports & Documentation
+### 2.9 Rapports & Documentation
 
 Stagebox offre des fonctionnalités complètes de rapport pour la documentation professionnelle d'installation. Les rapports incluent les inventaires d'appareils, les détails de configuration et peuvent être personnalisés avec le branding de l'installateur.
 
-#### 2.11.1 Profil installateur
+#### 2.9.1 Profil installateur
 
 Le profil installateur contient les informations de votre entreprise qui apparaissent sur tous les rapports générés. C'est un paramètre global partagé entre tous les bâtiments.
 
@@ -961,32 +853,35 @@ Le profil installateur contient les informations de votre entreprise qui apparai
 
 <div style="page-break-before: always;"></div>
 
-#### 2.11.2 Export d'étiquettes
+#### 2.9.2 Profil du bâtiment (Informations objet)
 
-Exporter les étiquettes d'appareils sous forme de fichier CSV. L'export d'étiquettes se trouve dans la section **Audit** de la barre latérale.
+Chaque bâtiment peut avoir son propre profil avec des informations spécifiques au client et au projet. Ces données apparaissent dans les rapports générés pour ce bâtiment.
 
-<img src="screenshots/96-label-export-dialog.png" width="450" alt="Label Export Dialog">
+**Accès au profil du bâtiment :**
 
-**Délimiteur CSV :**
+1. Ouvrez la page du bâtiment
+2. Allez à la section **Expert** dans la barre latérale
+3. Cliquez sur **⚙️ Paramètres du bâtiment**
+4. Sélectionnez l'onglet **Objet**
 
-Choisissez le séparateur de colonnes directement dans le dialogue d'export :
-- **Point-virgule (;)** — Par défaut, fonctionne avec les versions européennes d'Excel
-- **Virgule (,)** — Format CSV standard
-- **Tabulation** — Pour les valeurs séparées par des tabulations
+**Champs disponibles :**
 
-**Sélection des colonnes :**
+| Champ | Description |
+|-------|-------------|
+| Nom de l'objet | Nom du projet ou de la propriété (par ex. « Villa Müller ») |
+| Nom du client | Nom du client |
+| Adresse | Adresse de la propriété (multi-lignes possible) |
+| Téléphone de contact | Numéro de téléphone du client |
+| E-mail de contact | Adresse e-mail du client |
+| Notes | Notes supplémentaires (apparaissent dans les rapports) |
 
-Utilisez les cases à cocher pour choisir les colonnes qui apparaissent dans le fichier CSV exporté. Les colonnes disponibles incluent : MAC, IP, Hostname, Firmware, Modèle, Nom, Pièce, Emplacement et d'autres champs spécifiques aux appareils.
+> **Remarque :** Le nom de l'objet est utilisé comme titre du rapport. S'il n'est pas défini, le nom du bâtiment est utilisé à la place.
 
-**Aperçu :**
-
-Le dialogue affiche un aperçu en direct des 5 premiers appareils avec les colonnes et le délimiteur actuellement sélectionnés.
-
-> **Remarque :** Le fichier CSV exporté inclut un en-tête UTF-8 BOM pour l'affichage correct des caractères spéciaux et accentués dans Excel.
+<img src="screenshots/91-building-profile-tab.png" width="450" alt="Building Profile Tab">
 
 <div style="page-break-before: always;"></div>
 
-#### 2.11.3 Snapshots
+#### 2.9.3 Snapshots
 
 Un snapshot capture l'état complet de tous les appareils d'un bâtiment à un moment donné. Les snapshots sont stockés sous forme de paquets ZIP contenant les données des appareils et les fichiers de configuration.
 
@@ -1029,7 +924,7 @@ Stagebox conserve automatiquement uniquement les 5 snapshots les plus récents p
 
 <div style="page-break-before: always;"></div>
 
-#### 2.11.4 Générateur de rapports
+#### 2.9.4 Générateur de rapports
 
 Générer des rapports d'installation professionnels au format PDF ou Excel.
 
@@ -1094,7 +989,7 @@ L'export Excel contient les mêmes informations que le PDF au format tableur :
 
 <div style="page-break-before: always;"></div>
 
-#### 2.11.5 Audit de configuration
+#### 2.9.5 Audit de configuration
 
 La fonction Audit compare l'état actuel en direct de tous les appareils avec un snapshot de référence pour détecter les changements de configuration, les nouveaux appareils ou les appareils hors ligne.
 
@@ -1200,4 +1095,4 @@ L'audit détecte et signale :
 
 ---
 
-*Manuel Stagebox Web-UI — Version 1.2.0*
+*Manuel Stagebox Web-UI — Version 1.1.0*

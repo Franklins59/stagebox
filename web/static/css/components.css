@@ -636,3 +636,46 @@
     color: #fbbf24;
     border-radius: 2px;
 }
+
+/* Collapsible accordion sections */
+.collapsible-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 6px 0;
+    margin-top: 8px;
+    border-top: 1px solid var(--border-color, rgba(255,255,255,0.1));
+    user-select: none;
+}
+
+.collapsible-header:hover {
+    opacity: 0.8;
+}
+
+.collapsible-header .collapse-icon {
+    font-size: 0.7rem;
+    transition: transform 0.2s ease;
+    color: var(--text-secondary);
+    width: 12px;
+    flex-shrink: 0;
+}
+
+.collapsible-header.open .collapse-icon {
+    transform: rotate(90deg);
+}
+
+.collapsible-header .section-title {
+    margin: 0;
+    font-size: 0.8rem;
+}
+
+.collapsible-content {
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+}
+
+.collapsible-content.collapsed {
+    max-height: 0 !important;
+    overflow: hidden;
+}

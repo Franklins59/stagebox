@@ -1,6 +1,6 @@
 # Stagebox Web-UI Gebruikershandleiding
 
-> *Deze handleiding correspondeert met Stagebox Pro Versie 1.2.0*
+> *Deze handleiding correspondeert met Stagebox Pro Versie 1.1.0*
 
 ## Deel 1: Aan de slag
 
@@ -320,7 +320,7 @@ De gebouwpagina is de hoofdwerkruimte voor het provisioneren en beheren van appa
 <img src="screenshots/30-building-page-overview.png" width="500" alt="Building Page Overview">
 
 #### Layout:
-- **Linker zijbalk:** Provisioneringsfasen, filters, acties, instellingen, diagnostiek, audit
+- **Linker zijbalk:** Provisioneringsfasen, filters, acties, instellingen
 - **Middengebied:** Apparatenlijst
 - **Rechter zijbalk:** Stage-panelen of apparaatdetails, Script-, KVS-, Webhook-, Planning- en OTA-tabbladen
 
@@ -483,17 +483,6 @@ Basisinformatie over het apparaat:
 | Firmware | Huidige versie |
 
 <img src="screenshots/50-device-info-tab.png" width="300" alt="Device Info Tab">
-
-##### Kalibratie (Cover / Dimmer)
-
-Bij ondersteunde apparaten toont het tabblad Apparaatinfo een extra kalibratiesectie:
-
-- **Cover-kalibratie**: Start de motorkalibratie op het geselecteerde rolluikapparaat. Het apparaat voert een volledige open/dicht-cyclus uit om de eindposities te bepalen.
-- **Dimmer-kalibratie**: Start de kalibratie op het geselecteerde dimmerapparaat om de juiste aansturing van de aangesloten lichtbron te waarborgen.
-
-<img src="screenshots/57-cover-dimmer-calibration.png" width="300" alt="Cover / Dimmer Calibration">
-
-> **Opmerking:** Kalibratiesecties worden alleen weergegeven als het geselecteerde apparaat het bijbehorende component bezit (Cover of Light/Dimmer).
 
 <div style="page-break-before: always;"></div>
 
@@ -667,80 +656,21 @@ Gedeelde scripts voor uitrol beheren:
 
 <div style="page-break-before: always;"></div>
 
-### 2.7 Gebouwinstellingen
+### 2.7 Expertinstellingen (Geavanceerd)
 
-Toegang via de sectie **Instellingen** → **⚙️ Gebouwinstellingen** in de zijbalk van de gebouwpagina.
+> ⚠️ **Waarschuwing:** De expertinstellingen bieden directe configuratie van het provisioneringsgedrag en systeemparameters. Onjuiste wijzigingen kunnen de apparaatprovisionering beïnvloeden. Gebruik met voorzichtigheid!
 
-Het dialoog Gebouwinstellingen biedt een interface met tabbladen voor het configureren van alle gebouwspecifieke opties.
+Toegang via de sectie **Expert** → **⚙️ Gebouwinstellingen** in de zijbalk van de gebouwpagina.
 
-**Tabbladen:** Object → Flags → Ingangstype → Stage 1 Opties → Stage 3 Opties → Modelkaart → Systeem
+Het dialoog Gebouwinstellingen biedt een interface met tabbladen voor het configureren van geavanceerde opties.
 
 ---
 
-#### 2.7.1 Tabblad Object
-
-Project- en klantinformatie voor dit gebouw. Deze gegevens verschijnen in gegenereerde rapporten.
-
-**Beschikbare velden:**
-
-| Veld | Beschrijving |
-|------|-------------|
-| Objectnaam | Project- of vastgoednaam (bijv. «Villa Müller») |
-| Klantnaam | Naam van de klant |
-| Adres | Adres van het vastgoed (meerdere regels mogelijk) |
-| Contacttelefoon | Telefoonnummer van de klant |
-| Contact-e-mail | E-mailadres van de klant |
-| Opmerkingen | Aanvullende notities (verschijnen in rapporten) |
-
-> **Opmerking:** De objectnaam wordt als rapporttitel gebruikt. Als deze niet is ingesteld, wordt de gebouwnaam gebruikt.
-
-<img src="screenshots/91-building-profile-tab.png" width="450" alt="Building Profile Tab">
-
-<div style="page-break-before: always;"></div>
-
-#### 2.7.2 Tabblad Flags
-
-Apparaatflags voor alle apparaten in het gebouw tegelijk configureren.
-
-<img src="screenshots/75-settings-flags-tab.png" width="450" alt="Flags Tab">
-
-**Beschikbare flags:**
-
-| Flag | Beschrijving |
-|------|-------------|
-| **ECO Mode** | Energiebesparingsmodus in-/uitschakelen |
-| **BLE** | Bluetooth Low Energy in-/uitschakelen |
-| **AP Mode** | Access Point-modus in-/uitschakelen |
-
-**Gebruik:**
-
-1. Selecteer de gewenste apparaten via de selectievakjes
-2. Stel de gewenste flags in of uit
-3. Klik op **Toepassen** om de instellingen naar de geselecteerde apparaten te verzenden
-
-<div style="page-break-before: always;"></div>
-
-#### 2.7.3 Tabblad Ingangstype
-
-Ingangstypen voor alle apparaatingangen in het gebouw tegelijk configureren.
-
-<img src="screenshots/76-settings-input-type-tab.png" width="450" alt="Input Type Tab">
-
-Elke fysieke ingang van een Shelly-apparaat kan worden geconfigureerd als **Drukknop** (pulsmomenteel) of **Schakelaar** (tuimelschakelaar). Apparaten met meerdere ingangen (bijv. I4 met 4 ingangen) worden volledig ondersteund.
-
-**Gebruik:**
-
-1. Selecteer de gewenste apparaten via de selectievakjes
-2. Kies het gewenste ingangstype: **Drukknop** of **Schakelaar**
-3. Klik op **Toepassen** om de instelling naar alle ingangen van de geselecteerde apparaten te verzenden
-
-<div style="page-break-before: always;"></div>
-
-#### 2.7.4 Stage 1 Opties
+#### 2.7.1 Tabblad Provisionering
 
 Regelt het gedrag van de Stage 1 (AP-modus) provisionering.
 
-<img src="screenshots/70-expert-provisioning-tab.png" width="450" alt="Stage 1 Options Tab">
+<img src="screenshots/70-expert-provisioning-tab.png" width="450" alt="Expert Provisioning Tab">
 
 | Instelling | Beschrijving | Standaard |
 |------------|-------------|-----------|
@@ -752,11 +682,11 @@ Regelt het gedrag van de Stage 1 (AP-modus) provisionering.
 
 ---
 
-#### 2.7.5 Stage 3 Opties
+#### 2.7.2 Tabblad OTA & Namen
 
 Firmware-updategedrag en naamafhandeling configureren tijdens Stage 3.
 
-<img src="screenshots/71-expert-ota-tab.png" width="450" alt="Stage 3 Options Tab">
+<img src="screenshots/71-expert-ota-tab.png" width="450" alt="Expert OTA & Names Tab">
 
 **Firmware-updates (OTA):**
 
@@ -775,7 +705,43 @@ Firmware-updategedrag en naamafhandeling configureren tijdens Stage 3.
 
 <div style="page-break-before: always;"></div>
 
-#### 2.7.6 Tabblad Modelkaart
+#### 2.7.3 Tabblad Export
+
+CSV-exportinstellingen voor apparaatlabels en rapporten configureren.
+
+<img src="screenshots/72-expert-export-tab.png" width="450" alt="Expert Export Tab">
+
+**CSV-scheidingsteken:**
+
+Kies het kolomscheidingsteken voor geëxporteerde CSV-bestanden:
+- **Puntkomma (;)** — Standaard, werkt met Europese Excel-versies
+- **Komma (,)** — Standaard CSV-formaat
+- **Tab** — Voor tabgescheiden waarden
+
+**Standaardkolommen:**
+
+Selecteer welke kolommen in geëxporteerde CSV-bestanden verschijnen. Beschikbare kolommen:
+
+| Kolom | Beschrijving |
+|-------|-------------|
+| `id` | Apparaat-MAC-adres (unieke identificatie) |
+| `ip` | Huidig IP-adres |
+| `hostname` | Apparaat-hostnaam |
+| `fw` | Firmwareversie |
+| `model` | Beschrijvende modelnaam |
+| `hw_model` | Hardware-model-ID |
+| `friendly_name` | Toegewezen apparaatnaam |
+| `room` | Kamertoewijzing |
+| `location` | Locatie binnen de kamer |
+| `assigned_at` | Tijdstip van provisionering |
+| `last_seen` | Laatste communicatietijdstempel |
+| `stage3_friendly_status` | Naamtoewijzingsstatus |
+| `stage3_ota_status` | Firmware-updatestatus |
+| `stage4_status_result` | Resultaat van de configuratiefase |
+
+<div style="page-break-before: always;"></div>
+
+#### 2.7.4 Tabblad Modelkaart
 
 Aangepaste weergavenamen definiëren voor Shelly hardware-model-ID's.
 
@@ -793,110 +759,36 @@ De modelkaart vertaalt interne hardware-identificaties (bijv. `SNSW-001X16EU`) n
 
 <div style="page-break-before: always;"></div>
 
-#### 2.7.7 Tabblad Systeem
+#### 2.7.5 Tabblad Geavanceerd (YAML-editor)
 
-Systeeminstellingen per gebouw configureren.
+Directe bewerking van configuratiebestanden voor geavanceerde scenario's.
 
-<img src="screenshots/77-settings-system-tab.png" width="450" alt="System Tab">
+<img src="screenshots/74-expert-advanced-tab.png" width="450" alt="Expert Advanced Tab">
 
-| Instelling | Beschrijving |
-|------------|-------------|
-| **Tijdzone** | Tijdzone voor planningen en tijdgebaseerde automatiseringen |
-| **NTP-server** | Server voor tijdsynchronisatie van apparaten |
-| **GPS-coördinaten** | Breedte- en lengtegraad van de gebouwlocatie, nodig voor zonsopgang-/zonsondergangberekeningen in planningen |
+**Beschikbare bestanden:**
 
-**Zwitserse standaardwaarden:** Klik op de knop **Zwitserse standaardwaarden** om automatisch de tijdzone (`Europe/Zurich`), NTP-server en een centraal Zwitsers locatiepunt in te vullen.
+| Bestand | Beschrijving |
+|---------|-------------|
+| `config.yaml` | Hoofdconfiguratie van het gebouw (IP-bereiken, apparatendatabase, provisioneringsinstellingen) |
+| `profiles/*.yaml` | Apparaatconfiguratieprofielen voor Stage 4 |
 
-**Toepassen op apparaten:** Klik op **Toepassen op apparaten** om de instellingen via `Sys.SetConfig` naar alle apparaten in het gebouw te verzenden.
+**Functies:**
+- Syntaxvalidatie (groene/rode indicator)
+- Bestandsselectie uit het keuzemenu
+- Directe inhoudsbewerking
+- Alle wijzigingen worden automatisch opgeslagen vóór het bewaren
 
-<div style="page-break-before: always;"></div>
+**Validatie-indicator:**
+- 🟢 Groen: Geldige YAML-syntaxis
+- 🔴 Rood: Syntaxfout (details bij hoveren)
 
-### 2.8 Pro Ethernet
-
-Shelly Pro-apparaten omschakelen tussen WiFi en Ethernet — in beide richtingen.
-
-Toegang via de sectie **Instellingen** → **🔌 Pro Ethernet** in de zijbalk van de gebouwpagina.
-
-<img src="screenshots/78-pro-ethernet-modal.png" width="450" alt="Pro Ethernet Modal">
-
-**Werking:**
-
-- Detecteert automatisch Pro-apparaten die al op Ethernet zitten
-- IP-adres blijft ongewijzigd tijdens het omschakelen
-- WiFi wordt uitgeschakeld bij overschakeling naar Ethernet (en vice versa)
-- 2 herstarts per apparaat vereist (~30 seconden)
-
-**Gebruik:**
-
-1. Klik op **🔌 Pro Ethernet**
-2. Kies de gewenste richting (WiFi → Ethernet of Ethernet → WiFi)
-3. Selecteer de apparaten
-4. Klik op **Omschakelen**
-
-> **Opmerking:** Alleen Shelly Pro-apparaten (bijv. Pro4PM, Pro2PM) ondersteunen Ethernet. Andere apparaten worden niet weergegeven.
+> **Aanbeveling:** Gebruik de andere tabbladen voor normale configuratie. Gebruik de YAML-editor alleen wanneer u instellingen moet wijzigen die niet beschikbaar zijn in de UI, of voor probleemoplossing.
 
 <div style="page-break-before: always;"></div>
 
-### 2.9 Diagnostiek
+### 2.8 Systeemonderhoud
 
-De sectie Diagnostiek in de zijbalk biedt hulpmiddelen voor probleemoplossing en statusmonitoring.
-
-#### 2.9.1 Health Check
-
-De Health Check bevraagt alle apparaten in het gebouw en toont een gedetailleerd statusoverzicht.
-
-<img src="screenshots/79-health-check-modal.png" width="450" alt="Health Check Modal">
-
-**Samenvatting:**
-
-Bovenaan worden drie statusbadges weergegeven:
-- ✅ **Gezond**: Apparaten zonder problemen
-- ⚠️ **Waarschuwingen**: Apparaten met afwijkingen (bijv. zwak WiFi-signaal, hoge temperatuur)
-- ⬆️ **Updates**: Apparaten met beschikbare firmware-updates
-
-**Per apparaat:**
-
-| Informatie | Beschrijving |
-|------------|-------------|
-| WiFi-signaal | Signaalsterkte in dBm met grafische indicator |
-| CPU-temperatuur | Huidige processortemperatuur |
-| Uptime | Tijd sinds de laatste herstart |
-| RAM | Geheugengebruik in procent |
-| Update-melding | Als er een nieuwere firmware beschikbaar is |
-
-Apparaten met waarschuwingen worden gemarkeerd.
-
-<div style="page-break-before: always;"></div>
-
-#### 2.9.2 WiFi-scan
-
-De WiFi-scan toont beschikbare draadloze netwerken vanuit het perspectief van een geselecteerd apparaat.
-
-<img src="screenshots/79a-wlan-scan-modal.png" width="450" alt="WiFi Scan Modal">
-
-**Gebruik:**
-
-1. Selecteer een apparaat in de apparatenlijst
-2. Klik op **📡 WiFi-scan** in de sectie Diagnostiek
-3. Het apparaat scant de omgeving en toont alle zichtbare netwerken
-
-**Per netwerk:**
-
-| Informatie | Beschrijving |
-|------------|-------------|
-| SSID | Netwerknaam |
-| Kanaal | WiFi-kanaal |
-| Signaal | Signaalsterkte in dBm met grafische indicator |
-
-Het momenteel verbonden netwerk wordt gemarkeerd.
-
-> **Tip:** Gebruik de WiFi-scan om verbindingsproblemen te diagnosticeren — bijv. om te controleren of het doel-WiFi zichtbaar is op de locatie van het apparaat en hoe sterk het signaal is.
-
-<div style="page-break-before: always;"></div>
-
-### 2.10 Systeemonderhoud
-
-#### 2.10.1 Stagebox-updates
+#### 2.8.1 Stagebox-updates
 
 Stagebox-software-updates controleren en installeren:
 
@@ -909,7 +801,7 @@ Stagebox-software-updates controleren en installeren:
 <img src="screenshots/80-stagebox-update.png" width="450" alt="Stagebox Update Dialog">
 <div style="page-break-before: always;"></div>
 
-#### 2.10.2 Systeemupdates
+#### 2.8.2 Systeemupdates
 
 Besturingssysteemupdates controleren en installeren:
 
@@ -925,11 +817,11 @@ Besturingssysteemupdates controleren en installeren:
 
 <div style="page-break-before: always;"></div>
 
-### 2.11 Rapporten & Documentatie
+### 2.9 Rapporten & Documentatie
 
 Stagebox biedt uitgebreide rapportagefuncties voor professionele installatiedocumentatie. Rapporten bevatten apparaatinventarissen, configuratiedetails en kunnen worden aangepast met installateurbranding.
 
-#### 2.11.1 Installatieprofiel
+#### 2.9.1 Installatieprofiel
 
 Het installatieprofiel bevat uw bedrijfsinformatie die op alle gegenereerde rapporten verschijnt. Dit is een globale instelling die voor alle gebouwen geldt.
 
@@ -961,32 +853,35 @@ Het installatieprofiel bevat uw bedrijfsinformatie die op alle gegenereerde rapp
 
 <div style="page-break-before: always;"></div>
 
-#### 2.11.2 Labelexport
+#### 2.9.2 Gebouwprofiel (Objectinformatie)
 
-Apparaatlabels exporteren als CSV-bestand. De labelexport bevindt zich in de sectie **Audit** van de zijbalk.
+Elk gebouw kan een eigen profiel hebben met klant- en projectspecifieke informatie. Deze gegevens verschijnen in rapporten die voor dat gebouw worden gegenereerd.
 
-<img src="screenshots/96-label-export-dialog.png" width="450" alt="Label Export Dialog">
+**Toegang tot het gebouwprofiel:**
 
-**CSV-scheidingsteken:**
+1. Open de gebouwpagina
+2. Ga naar de sectie **Expert** in de zijbalk
+3. Klik op **⚙️ Gebouwinstellingen**
+4. Selecteer het tabblad **Object**
 
-Kies het kolomscheidingsteken direct in het exportdialoog:
-- **Puntkomma (;)** — Standaard, werkt met Europese Excel-versies
-- **Komma (,)** — Standaard CSV-formaat
-- **Tab** — Voor tabgescheiden waarden
+**Beschikbare velden:**
 
-**Kolomselectie:**
+| Veld | Beschrijving |
+|------|-------------|
+| Objectnaam | Project- of vastgoednaam (bijv. «Villa Müller») |
+| Klantnaam | Naam van de klant |
+| Adres | Adres van het vastgoed (meerdere regels mogelijk) |
+| Contacttelefoon | Telefoonnummer van de klant |
+| Contact-e-mail | E-mailadres van de klant |
+| Opmerkingen | Aanvullende notities (verschijnen in rapporten) |
 
-Gebruik selectievakjes om te kiezen welke kolommen in het geëxporteerde CSV-bestand verschijnen. Beschikbare kolommen omvatten: MAC, IP, Hostnaam, Firmware, Model, Naam, Kamer, Locatie en andere apparaatspecifieke velden.
+> **Opmerking:** De objectnaam wordt als rapporttitel gebruikt. Als deze niet is ingesteld, wordt in plaats daarvan de gebouwnaam gebruikt.
 
-**Voorbeeld:**
-
-Het dialoog toont een live-voorbeeld van de eerste 5 apparaten met de momenteel geselecteerde kolommen en het scheidingsteken.
-
-> **Opmerking:** Het geëxporteerde CSV-bestand bevat een UTF-8 BOM-header voor de correcte weergave van umlauten en speciale tekens in Excel.
+<img src="screenshots/91-building-profile-tab.png" width="450" alt="Building Profile Tab">
 
 <div style="page-break-before: always;"></div>
 
-#### 2.11.3 Snapshots
+#### 2.9.3 Snapshots
 
 Een snapshot legt de volledige status vast van alle apparaten in een gebouw op een specifiek moment. Snapshots worden opgeslagen als ZIP-pakketten met apparaatgegevens en configuratiebestanden.
 
@@ -1029,7 +924,7 @@ Stagebox bewaart automatisch alleen de 5 meest recente snapshots per gebouw om o
 
 <div style="page-break-before: always;"></div>
 
-#### 2.11.4 Rapportgenerator
+#### 2.9.4 Rapportgenerator
 
 Professionele installatierapporten genereren in PDF- of Excel-formaat.
 
@@ -1094,7 +989,7 @@ De Excel-export bevat dezelfde informatie als het PDF-rapport in spreadsheetform
 
 <div style="page-break-before: always;"></div>
 
-#### 2.11.5 Configuratie-audit
+#### 2.9.5 Configuratie-audit
 
 De auditfunctie vergelijkt de huidige livestatus van alle apparaten met een referentiesnapshot om configuratiewijzigingen, nieuwe apparaten of offline-apparaten te detecteren.
 
@@ -1200,4 +1095,4 @@ De audit detecteert en rapporteert:
 
 ---
 
-*Stagebox Web-UI Handleiding — Versie 1.2.0*
+*Stagebox Web-UI Handleiding — Versie 1.1.0*

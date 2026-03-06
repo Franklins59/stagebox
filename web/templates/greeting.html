@@ -1327,7 +1327,7 @@
             </div>
         </div>
         <div class="header-right">
-            <a href="/manual" class="manual-btn" id="manual-link">📖 <span data-i18n="manual.title">Manual</span></a>
+            <a href="/manual" class="manual-btn" id="manual-link" target="stagebox-manual">📖 <span data-i18n="manual.title">Manual</span></a>
         </div>
     </header>
 
@@ -2104,7 +2104,7 @@
         function updateManualLink() {
             const lang = i18n.getLanguage();
             const manualLink = document.getElementById('manual-link');
-            if (manualLink && lang !== 'en') {
+            if (manualLink) {
                 manualLink.href = `/manual?lang=${lang}`;
             }
         }

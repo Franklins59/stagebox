@@ -327,6 +327,86 @@ const API = {
             method: 'POST',
             body: JSON.stringify(network)
         });
+    },
+    
+    // =========================================================================
+    // Diagnostics
+    // =========================================================================
+    
+    /**
+     * Run health check on all or selected devices (Pro only)
+     * @param {string[]} [devices] - Optional array of MACs to check
+     */
+    async healthCheck(devices = []) {
+        return await this.request('/api/diagnostics/health-check', {
+            method: 'POST',
+            body: JSON.stringify({ devices })
+        });
+    },
+    
+    /**
+     * Run WiFi scan from a specific device
+     * @param {string} deviceId - Device MAC
+     */
+    async wifiScan(deviceId) {
+        return await this.request(`/api/diagnostics/wifi-scan/${encodeURIComponent(deviceId)}`, {
+            method: 'POST'
+        });
+    },
+    
+    /**
+     * Get Ethernet + ECO mode config for a device
+     * @param {string} deviceId - Device MAC
+     */
+    async getDeviceNetwork(deviceId) {
+        return await this.request(`/api/diagnostics/device/${encodeURIComponent(deviceId)}/network`);
+    },
+    
+    /**
+     * Update Ethernet and/or ECO mode config
+     * @param {string} deviceId - Device MAC
+     * @param {object} config - {eco_mode: bool, ethernet: {...}}
+     */
+    async setDeviceNetwork(deviceId, config) {
+        return await this.request(`/api/diagnostics/device/${encodeURIComponent(deviceId)}/network`, {
+            method: 'PUT',
+            body: JSON.stringify(config)
+        });
+    },
+    
+    // =========================================================================
+    // Pro Ethernet
+    // =========================================================================
+    
+    /**
+     * Scan all devices for Ethernet link status (Pro only)
+     */
+    async proEthernetScan() {
+        return await this.request('/api/pro-ethernet/scan', {
+            method: 'POST'
+        });
+    },
+    
+    /**
+     * Switch selected devices from WiFi to Ethernet (Pro only)
+     * @param {string[]} devices - Array of MACs to switch
+     */
+    async proEthernetSwitch(devices) {
+        return await this.request('/api/pro-ethernet/switch', {
+            method: 'POST',
+            body: JSON.stringify({ devices })
+        });
+    },
+    
+    /**
+     * Revert selected devices from Ethernet back to WiFi
+     * @param {string[]} devices - Array of MACs to revert
+     */
+    async proEthernetRevert(devices) {
+        return await this.request('/api/pro-ethernet/revert', {
+            method: 'POST',
+            body: JSON.stringify({ devices })
+        });
     }
 };
 

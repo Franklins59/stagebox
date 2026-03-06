@@ -226,6 +226,12 @@ def admin_get_settings():
             'report': {
                 'csv_delimiter': cfg.get('report', {}).get('export', {}).get('csv_delimiter', ';'),
                 'default_columns': cfg.get('report', {}).get('export', {}).get('default_columns', []),
+            },
+            'system': {
+                'timezone': cfg.get('system', {}).get('timezone', ''),
+                'ntp_server': cfg.get('system', {}).get('ntp_server', ''),
+                'latitude': cfg.get('system', {}).get('location', {}).get('lat', None),
+                'longitude': cfg.get('system', {}).get('location', {}).get('lng', None),
             }
         }
         
@@ -292,6 +298,24 @@ def admin_save_settings():
             if 'default_columns' in rpt:
                 cfg['report']['export']['default_columns'] = rpt['default_columns']
         
+        # Update system settings
+        if 'system' in data:
+            if 'system' not in cfg:
+                cfg['system'] = {}
+            
+            sys_data = data['system']
+            if 'timezone' in sys_data:
+                cfg['system']['timezone'] = sys_data['timezone'] or ''
+            if 'ntp_server' in sys_data:
+                cfg['system']['ntp_server'] = sys_data['ntp_server'] or ''
+            if 'latitude' in sys_data or 'longitude' in sys_data:
+                if 'location' not in cfg['system']:
+                    cfg['system']['location'] = {}
+                if 'latitude' in sys_data:
+                    cfg['system']['location']['lat'] = sys_data['latitude']
+                if 'longitude' in sys_data:
+                    cfg['system']['location']['lng'] = sys_data['longitude']
+        
         # Save
         with open(config.CONFIG_FILE, 'w', encoding='utf-8') as f:
             yaml.dump(cfg, f, default_flow_style=False, allow_unicode=True)
@@ -300,6 +324,123 @@ def admin_save_settings():
         
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# ===========================================================================
+# Apply System Config to Devices
+# ===========================================================================
+
+@bp.route('/api/admin/apply-system-config', methods=['POST'])
+@require_admin
+def apply_system_config():
+    """Apply system settings (timezone, NTP, location) to all online devices."""
+    import requests as http_requests
+    from web.services import device_manager
+
+    if not config.DATA_DIR:
+        return jsonify({'success': False, 'error': 'No building active'}), 400
+
+    data = request.get_json() or {}
+    timezone = data.get('timezone')
+    ntp_server = data.get('ntp_server')
+    lat = data.get('latitude')
+    lng = data.get('longitude')
+
+    # Build Sys.SetConfig payload
+    sys_config = {}
+    if timezone:
+        if 'location' not in sys_config:
+            sys_config['location'] = {}
+        sys_config['location']['tz'] = timezone
+    if lat is not None:
+        if 'location' not in sys_config:
+            sys_config['location'] = {}
+        sys_config['location']['lat'] = float(lat)
+    if lng is not None:
+        if 'location' not in sys_config:
+            sys_config['location'] = {}
+        sys_config['location']['lng'] = float(lng)
+    if ntp_server:
+        sys_config['sntp'] = {'server': ntp_server}
+
+    if not sys_config:
+        return jsonify({'success': False, 'error': 'No settings to apply'}), 400
+
+    # Load all devices
+    device_manager.load_devices()
+    devices = device_manager.devices
+
+    if not devices:
+        return jsonify({'success': True, 'results': []})
+
+    results = []
+    for device in devices:
+        ip = device.get('ip')
+        mac = device.get('id', '')
+        name = device.get('friendly_name') or device.get('room', '') or ip or mac
+
+        if not ip:
+            results.append({
+                'ip': ip, 'mac': mac, 'name': name,
+                'success': False, 'error': 'No IP'
+            })
+            continue
+
+        try:
+            resp = http_requests.post(
+                f'http://{ip}/rpc',
+                json={
+                    'id': 1,
+                    'method': 'Sys.SetConfig',
+                    'params': {'config': sys_config}
+                },
+                timeout=5
+            )
+            if resp.status_code == 200:
+                rpc_data = resp.json()
+                if 'result' in rpc_data:
+                    results.append({
+                        'ip': ip, 'mac': mac, 'name': name,
+                        'success': True,
+                        'restart_required': rpc_data['result'].get('restart_required', False)
+                    })
+                elif 'error' in rpc_data:
+                    results.append({
+                        'ip': ip, 'mac': mac, 'name': name,
+                        'success': False,
+                        'error': rpc_data['error'].get('message', 'RPC error')
+                    })
+                else:
+                    results.append({
+                        'ip': ip, 'mac': mac, 'name': name,
+                        'success': False, 'error': f'Unexpected response'
+                    })
+            else:
+                results.append({
+                    'ip': ip, 'mac': mac, 'name': name,
+                    'success': False, 'error': f'HTTP {resp.status_code}'
+                })
+        except http_requests.exceptions.Timeout:
+            results.append({
+                'ip': ip, 'mac': mac, 'name': name,
+                'success': False, 'error': 'Timeout (offline?)'
+            })
+        except Exception as e:
+            results.append({
+                'ip': ip, 'mac': mac, 'name': name,
+                'success': False, 'error': str(e)
+            })
+
+    ok_count = sum(1 for r in results if r['success'])
+    return jsonify({
+        'success': True,
+        'results': results,
+        'summary': {
+            'total': len(results),
+            'ok': ok_count,
+            'failed': len(results) - ok_count
+        }
+    })
 
 
 # ===========================================================================

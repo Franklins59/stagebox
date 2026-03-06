@@ -99,7 +99,7 @@ const UI = {
         });
         
         // Track checkbox changes in settings sections
-        document.querySelectorAll('#switch-settings-section input, #cover-settings-section input').forEach(input => {
+        document.querySelectorAll('#switch-settings-section input, #cover-settings-section input, #cover-settings-section select, #light-settings-section input, #light-settings-section select').forEach(input => {
             input.addEventListener('change', () => {
                 this.checkFormChanges();
             });
@@ -544,6 +544,46 @@ const UI = {
                     document.getElementById('cover-close-time').value = settings.cover.maxtime_close || 60;
                     document.getElementById('cover-swap-inputs').checked = settings.cover.swap_inputs || false;
                     document.getElementById('cover-invert').checked = settings.cover.invert_directions || false;
+                    document.getElementById('cover-initial-state').value = settings.cover.initial_state || 'stopped';
+                    
+                    // Calibration status
+                    const badge = document.getElementById('cover-calib-badge');
+                    if (settings.cover.pos_control === true) {
+                        badge.className = 'calib-badge calibrated';
+                        badge.textContent = '✅ ' + (i18n.t('details.calibrated') || 'Calibrated');
+                    } else if (settings.cover.pos_control === false) {
+                        badge.className = 'calib-badge not-calibrated';
+                        badge.textContent = '⚠️ ' + (i18n.t('details.not_calibrated') || 'Not Calibrated');
+                    } else {
+                        badge.className = 'calib-badge unknown';
+                        badge.textContent = '—';
+                    }
+                    
+                    // Obstruction detection
+                    document.getElementById('cover-obstruction-enable').checked = settings.cover.obstruction_enable || false;
+                    document.getElementById('cover-obstruction-direction').value = settings.cover.obstruction_direction || 'both';
+                    document.getElementById('cover-obstruction-action').value = settings.cover.obstruction_action || 'stop';
+                    document.getElementById('cover-obstruction-power').value = settings.cover.obstruction_power_thr ?? -1;
+                    toggleObstructionFields();
+                    
+                    // Slat control
+                    document.getElementById('cover-slat-enable').checked = settings.cover.slat_enable || false;
+                    document.getElementById('cover-slat-open-time').value = settings.cover.slat_open_time ?? 1.5;
+                    document.getElementById('cover-slat-close-time').value = settings.cover.slat_close_time ?? 1.5;
+                    document.getElementById('cover-slat-step').value = settings.cover.slat_step ?? 5;
+                    toggleSlatFields();
+                    
+                    // Cover protections
+                    const cvProtSection = document.getElementById('cover-protections-section');
+                    if (settings.cover.power_limit != null) {
+                        document.getElementById('cover-power-limit').value = settings.cover.power_limit;
+                        document.getElementById('cover-current-limit').value = settings.cover.current_limit ?? '';
+                        document.getElementById('cover-voltage-limit').value = settings.cover.voltage_limit ?? 280;
+                        document.getElementById('cover-undervoltage-limit').value = settings.cover.undervoltage_limit ?? 100;
+                        if (cvProtSection) cvProtSection.style.display = '';
+                    } else {
+                        if (cvProtSection) cvProtSection.style.display = 'none';
+                    }
                     
                     this.originalSettings.cover = { ...settings.cover };
                 }
@@ -555,11 +595,50 @@ const UI = {
                     document.getElementById('light-initial-state').value = settings.light.initial_state || 'off';
                     document.getElementById('light-default-brightness').value = settings.light.default_brightness || 100;
                     document.getElementById('light-min-brightness').value = settings.light.min_brightness_on_toggle || 0;
+                    document.getElementById('light-transition').value = settings.light.transition_duration ?? 0;
+                    document.getElementById('light-fade-rate').value = settings.light.button_fade_rate ?? 3;
+                    document.getElementById('light-in-mode').value = settings.light.in_mode || 'dim';
+                    // Filter in_mode options based on current Input.type
+                    setTimeout(filterInModeOptions, 100);
+                    // Range map
+                    const rangeMap = settings.light.range_map || [0, 100];
+                    document.getElementById('light-range-min').value = rangeMap[0] ?? 0;
+                    document.getElementById('light-range-max').value = rangeMap[1] ?? 100;
+                    // Protections (only show section if values exist)
+                    const protSection = document.getElementById('light-protections-section');
+                    if (settings.light.power_limit != null) {
+                        document.getElementById('light-power-limit').value = settings.light.power_limit;
+                        document.getElementById('light-current-limit').value = settings.light.current_limit ?? '';
+                        document.getElementById('light-voltage-limit').value = settings.light.voltage_limit ?? 280;
+                        document.getElementById('light-undervoltage-limit').value = settings.light.undervoltage_limit ?? 100;
+                        if (protSection) protSection.style.display = '';
+                    } else {
+                        // Device doesn't support protections
+                        if (protSection) protSection.style.display = 'none';
+                    }
                     document.getElementById('light-night-mode').checked = settings.light.night_mode_enable || false;
                     document.getElementById('light-night-brightness').value = settings.light.night_mode_brightness || 50;
+                    // Night mode active_between
+                    const activeBetween = settings.light.night_mode_active_between || [];
+                    document.getElementById('light-night-from').value = activeBetween[0] || '22:00';
+                    document.getElementById('light-night-to').value = activeBetween[1] || '06:00';
+                    toggleNightModeFields();
+                    // Light calibration status
+                    const lightBadge = document.getElementById('light-calib-badge');
+                    if (settings.light.calibrating === true) {
+                        lightBadge.className = 'calib-badge calibrating';
+                        lightBadge.textContent = '⏳ ' + (i18n.t('details.calibrating') || 'Calibrating...');
+                    } else if (settings.light.calibrating === false) {
+                        lightBadge.className = 'calib-badge calibrated';
+                        lightBadge.textContent = '✅ ' + (i18n.t('details.ready') || 'Ready');
+                    } else {
+                        lightBadge.className = 'calib-badge unknown';
+                        lightBadge.textContent = '—';
+                    }
+                    document.getElementById('light-auto-on').checked = settings.light.auto_on || false;
                     document.getElementById('light-auto-off').checked = settings.light.auto_off || false;
-                    document.getElementById('light-auto-off-delay').value = settings.light.auto_off_delay || 60;
                     document.getElementById('light-auto-on-delay').value = settings.light.auto_on_delay || 60;
+                    document.getElementById('light-auto-off-delay').value = settings.light.auto_off_delay || 60;
                     
                     this.originalSettings.light = { ...settings.light };
                     this.originalSettings.inputModeSource = settings.input_mode_source;
@@ -583,6 +662,18 @@ const UI = {
                     document.getElementById('switch-auto-off-delay').value = settings.switch.auto_off_delay || 60;
                     document.getElementById('switch-auto-on').checked = settings.switch.auto_on || false;
                     document.getElementById('switch-auto-on-delay').value = settings.switch.auto_on_delay || 60;
+                    
+                    // Switch protections
+                    const swProtSection = document.getElementById('switch-protections-section');
+                    if (settings.switch.power_limit != null) {
+                        document.getElementById('switch-power-limit').value = settings.switch.power_limit;
+                        document.getElementById('switch-current-limit').value = settings.switch.current_limit ?? '';
+                        document.getElementById('switch-voltage-limit').value = settings.switch.voltage_limit ?? 280;
+                        document.getElementById('switch-undervoltage-limit').value = settings.switch.undervoltage_limit ?? 100;
+                        if (swProtSection) swProtSection.style.display = '';
+                    } else {
+                        if (swProtSection) swProtSection.style.display = 'none';
+                    }
                     
                     this.originalSettings.switch = { ...settings.switch };
                     this.originalSettings.inputModeSource = settings.input_mode_source;
@@ -634,10 +725,15 @@ const UI = {
                         currentMode = input.type;
                     }
                     
-                    const modeControl = `<select id="input-type-${input.id}" data-input-id="${input.id}" data-mode-source="${inputModeSource}">
+                    const modeControl = `<select id="input-type-${input.id}" data-input-id="${input.id}" data-mode-source="${inputModeSource}"
+                               ${inputModeSource === 'light' ? 'style="display:none"' : ''}>
                                <option value="button" ${currentMode === 'button' ? 'selected' : ''}>Button</option>
                                <option value="switch" ${currentMode === 'switch' ? 'selected' : ''}>Switch</option>
                            </select>`;
+                    
+                    // For dimmers, show the synced type as info text instead
+                    const typeInfo = inputModeSource === 'light' ? 
+                        `<span class="input-type-info" style="font-size:0.8rem; color: var(--text-secondary);">${currentMode}</span>` : '';
                     
                     row.innerHTML = `
                         <div class="form-group" style="flex: 2;">
@@ -647,7 +743,7 @@ const UI = {
                         </div>
                         <div class="form-group" style="flex: 1;">
                             <label>Type</label>
-                            ${modeControl}
+                            ${modeControl}${typeInfo}
                         </div>
                         <div class="form-group checkbox-group" style="flex: 0; padding-top: 1.4rem;">
                             <label>
@@ -660,7 +756,13 @@ const UI = {
                     
                     // Add change listeners
                     row.querySelectorAll('select, input').forEach(el => {
-                        el.addEventListener('change', () => this.checkFormChanges());
+                        el.addEventListener('change', () => {
+                            this.checkFormChanges();
+                            // Sync in_mode options when input type changes (dimmers)
+                            if (el.id && el.id.startsWith('input-type-')) {
+                                if (typeof filterInModeOptions === 'function') filterInModeOptions();
+                            }
+                        });
                     });
                 });
             }
@@ -689,6 +791,10 @@ const UI = {
                 auto_off_delay: parseFloat(document.getElementById('switch-auto-off-delay').value) || 60,
                 auto_on: document.getElementById('switch-auto-on').checked,
                 auto_on_delay: parseFloat(document.getElementById('switch-auto-on-delay').value) || 60,
+                power_limit: document.getElementById('switch-power-limit').value !== '' ? parseInt(document.getElementById('switch-power-limit').value) : null,
+                current_limit: document.getElementById('switch-current-limit').value !== '' ? parseFloat(document.getElementById('switch-current-limit').value) : null,
+                voltage_limit: document.getElementById('switch-voltage-limit').value !== '' ? parseInt(document.getElementById('switch-voltage-limit').value) : null,
+                undervoltage_limit: document.getElementById('switch-undervoltage-limit').value !== '' ? parseInt(document.getElementById('switch-undervoltage-limit').value) : null,
             };
         }
         
@@ -699,6 +805,21 @@ const UI = {
                 maxtime_close: parseFloat(document.getElementById('cover-close-time').value) || 60,
                 swap_inputs: document.getElementById('cover-swap-inputs').checked,
                 invert_directions: document.getElementById('cover-invert').checked,
+                initial_state: document.getElementById('cover-initial-state').value,
+                // Obstruction detection
+                obstruction_enable: document.getElementById('cover-obstruction-enable').checked,
+                obstruction_direction: document.getElementById('cover-obstruction-direction').value,
+                obstruction_action: document.getElementById('cover-obstruction-action').value,
+                obstruction_power_thr: parseFloat(document.getElementById('cover-obstruction-power').value) ?? -1,
+                // Slat control
+                slat_enable: document.getElementById('cover-slat-enable').checked,
+                slat_open_time: parseFloat(document.getElementById('cover-slat-open-time').value) || 1.5,
+                slat_close_time: parseFloat(document.getElementById('cover-slat-close-time').value) || 1.5,
+                slat_step: parseInt(document.getElementById('cover-slat-step').value) || 5,
+                power_limit: document.getElementById('cover-power-limit').value !== '' ? parseInt(document.getElementById('cover-power-limit').value) : null,
+                current_limit: document.getElementById('cover-current-limit').value !== '' ? parseFloat(document.getElementById('cover-current-limit').value) : null,
+                voltage_limit: document.getElementById('cover-voltage-limit').value !== '' ? parseInt(document.getElementById('cover-voltage-limit').value) : null,
+                undervoltage_limit: document.getElementById('cover-undervoltage-limit').value !== '' ? parseInt(document.getElementById('cover-undervoltage-limit').value) : null,
             };
         }
         
@@ -708,11 +829,27 @@ const UI = {
                 initial_state: document.getElementById('light-initial-state').value,
                 default_brightness: parseInt(document.getElementById('light-default-brightness').value) || 100,
                 min_brightness_on_toggle: parseInt(document.getElementById('light-min-brightness').value) || 0,
+                transition_duration: parseFloat(document.getElementById('light-transition').value) || 0,
+                button_fade_rate: parseInt(document.getElementById('light-fade-rate').value) || 3,
+                in_mode: document.getElementById('light-in-mode').value,
+                range_map: [
+                    parseInt(document.getElementById('light-range-min').value) || 0,
+                    parseInt(document.getElementById('light-range-max').value) || 100
+                ],
+                power_limit: document.getElementById('light-power-limit').value !== '' ? parseInt(document.getElementById('light-power-limit').value) : null,
+                current_limit: document.getElementById('light-current-limit').value !== '' ? parseFloat(document.getElementById('light-current-limit').value) : null,
+                voltage_limit: document.getElementById('light-voltage-limit').value !== '' ? parseInt(document.getElementById('light-voltage-limit').value) : null,
+                undervoltage_limit: document.getElementById('light-undervoltage-limit').value !== '' ? parseInt(document.getElementById('light-undervoltage-limit').value) : null,
                 night_mode_enable: document.getElementById('light-night-mode').checked,
                 night_mode_brightness: parseInt(document.getElementById('light-night-brightness').value) || 50,
+                night_mode_active_between: [
+                    document.getElementById('light-night-from').value || '22:00',
+                    document.getElementById('light-night-to').value || '06:00'
+                ],
+                auto_on: document.getElementById('light-auto-on').checked,
                 auto_off: document.getElementById('light-auto-off').checked,
-                auto_off_delay: parseFloat(document.getElementById('light-auto-off-delay').value) || 60,
                 auto_on_delay: parseFloat(document.getElementById('light-auto-on-delay').value) || 60,
+                auto_off_delay: parseFloat(document.getElementById('light-auto-off-delay').value) || 60,
             };
         }
         
@@ -757,6 +894,11 @@ const UI = {
             if (orig.auto_off_delay !== curr.auto_off_delay) return true;
             if (orig.auto_on !== curr.auto_on) return true;
             if (orig.auto_on_delay !== curr.auto_on_delay) return true;
+            // Protections
+            if ((orig.power_limit ?? null) !== curr.power_limit) return true;
+            if ((orig.current_limit ?? null) !== curr.current_limit) return true;
+            if ((orig.voltage_limit ?? null) !== curr.voltage_limit) return true;
+            if ((orig.undervoltage_limit ?? null) !== curr.undervoltage_limit) return true;
         }
         
         if (current.cover && this.originalSettings.cover) {
@@ -767,6 +909,22 @@ const UI = {
             if (orig.maxtime_close !== curr.maxtime_close) return true;
             if (orig.swap_inputs !== curr.swap_inputs) return true;
             if (orig.invert_directions !== curr.invert_directions) return true;
+            if ((orig.initial_state || 'stopped') !== curr.initial_state) return true;
+            // Obstruction detection
+            if ((orig.obstruction_enable || false) !== curr.obstruction_enable) return true;
+            if ((orig.obstruction_direction || 'both') !== curr.obstruction_direction) return true;
+            if ((orig.obstruction_action || 'stop') !== curr.obstruction_action) return true;
+            if ((orig.obstruction_power_thr ?? -1) !== curr.obstruction_power_thr) return true;
+            // Slat control
+            if ((orig.slat_enable || false) !== curr.slat_enable) return true;
+            if ((orig.slat_open_time ?? 1.5) !== curr.slat_open_time) return true;
+            if ((orig.slat_close_time ?? 1.5) !== curr.slat_close_time) return true;
+            if ((orig.slat_step ?? 5) !== curr.slat_step) return true;
+            // Protections
+            if ((orig.power_limit ?? null) !== curr.power_limit) return true;
+            if ((orig.current_limit ?? null) !== curr.current_limit) return true;
+            if ((orig.voltage_limit ?? null) !== curr.voltage_limit) return true;
+            if ((orig.undervoltage_limit ?? null) !== curr.undervoltage_limit) return true;
         }
         
         if (current.light && this.originalSettings.light) {
@@ -776,11 +934,30 @@ const UI = {
             if (orig.initial_state !== curr.initial_state) return true;
             if (orig.default_brightness !== curr.default_brightness) return true;
             if (orig.min_brightness_on_toggle !== curr.min_brightness_on_toggle) return true;
+            if ((orig.transition_duration ?? 0) !== curr.transition_duration) return true;
+            if ((orig.button_fade_rate ?? 3) !== curr.button_fade_rate) return true;
+            if ((orig.in_mode || 'dim') !== curr.in_mode) return true;
+            // Range map
+            const origRM = orig.range_map || [0, 100];
+            const currRM = curr.range_map || [0, 100];
+            if ((origRM[0] ?? 0) !== (currRM[0] ?? 0)) return true;
+            if ((origRM[1] ?? 100) !== (currRM[1] ?? 100)) return true;
+            // Protections
+            if ((orig.power_limit ?? null) !== curr.power_limit) return true;
+            if ((orig.current_limit ?? null) !== curr.current_limit) return true;
+            if ((orig.voltage_limit ?? null) !== curr.voltage_limit) return true;
+            if ((orig.undervoltage_limit ?? null) !== curr.undervoltage_limit) return true;
             if (orig.night_mode_enable !== curr.night_mode_enable) return true;
             if (orig.night_mode_brightness !== curr.night_mode_brightness) return true;
+            // Compare active_between arrays
+            const origAB = orig.night_mode_active_between || [];
+            const currAB = curr.night_mode_active_between || [];
+            if ((origAB[0] || '22:00') !== (currAB[0] || '22:00')) return true;
+            if ((origAB[1] || '06:00') !== (currAB[1] || '06:00')) return true;
+            if ((orig.auto_on || false) !== curr.auto_on) return true;
             if (orig.auto_off !== curr.auto_off) return true;
-            if (orig.auto_off_delay !== curr.auto_off_delay) return true;
             if (orig.auto_on_delay !== curr.auto_on_delay) return true;
+            if (orig.auto_off_delay !== curr.auto_off_delay) return true;
         }
         
         if (current.inputs && this.originalSettings.inputs) {
@@ -864,6 +1041,7 @@ const UI = {
         try {
             this.elements.saveBtn.disabled = true;
             this.elements.saveBtn.textContent = i18n.t('details.saving');
+            let needsReboot = false;
             
             // 1. Save to ip_state.json
             const result = await API.updateDevice(deviceId, updates);
@@ -895,9 +1073,27 @@ const UI = {
                     window.App.loadDevices();
                     return;
                 }
+                if (settingsResult.restart_required) {
+                    needsReboot = true;
+                }
             }
             
             this.showToast(i18n.t('details.update_success'), 'success');
+            
+            // Show reboot dialog if needed
+            if (needsReboot) {
+                const rebootMsg = i18n.t('details.restart_required') || 'The device requires a reboot to apply changes.';
+                const rebootBtn = i18n.t('details.reboot_now') || 'Reboot Now';
+                const laterBtn = i18n.t('common.later') || 'Later';
+                if (confirm(`${rebootMsg}\n\n${rebootBtn}?`)) {
+                    try {
+                        await fetch(`/api/devices/${deviceId}/reboot`, { method: 'POST' });
+                        this.showToast(i18n.t('details.rebooting') || 'Rebooting device...', 'info');
+                    } catch (e) {
+                        this.showToast(i18n.t('details.reboot_failed') || 'Reboot failed', 'error');
+                    }
+                }
+            }
             
             // Reload and re-select device
             await window.App.loadDevices();

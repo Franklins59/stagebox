@@ -182,6 +182,11 @@ def get_device_settings(device_id):
                 'auto_off': switch_config.get('auto_off', False),
                 'auto_off_delay': switch_config.get('auto_off_delay', 60),
                 'in_mode': switch_config.get('in_mode', 'momentary'),
+                # Protections (may not exist on all devices)
+                'power_limit': switch_config.get('power_limit'),
+                'voltage_limit': switch_config.get('voltage_limit'),
+                'undervoltage_limit': switch_config.get('undervoltage_limit'),
+                'current_limit': switch_config.get('current_limit'),
             }
             # If device has switch component, input mode is controlled via switch.in_mode
             result['input_mode_source'] = 'switch'
@@ -191,6 +196,8 @@ def get_device_settings(device_id):
         # Try to get Cover config
         try:
             cover_config = rpc.call('Cover.GetConfig', {'id': 0})
+            obstruction = cover_config.get('obstruction_detection', {})
+            slat = cover_config.get('slat_control', {})
             result['cover'] = {
                 'name': cover_config.get('name', ''),
                 'maxtime_open': cover_config.get('maxtime_open', 60),
@@ -198,7 +205,32 @@ def get_device_settings(device_id):
                 'swap_inputs': cover_config.get('swap_inputs', False),
                 'invert_directions': cover_config.get('invert_directions', False),
                 'initial_state': cover_config.get('initial_state', 'stopped'),
+                # Obstruction detection
+                'obstruction_enable': obstruction.get('enable', False),
+                'obstruction_direction': obstruction.get('direction', 'both'),
+                'obstruction_action': obstruction.get('action', 'stop'),
+                'obstruction_power_thr': obstruction.get('power_thr', -1),
+                # Slat control (Venetian blinds)
+                'slat_enable': slat.get('enable', False) if slat else False,
+                'slat_open_time': slat.get('open_time', 1.5) if slat else 1.5,
+                'slat_close_time': slat.get('close_time', 1.5) if slat else 1.5,
+                'slat_step': slat.get('step', 5) if slat else 5,
+                # Protections (may not exist on all devices)
+                'power_limit': cover_config.get('power_limit'),
+                'voltage_limit': cover_config.get('voltage_limit'),
+                'undervoltage_limit': cover_config.get('undervoltage_limit'),
+                'current_limit': cover_config.get('current_limit'),
             }
+            # Also get Cover status for calibration info
+            try:
+                cover_status = rpc.call('Cover.GetStatus', {'id': 0})
+                result['cover']['pos_control'] = cover_status.get('pos_control', False)
+                result['cover']['current_pos'] = cover_status.get('current_pos')
+                result['cover']['state'] = cover_status.get('state', 'stopped')
+            except:
+                result['cover']['pos_control'] = None
+                result['cover']['current_pos'] = None
+                result['cover']['state'] = None
         except:
             pass  # Device might not have Cover component
         
@@ -215,10 +247,29 @@ def get_device_settings(device_id):
                 'default_brightness': light_config.get('default', {}).get('brightness', 100),
                 'night_mode_enable': light_config.get('night_mode', {}).get('enable', False),
                 'night_mode_brightness': light_config.get('night_mode', {}).get('brightness', 50),
+                'night_mode_active_between': light_config.get('night_mode', {}).get('active_between', []),
                 'min_brightness_on_toggle': light_config.get('min_brightness_on_toggle', 0),
+                'transition_duration': light_config.get('transition_duration', 0),
+                'button_fade_rate': light_config.get('button_fade_rate', 3),
+                # Input mode (dim/follow/flip/activate)
+                'in_mode': light_config.get('in_mode', 'dim'),
+                # Range map (min/max brightness)
+                'range_map': light_config.get('range_map', [0, 100]),
+                # Protections
+                'current_limit': light_config.get('current_limit'),
+                'power_limit': light_config.get('power_limit'),
+                'voltage_limit': light_config.get('voltage_limit'),
+                'undervoltage_limit': light_config.get('undervoltage_limit'),
             }
-            # Dimmer also uses input_mode_source = 'switch' style
-            result['input_mode_source'] = 'switch'
+            # Get Light status for calibration info
+            try:
+                light_status = rpc.call('Light.GetStatus', {'id': 0})
+                result['light']['calibrating'] = light_status.get('calibrating', False)
+                result['light']['calib_progress'] = light_status.get('calib_progress')
+            except:
+                result['light']['calibrating'] = None
+            # Dimmer: in_mode is controlled via Light component, not Switch
+            result['input_mode_source'] = 'light'
         except:
             pass  # Device might not have Light component
         
@@ -286,8 +337,10 @@ def update_device_settings(device_id):
         # For Minis: Set Input.type FIRST to unlock Switch.SetConfig
         if input_type_to_set and input_mode_source == 'switch':
             try:
-                rpc.call('Input.SetConfig', {'id': 0, 'config': {'type': input_type_to_set}})
+                resp = rpc.call('Input.SetConfig', {'id': 0, 'config': {'type': input_type_to_set}})
                 results['inputs'].append(f'input:0 type set to {input_type_to_set}')
+                if isinstance(resp, dict) and resp.get('restart_required'):
+                    results['restart_required'] = True
             except Exception as e:
                 results['inputs'].append(f'input:0 type failed: {str(e)}')
         
@@ -311,11 +364,22 @@ def update_device_settings(device_id):
                 switch_config['auto_off'] = switch_data['auto_off']
             if 'auto_off_delay' in switch_data:
                 switch_config['auto_off_delay'] = float(switch_data['auto_off_delay'])
+            # Protections
+            if 'power_limit' in switch_data and switch_data['power_limit'] is not None:
+                switch_config['power_limit'] = int(switch_data['power_limit'])
+            if 'voltage_limit' in switch_data and switch_data['voltage_limit'] is not None:
+                switch_config['voltage_limit'] = int(switch_data['voltage_limit'])
+            if 'undervoltage_limit' in switch_data and switch_data['undervoltage_limit'] is not None:
+                switch_config['undervoltage_limit'] = int(switch_data['undervoltage_limit'])
+            if 'current_limit' in switch_data and switch_data['current_limit'] is not None:
+                switch_config['current_limit'] = float(switch_data['current_limit'])
             
             if switch_config:
                 try:
-                    rpc.call('Switch.SetConfig', {'id': 0, 'config': switch_config})
+                    resp = rpc.call('Switch.SetConfig', {'id': 0, 'config': switch_config})
                     results['switch'] = 'updated'
+                    if isinstance(resp, dict) and resp.get('restart_required'):
+                        results['restart_required'] = True
                 except Exception as e:
                     results['switch'] = f'failed: {str(e)}'
         
@@ -343,10 +407,54 @@ def update_device_settings(device_id):
                 cover_config['swap_inputs'] = cover_data['swap_inputs']
             if 'invert_directions' in cover_data:
                 cover_config['invert_directions'] = cover_data['invert_directions']
+            if 'initial_state' in cover_data:
+                cover_config['initial_state'] = cover_data['initial_state']
+            
+            # Obstruction detection
+            obstruction_keys = ['obstruction_enable', 'obstruction_direction', 'obstruction_action', 'obstruction_power_thr']
+            if any(k in cover_data for k in obstruction_keys):
+                obstruction = {}
+                if 'obstruction_enable' in cover_data:
+                    obstruction['enable'] = cover_data['obstruction_enable']
+                if 'obstruction_direction' in cover_data:
+                    obstruction['direction'] = cover_data['obstruction_direction']
+                if 'obstruction_action' in cover_data:
+                    obstruction['action'] = cover_data['obstruction_action']
+                if 'obstruction_power_thr' in cover_data:
+                    obstruction['power_thr'] = float(cover_data['obstruction_power_thr'])
+                cover_config['obstruction_detection'] = obstruction
+            
+            # Slat control (Venetian blinds)
+            slat_keys = ['slat_enable', 'slat_open_time', 'slat_close_time', 'slat_step']
+            if any(k in cover_data for k in slat_keys):
+                slat = {}
+                if 'slat_enable' in cover_data:
+                    slat['enable'] = cover_data['slat_enable']
+                if 'slat_open_time' in cover_data:
+                    slat['open_time'] = float(cover_data['slat_open_time'])
+                if 'slat_close_time' in cover_data:
+                    slat['close_time'] = float(cover_data['slat_close_time'])
+                if 'slat_step' in cover_data:
+                    slat['step'] = int(cover_data['slat_step'])
+                cover_config['slat_control'] = slat
+            # Protections
+            if 'power_limit' in cover_data and cover_data['power_limit'] is not None:
+                cover_config['power_limit'] = int(cover_data['power_limit'])
+            if 'voltage_limit' in cover_data and cover_data['voltage_limit'] is not None:
+                cover_config['voltage_limit'] = int(cover_data['voltage_limit'])
+            if 'undervoltage_limit' in cover_data and cover_data['undervoltage_limit'] is not None:
+                cover_config['undervoltage_limit'] = int(cover_data['undervoltage_limit'])
+            if 'current_limit' in cover_data and cover_data['current_limit'] is not None:
+                cover_config['current_limit'] = float(cover_data['current_limit'])
             
             if cover_config:
-                rpc.call('Cover.SetConfig', {'id': 0, 'config': cover_config})
-                results['cover'] = 'updated'
+                try:
+                    resp = rpc.call('Cover.SetConfig', {'id': 0, 'config': cover_config})
+                    results['cover'] = 'updated'
+                    if isinstance(resp, dict) and resp.get('restart_required'):
+                        results['restart_required'] = True
+                except Exception as e:
+                    results['cover'] = f'failed: {str(e)}'
         
         # Update Light/Dimmer settings
         if 'light' in data and data['light']:
@@ -369,17 +477,61 @@ def update_device_settings(device_id):
             if 'default_brightness' in light_data:
                 light_config['default'] = {'brightness': int(light_data['default_brightness'])}
             if 'night_mode_enable' in light_data or 'night_mode_brightness' in light_data:
-                light_config['night_mode'] = {
+                night_mode = {
                     'enable': light_data.get('night_mode_enable', False),
                     'brightness': int(light_data.get('night_mode_brightness', 50))
                 }
+                # Active time range (list of two time strings, e.g. ["22:00", "06:00"])
+                active_between = light_data.get('night_mode_active_between')
+                if active_between and isinstance(active_between, list) and len(active_between) == 2:
+                    night_mode['active_between'] = active_between
+                light_config['night_mode'] = night_mode
             if 'min_brightness_on_toggle' in light_data:
                 light_config['min_brightness_on_toggle'] = int(light_data['min_brightness_on_toggle'])
+            if 'transition_duration' in light_data:
+                light_config['transition_duration'] = float(light_data['transition_duration'])
+            if 'button_fade_rate' in light_data:
+                light_config['button_fade_rate'] = int(light_data['button_fade_rate'])
+            if 'in_mode' in light_data:
+                light_config['in_mode'] = light_data['in_mode']
+            if 'range_map' in light_data and isinstance(light_data['range_map'], list) and len(light_data['range_map']) == 2:
+                light_config['range_map'] = [int(light_data['range_map'][0]), int(light_data['range_map'][1])]
+            if 'current_limit' in light_data and light_data['current_limit'] is not None:
+                light_config['current_limit'] = float(light_data['current_limit'])
+            if 'power_limit' in light_data and light_data['power_limit'] is not None:
+                light_config['power_limit'] = int(light_data['power_limit'])
+            if 'voltage_limit' in light_data and light_data['voltage_limit'] is not None:
+                light_config['voltage_limit'] = int(light_data['voltage_limit'])
+            if 'undervoltage_limit' in light_data and light_data['undervoltage_limit'] is not None:
+                light_config['undervoltage_limit'] = int(light_data['undervoltage_limit'])
             
             if light_config:
+                # Sync Input.type with Light.in_mode if in_mode is being changed
+                # Valid combinations: button → dim/flip/activate, switch → follow/flip
+                if 'in_mode' in light_config:
+                    new_in_mode = light_config['in_mode']
+                    required_input_type = None
+                    if new_in_mode in ('dim', 'activate'):
+                        required_input_type = 'button'
+                    elif new_in_mode == 'follow':
+                        required_input_type = 'switch'
+                    # 'flip' is compatible with both, no change needed
+                    
+                    if required_input_type:
+                        try:
+                            # Read current Input.type to check if change is needed
+                            current_input = rpc.call('Input.GetConfig', {'id': 0})
+                            if current_input.get('type') != required_input_type:
+                                rpc.call('Input.SetConfig', {'id': 0, 'config': {'type': required_input_type}})
+                                results['inputs'].append(f'input:0 type synced to {required_input_type}')
+                        except Exception as e:
+                            results['inputs'].append(f'input:0 type sync failed: {str(e)}')
+                
                 try:
-                    rpc.call('Light.SetConfig', {'id': 0, 'config': light_config})
+                    resp = rpc.call('Light.SetConfig', {'id': 0, 'config': light_config})
                     results['light'] = 'updated'
+                    if isinstance(resp, dict) and resp.get('restart_required'):
+                        results['restart_required'] = True
                 except Exception as e:
                     results['light'] = f'failed: {str(e)}'
         
@@ -406,8 +558,10 @@ def update_device_settings(device_id):
                 # Handle input type change for I4 (not Minis - those use in_mode above)
                 if 'type' in input_data and mode_source == 'input':
                     try:
-                        rpc.call('Input.SetConfig', {'id': input_id, 'config': {'type': input_data['type']}})
+                        resp = rpc.call('Input.SetConfig', {'id': input_id, 'config': {'type': input_data['type']}})
                         results['inputs'].append(f'input:{input_id} type updated')
+                        if isinstance(resp, dict) and resp.get('restart_required'):
+                            results['restart_required'] = True
                     except Exception as e:
                         results['inputs'].append(f'input:{input_id} type failed: {str(e)}')
                 
@@ -422,7 +576,8 @@ def update_device_settings(device_id):
         return jsonify({
             'success': True,
             'message': 'Settings updated',
-            'results': results
+            'results': results,
+            'restart_required': results.get('restart_required', False)
         })
         
     except Exception as e:
@@ -541,12 +696,33 @@ def export_labels_csv():
     if request.method == 'POST':
         data = request.get_json() or {}
         macs = data.get('macs', [])
+        delimiter = data.get('delimiter', ';')
+        requested_columns = data.get('columns', [])
         if macs:
             mac_set = set(macs)
             devices = [d for d in devices if d.get('id') in mac_set]
+    else:
+        delimiter = request.args.get('delimiter', ';')
+        requested_columns = []
+    
+    # Validate delimiter
+    if delimiter not in (';', ',', '\t'):
+        delimiter = ';'
+    
+    # All available columns
+    all_columns = ['friendly_name', 'label_line1', 'label_line2', 'ip_short', 'room', 'location', 'model', 'mac_short', 'ip_full', 'mac_full']
+    
+    # Filter to requested columns (maintain order), fallback to all
+    if requested_columns:
+        columns = [c for c in requested_columns if c in all_columns]
+    else:
+        columns = all_columns
+    
+    if not columns:
+        columns = all_columns
     
     # Build CSV
-    lines = ['friendly_name,label_line1,label_line2,ip_short,room,location,model,mac_short,ip_full,mac_full']
+    lines = [delimiter.join(columns)]
     
     for device in devices:
         ip = device.get('ip', '')
@@ -573,26 +749,29 @@ def export_labels_csv():
         
         label_line2 = f"{model} {mac_short}" if model else mac_short
         
-        line = ','.join([
-            escape_csv(friendly_name),
-            escape_csv(label_line1),
-            escape_csv(label_line2),
-            escape_csv(ip_short),
-            escape_csv(room),
-            escape_csv(location),
-            escape_csv(model),
-            escape_csv(mac_short),
-            escape_csv(ip),
-            escape_csv(mac)
-        ])
+        # Build values dict for column selection
+        values = {
+            'friendly_name': friendly_name,
+            'label_line1': label_line1,
+            'label_line2': label_line2,
+            'ip_short': ip_short,
+            'room': room,
+            'location': location,
+            'model': model,
+            'mac_short': mac_short,
+            'ip_full': ip,
+            'mac_full': mac,
+        }
+        
+        line = delimiter.join([escape_csv(values.get(col, ''), delimiter) for col in columns])
         lines.append(line)
     
-    csv_content = '\n'.join(lines)
+    csv_content = '\ufeff' + '\n'.join(lines)
     
     filename = f"{get_active_building()}_labels.csv"
     return Response(
-        csv_content,
-        mimetype='text/csv',
+        csv_content.encode('utf-8'),
+        mimetype='text/csv; charset=utf-8',
         headers={'Content-Disposition': f'attachment; filename={filename}'}
     )
 
@@ -1179,3 +1358,476 @@ def sync_devices():
         'synced': len(devices),
         'changes': changes
     })
+
+
+# ===========================================================================
+# Device Flags (ECO, BLE, LED, AP, MQTT) — Bulk read/apply
+# ===========================================================================
+
+def _flags_rpc(ip, method, params=None, timeout=5):
+    """RPC call for flag operations (core RpcClient with HTTP fallback)."""
+    from web.services import core_modules
+    import requests as http_requests
+
+    if core_modules.CORE_AVAILABLE and core_modules.RpcClient:
+        try:
+            rpc = core_modules.RpcClient(ip, timeout_s=float(timeout))
+            return rpc.call(method, params or {})
+        except Exception as e:
+            return {'_error': str(e)}
+
+    # HTTP fallback
+    try:
+        resp = http_requests.post(
+            f'http://{ip}/rpc',
+            json={'id': 1, 'method': method, 'params': params or {}},
+            timeout=timeout
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            if 'result' in data:
+                return data['result']
+            if 'error' in data:
+                return {'_error': data['error'].get('message', 'RPC error')}
+        return {'_error': f'HTTP {resp.status_code}'}
+    except Exception as e:
+        return {'_error': str(e)}
+
+
+def _read_device_flags(ip):
+    """Read all 5 flags from a single device. Returns dict with flag states."""
+    flags = {}
+
+    # ECO from Sys.GetConfig
+    sys_cfg = _flags_rpc(ip, 'Sys.GetConfig', timeout=3)
+    if isinstance(sys_cfg, dict) and '_error' not in sys_cfg:
+        device_cfg = sys_cfg.get('device', {})
+        flags['eco'] = device_cfg.get('eco_mode', False)
+    else:
+        flags['eco'] = None
+
+    # BLE from BLE.GetConfig
+    ble_cfg = _flags_rpc(ip, 'BLE.GetConfig', timeout=2)
+    if isinstance(ble_cfg, dict) and '_error' not in ble_cfg:
+        flags['ble'] = ble_cfg.get('enable', False)
+    else:
+        flags['ble'] = None
+
+    # AP from WiFi.GetConfig
+    wifi_cfg = _flags_rpc(ip, 'WiFi.GetConfig', timeout=2)
+    if isinstance(wifi_cfg, dict) and '_error' not in wifi_cfg:
+        ap = wifi_cfg.get('ap', {})
+        flags['ap'] = ap.get('enable', False)
+    else:
+        flags['ap'] = None
+
+    # MQTT from MQTT.GetConfig
+    mqtt_cfg = _flags_rpc(ip, 'MQTT.GetConfig', timeout=2)
+    if isinstance(mqtt_cfg, dict) and '_error' not in mqtt_cfg:
+        flags['mqtt'] = mqtt_cfg.get('enable', False)
+    else:
+        flags['mqtt'] = None
+
+    return flags
+
+
+# =====================================================================
+# Cover Calibration & Status
+# =====================================================================
+
+@bp.route('/api/devices/<device_id>/cover/calibrate', methods=['POST'])
+def cover_calibrate(device_id):
+    """Start cover calibration procedure."""
+    from web.services import core_modules
+
+    device = device_manager.get_device(device_id)
+    if not device:
+        return jsonify({'success': False, 'error': 'Device not found'}), 404
+
+    ip = device.get('ip')
+    if not ip:
+        return jsonify({'success': False, 'error': 'Device has no IP'}), 400
+
+    if not core_modules.CORE_AVAILABLE or not core_modules.RpcClient:
+        return jsonify({'success': False, 'error': 'Core not available'}), 500
+
+    try:
+        rpc = core_modules.RpcClient(ip, timeout_s=5.0)
+        rpc.call('Cover.Calibrate', {'id': 0})
+        return jsonify({'success': True, 'message': 'Calibration started'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@bp.route('/api/devices/<device_id>/cover/stop', methods=['POST'])
+def cover_stop(device_id):
+    """Stop cover movement (including calibration)."""
+    from web.services import core_modules
+
+    device = device_manager.get_device(device_id)
+    if not device:
+        return jsonify({'success': False, 'error': 'Device not found'}), 404
+
+    ip = device.get('ip')
+    if not ip:
+        return jsonify({'success': False, 'error': 'Device has no IP'}), 400
+
+    if not core_modules.CORE_AVAILABLE or not core_modules.RpcClient:
+        return jsonify({'success': False, 'error': 'Core not available'}), 500
+
+    try:
+        rpc = core_modules.RpcClient(ip, timeout_s=5.0)
+        rpc.call('Cover.Stop', {'id': 0})
+        return jsonify({'success': True, 'message': 'Cover stopped'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@bp.route('/api/devices/<device_id>/cover/status', methods=['GET'])
+def cover_status(device_id):
+    """Get cover status (for calibration polling)."""
+    from web.services import core_modules
+
+    device = device_manager.get_device(device_id)
+    if not device:
+        return jsonify({'success': False, 'error': 'Device not found'}), 404
+
+    ip = device.get('ip')
+    if not ip:
+        return jsonify({'success': False, 'error': 'Device has no IP'}), 400
+
+    if not core_modules.CORE_AVAILABLE or not core_modules.RpcClient:
+        return jsonify({'success': False, 'error': 'Core not available'}), 500
+
+    try:
+        rpc = core_modules.RpcClient(ip, timeout_s=5.0)
+        status = rpc.call('Cover.GetStatus', {'id': 0})
+        return jsonify({
+            'success': True,
+            'state': status.get('state', 'stopped'),
+            'pos_control': status.get('pos_control', False),
+            'current_pos': status.get('current_pos'),
+            'slat_pos': status.get('slat_pos'),
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@bp.route('/api/devices/<device_id>/light/calibrate', methods=['POST'])
+def light_calibrate(device_id):
+    """Start light/dimmer calibration procedure."""
+    from web.services import core_modules
+
+    device = device_manager.get_device(device_id)
+    if not device:
+        return jsonify({'success': False, 'error': 'Device not found'}), 404
+
+    ip = device.get('ip')
+    if not ip:
+        return jsonify({'success': False, 'error': 'Device has no IP'}), 400
+
+    if not core_modules.CORE_AVAILABLE or not core_modules.RpcClient:
+        return jsonify({'success': False, 'error': 'Core not available'}), 500
+
+    try:
+        rpc = core_modules.RpcClient(ip, timeout_s=10.0)
+        rpc.call('Light.Calibrate', {'id': 0})
+        return jsonify({'success': True, 'message': 'Calibration started'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@bp.route('/api/devices/<device_id>/light/status', methods=['GET'])
+def light_status(device_id):
+    """Get light status (for calibration polling)."""
+    from web.services import core_modules
+
+    device = device_manager.get_device(device_id)
+    if not device:
+        return jsonify({'success': False, 'error': 'Device not found'}), 404
+
+    ip = device.get('ip')
+    if not ip:
+        return jsonify({'success': False, 'error': 'Device has no IP'}), 400
+
+    if not core_modules.CORE_AVAILABLE or not core_modules.RpcClient:
+        return jsonify({'success': False, 'error': 'Core not available'}), 500
+
+    try:
+        rpc = core_modules.RpcClient(ip, timeout_s=5.0)
+        status = rpc.call('Light.GetStatus', {'id': 0})
+        return jsonify({
+            'success': True,
+            'calibrating': status.get('calibrating', False),
+            'calib_progress': status.get('calib_progress'),
+            'output': status.get('output', False),
+            'brightness': status.get('brightness'),
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@bp.route('/api/devices/flags/read', methods=['POST'])
+def read_device_flags():
+    """Read flag states (ECO, BLE, LED, AP, MQTT) from selected devices."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    if not is_building_active():
+        return jsonify({'success': False, 'error': 'No building active'}), 400
+
+    data = request.get_json() or {}
+    macs = data.get('macs', [])
+
+    if not macs:
+        return jsonify({'success': False, 'error': 'No devices specified'}), 400
+
+    device_manager.load_devices()
+    devices = device_manager.devices
+
+    # Build lookup: mac -> device
+    dev_map = {d['id']: d for d in devices if d.get('id') in macs}
+
+    results = []
+
+    def read_one(mac):
+        dev = dev_map.get(mac)
+        if not dev or not dev.get('ip'):
+            return {'mac': mac, 'success': False, 'error': 'No IP'}
+        ip = dev['ip']
+        name = dev.get('friendly_name') or dev.get('room', '') or ip
+        try:
+            flags = _read_device_flags(ip)
+            return {'mac': mac, 'ip': ip, 'name': name, 'success': True, 'flags': flags}
+        except Exception as e:
+            return {'mac': mac, 'ip': ip, 'name': name, 'success': False, 'error': str(e)}
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {executor.submit(read_one, mac): mac for mac in macs}
+        for future in as_completed(futures):
+            results.append(future.result())
+
+    # Sort by original order
+    mac_order = {mac: i for i, mac in enumerate(macs)}
+    results.sort(key=lambda r: mac_order.get(r['mac'], 999))
+
+    return jsonify({'success': True, 'results': results})
+
+
+@bp.route('/api/devices/flags/apply', methods=['POST'])
+def apply_device_flags():
+    """Apply flag changes to selected devices."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    if not is_building_active():
+        return jsonify({'success': False, 'error': 'No building active'}), 400
+
+    data = request.get_json() or {}
+    macs = data.get('macs', [])
+    flags = data.get('flags', {})
+    mqtt_server = data.get('mqtt_server', '').strip()
+    # flags = { eco: true/false/null, ble: true/false/null, ... }
+    # null = skip (don't change)
+
+    if not macs:
+        return jsonify({'success': False, 'error': 'No devices specified'}), 400
+
+    # Filter out skipped flags
+    active_flags = {k: v for k, v in flags.items() if v is not None}
+    if not active_flags:
+        return jsonify({'success': False, 'error': 'No flags to apply'}), 400
+
+    # MQTT enable requires server address
+    if active_flags.get('mqtt') is True and not mqtt_server:
+        return jsonify({'success': False, 'error': 'MQTT server address required when enabling MQTT'}), 400
+
+    device_manager.load_devices()
+    devices = device_manager.devices
+    dev_map = {d['id']: d for d in devices if d.get('id') in macs}
+
+    results = []
+
+    def apply_one(mac):
+        dev = dev_map.get(mac)
+        if not dev or not dev.get('ip'):
+            return {'mac': mac, 'success': False, 'error': 'No IP'}
+
+        ip = dev['ip']
+        name = dev.get('friendly_name') or dev.get('room', '') or ip
+        errors = []
+
+        # ECO via Sys.SetConfig
+        if 'eco' in active_flags:
+            res = _flags_rpc(ip, 'Sys.SetConfig', {
+                'config': {'device': {'eco_mode': active_flags['eco']}}
+            }, timeout=3)
+            if isinstance(res, dict) and '_error' in res:
+                errors.append(f"ECO: {res['_error']}")
+
+        # BLE via BLE.SetConfig
+        if 'ble' in active_flags:
+            res = _flags_rpc(ip, 'BLE.SetConfig', {'config': {'enable': active_flags['ble']}}, timeout=2)
+            if isinstance(res, dict) and '_error' in res:
+                errors.append(f"BLE: {res['_error']}")
+
+        # AP via WiFi.SetConfig
+        if 'ap' in active_flags:
+            res = _flags_rpc(ip, 'WiFi.SetConfig', {'config': {'ap': {'enable': active_flags['ap']}}}, timeout=2)
+            if isinstance(res, dict) and '_error' in res:
+                errors.append(f"AP: {res['_error']}")
+
+        # MQTT via MQTT.SetConfig
+        if 'mqtt' in active_flags:
+            mqtt_config = {'enable': active_flags['mqtt']}
+            if active_flags['mqtt'] and mqtt_server:
+                mqtt_config['server'] = mqtt_server
+            res = _flags_rpc(ip, 'MQTT.SetConfig', {'config': mqtt_config}, timeout=2)
+            if isinstance(res, dict) and '_error' in res:
+                errors.append(f"MQTT: {res['_error']}")
+
+        if errors:
+            return {'mac': mac, 'ip': ip, 'name': name, 'success': False, 'error': '; '.join(errors)}
+        return {'mac': mac, 'ip': ip, 'name': name, 'success': True}
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {executor.submit(apply_one, mac): mac for mac in macs}
+        for future in as_completed(futures):
+            results.append(future.result())
+
+    mac_order = {mac: i for i, mac in enumerate(macs)}
+    results.sort(key=lambda r: mac_order.get(r['mac'], 999))
+
+    ok = sum(1 for r in results if r['success'])
+    return jsonify({'success': True, 'results': results, 'ok': ok, 'total': len(results)})
+
+
+# =====================================================================
+# Bulk Input Type Configuration
+# =====================================================================
+
+def _read_device_inputs(ip):
+    """Read Input.GetConfig for all inputs on a device. Returns list of inputs."""
+    inputs = []
+    # Try up to 4 inputs (I4 has 4, most devices have 1-2)
+    for i in range(4):
+        cfg = _flags_rpc(ip, 'Input.GetConfig', {'id': i}, timeout=2)
+        if isinstance(cfg, dict) and '_error' not in cfg:
+            inputs.append({
+                'id': i,
+                'name': cfg.get('name', '') or '',
+                'type': cfg.get('type', 'button'),
+            })
+        else:
+            break  # No more inputs
+    return inputs
+
+
+@bp.route('/api/devices/input-type/read', methods=['POST'])
+def read_device_input_types():
+    """Read input types from selected devices."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    if not is_building_active():
+        return jsonify({'success': False, 'error': 'No building active'}), 400
+
+    data = request.get_json() or {}
+    macs = data.get('macs', [])
+
+    if not macs:
+        return jsonify({'success': False, 'error': 'No devices specified'}), 400
+
+    device_manager.load_devices()
+    devices = device_manager.devices
+    dev_map = {d['id']: d for d in devices if d.get('id') in macs}
+
+    results = []
+
+    def read_one(mac):
+        dev = dev_map.get(mac)
+        if not dev or not dev.get('ip'):
+            return {'mac': mac, 'success': False, 'error': 'No IP'}
+        ip = dev['ip']
+        name = dev.get('friendly_name') or dev.get('room', '') or ip
+        try:
+            inputs = _read_device_inputs(ip)
+            if not inputs:
+                return {'mac': mac, 'ip': ip, 'name': name, 'success': False, 'error': 'No inputs'}
+            return {'mac': mac, 'ip': ip, 'name': name, 'success': True, 'inputs': inputs}
+        except Exception as e:
+            return {'mac': mac, 'ip': ip, 'name': name, 'success': False, 'error': str(e)}
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {executor.submit(read_one, mac): mac for mac in macs}
+        for future in as_completed(futures):
+            results.append(future.result())
+
+    mac_order = {mac: i for i, mac in enumerate(macs)}
+    results.sort(key=lambda r: mac_order.get(r['mac'], 999))
+
+    return jsonify({'success': True, 'results': results})
+
+
+@bp.route('/api/devices/input-type/apply', methods=['POST'])
+def apply_device_input_types():
+    """Apply input type (button/switch) to all inputs on selected devices."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    if not is_building_active():
+        return jsonify({'success': False, 'error': 'No building active'}), 400
+
+    data = request.get_json() or {}
+    macs = data.get('macs', [])
+    input_type = data.get('input_type', '')  # 'button' or 'switch'
+
+    if not macs:
+        return jsonify({'success': False, 'error': 'No devices specified'}), 400
+
+    if input_type not in ('button', 'switch'):
+        return jsonify({'success': False, 'error': 'Invalid input type'}), 400
+
+    device_manager.load_devices()
+    devices = device_manager.devices
+    dev_map = {d['id']: d for d in devices if d.get('id') in macs}
+
+    results = []
+
+    def apply_one(mac):
+        dev = dev_map.get(mac)
+        if not dev or not dev.get('ip'):
+            return {'mac': mac, 'success': False, 'error': 'No IP'}
+
+        ip = dev['ip']
+        name = dev.get('friendly_name') or dev.get('room', '') or ip
+        errors = []
+        changed = 0
+
+        # First read how many inputs exist
+        inputs = _read_device_inputs(ip)
+        if not inputs:
+            return {'mac': mac, 'ip': ip, 'name': name, 'success': False, 'error': 'No inputs'}
+
+        for inp in inputs:
+            if inp['type'] == input_type:
+                continue  # Already correct type
+            res = _flags_rpc(ip, 'Input.SetConfig', {
+                'id': inp['id'],
+                'config': {'type': input_type}
+            }, timeout=3)
+            if isinstance(res, dict) and '_error' in res:
+                errors.append(f"Input:{inp['id']}: {res['_error']}")
+            else:
+                changed += 1
+
+        if errors:
+            return {'mac': mac, 'ip': ip, 'name': name, 'success': False, 'error': '; '.join(errors)}
+        return {'mac': mac, 'ip': ip, 'name': name, 'success': True, 'changed': changed, 'total': len(inputs)}
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {executor.submit(apply_one, mac): mac for mac in macs}
+        for future in as_completed(futures):
+            results.append(future.result())
+
+    mac_order = {mac: i for i, mac in enumerate(macs)}
+    results.sort(key=lambda r: mac_order.get(r['mac'], 999))
+
+    ok = sum(1 for r in results if r['success'])
+    return jsonify({'success': True, 'results': results, 'ok': ok, 'total': len(results)})
