@@ -197,7 +197,7 @@ def get_device_settings(device_id):
         try:
             cover_config = rpc.call('Cover.GetConfig', {'id': 0})
             obstruction = cover_config.get('obstruction_detection', {})
-            slat = cover_config.get('slat_control', {})
+            slat = cover_config.get('slat', {})
             result['cover'] = {
                 'name': cover_config.get('name', ''),
                 'maxtime_open': cover_config.get('maxtime_open', 60),
@@ -436,7 +436,7 @@ def update_device_settings(device_id):
                     slat['close_time'] = float(cover_data['slat_close_time'])
                 if 'slat_step' in cover_data:
                     slat['step'] = int(cover_data['slat_step'])
-                cover_config['slat_control'] = slat
+                cover_config['slat'] = slat
             # Protections
             if 'power_limit' in cover_data and cover_data['power_limit'] is not None:
                 cover_config['power_limit'] = int(cover_data['power_limit'])
